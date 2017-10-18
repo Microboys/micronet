@@ -1,0 +1,11 @@
+{
+  "name": "micronet",
+  "version": "1.0.0",
+  "description": "Micro:net",
+  "license": "MIT",
+  "dependencies": {
+    "microbit": "lancaster-university/microbit"
+  },
+  "targetDependencies": {},
+  "bin": "./source"
+}
