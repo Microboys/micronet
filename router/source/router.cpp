@@ -23,7 +23,8 @@ void print_packet(PacketBuffer p) {
 }
 
 PacketBuffer format_packet(uint16_t source_ip, uint16_t imm_dest_ip,
-        uint16_t dest_ip, uint8_t timestamp, packet_type ptype) {
+        uint16_t dest_ip, uint8_t timestamp, packet_type ptype, uint8_t ttl,
+        uint8_t payload) {
     PacketBuffer p(PACKET_SIZE);
     //TODO: fragmentation data
     //TODO: payload
@@ -35,6 +36,8 @@ PacketBuffer format_packet(uint16_t source_ip, uint16_t imm_dest_ip,
     p[5] = (uint8_t)(dest_ip >> 8);
     p[6] = (uint8_t)(dest_ip);
     p[7] = timestamp;
+    p[8] = ttl;
+    p[9] = payload;
     return p;
 }
 
@@ -47,12 +50,14 @@ void onData(MicroBitEvent e) {
     uint16_t imm_dest_ip = concat(p[3], p[4]);
     uint16_t dest_ip = concat(p[5], p[6]);
     uint8_t timestamp = p[7];
+    uint8_t ttl = p[8];
+    uint8_t payload = p[9];
 
     if (ptype == PING) {
         if (dest_ip == 0) {
             dest_ip = source_ip;
             source_ip = ip;
-            PacketBuffer pnew = format_packet(source_ip, dest_ip, dest_ip, 0, PING);
+            PacketBuffer pnew = format_packet(source_ip, dest_ip, dest_ip, 0, ptype, ttl-1, payload);
             uBit.radio.datagram.send(pnew);
         } else if (imm_dest_ip == ip) {
             struct router_info neighbour;
@@ -60,6 +65,16 @@ void onData(MicroBitEvent e) {
             neighbour.distance = uBit.radio.getRSSI();
             neighbours.push_back(neighbour);
             print_neighbours();
+        }
+    } else if (ptype == MESSAGE) {
+        if (dest_ip == ip) {
+            serial.printf("%i sent me %i!\n\r", source_ip, payload);
+            uBit.display.printAsync(payload);
+        } else if (ttl > 0 && imm_dest_ip == ip) {
+            for (auto n : neighbours) {
+                PacketBuffer pnew = format_packet(source_ip, n.ip, dest_ip, 0, ptype, ttl-1, payload);
+                uBit.radio.datagram.send(pnew);
+            }
         }
     }
 
@@ -75,10 +90,26 @@ void print_neighbours() {
 
 }
 
-void onClick(MicroBitEvent e) {
-    PacketBuffer p = format_packet(ip, 0, 0, 0, PING);
+void ping(MicroBitEvent e) {
+    PacketBuffer p = format_packet(ip, 0, 0, 0, PING, MAX_TTL, 0);
     uBit.radio.datagram.send(p);
     serial.send("pinging...\n\r");
+}
+
+void send_message(MicroBitEvent e) {
+    if (!neighbours.empty()) {
+        uint16_t target = neighbours[uBit.random(neighbours.size())].ip;
+
+        //TODO
+        uint8_t message = 99;
+
+        for (auto n : neighbours) {
+            PacketBuffer p = format_packet(ip, n.ip, target, 0, MESSAGE, MAX_TTL, message);
+            uBit.radio.datagram.send(p);
+        }
+        
+        serial.printf("Sending %i to %i...\n\r", message, target);
+    }
 }
 
 void setup() {
@@ -93,8 +124,8 @@ int main() {
     uBit.init();
     setup();
     uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, onData);
-    uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, onClick);
-    uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, onClick);
+    uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, ping);
+    uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, send_message);
     uBit.radio.enable();
     release_fiber();
 }
