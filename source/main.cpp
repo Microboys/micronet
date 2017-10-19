@@ -1,27 +1,36 @@
 #include "MicroBit.h"
 
-#define MY_APP_ID 4000
-
 MicroBit uBit;
 MicroBitSerial serial(USBTX, USBRX);
+int ip = 0;
 
 void onData(MicroBitEvent e) {
-    ManagedString s = uBit.radio.datagram.recv();
+    PacketBuffer p = uBit.radio.datagram.recv();
 
-    uBit.display.print(uBit.radio.getRSSI());
+    for (int i = 0; i < 4; i++) {
+        serial.send(p[i] + " | ");
+    }
+    serial.send(uBit.radio.getRSSI() + " | ");
+    uBit.display.printAsync("AA");
 }
 
 int main() {
     uBit.init();
+    ip = uBit.random(254) + 1;
     uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, onData);
     uBit.radio.enable();
 
     while (true) {
         if (uBit.buttonA.isPressed() || uBit.buttonB.isPressed()) {
-            uBit.radio.datagram.send("0");
-            uBit.display.print("11");
+            //ManagedString packet = format_packet(ip, 0, "", true);
+            PacketBuffer p(200);
+            p[0] = ip;
+            p[1] = 0;
+            p[2] = 0;
+            p[3] = true;
+            uBit.radio.datagram.send(p);
+            serial.send("pinging... | ");
         }
-        serial.send("HELLO FROM MICROBIT");
         uBit.sleep(100);
     }
     release_fiber();
