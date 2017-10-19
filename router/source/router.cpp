@@ -33,7 +33,7 @@ PacketBuffer format_packet(uint16_t source_ip, uint16_t imm_dest_ip,
     p[3] = (uint8_t)(imm_dest_ip >> 8);
     p[4] = (uint8_t)(imm_dest_ip);
     p[5] = (uint8_t)(dest_ip >> 8);
-    p[5] = (uint8_t)(dest_ip);
+    p[6] = (uint8_t)(dest_ip);
     p[7] = timestamp;
     return p;
 }

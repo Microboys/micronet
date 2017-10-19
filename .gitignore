@@ -2,8 +2,9 @@ router/build/
 router/yotta_modules/
 router/yotta_targets/
 router/.yotta.json
-router/*.swp
-router/*.swo
+*.swp
+*.swo
+tags
 router/tags
 router/tags.temp
 router/tags.lock
