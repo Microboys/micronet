@@ -1,8 +1,11 @@
 #include "router.h"
+#include <vector>
 MicroBit uBit;
 MicroBitSerial serial(USBTX, USBRX);
 
 uint16_t ip = 0;
+
+std::vector<router_info> neighbours;
 
 uint16_t concat(uint8_t upper, uint8_t lower) {
     return (upper << 8) | lower;
@@ -39,7 +42,37 @@ void onData(MicroBitEvent e) {
     PacketBuffer p = uBit.radio.datagram.recv();
     print_packet(p);
 
+    packet_type ptype = (packet_type) p[0];
+    uint16_t source_ip = concat(p[1], p[2]);
+    uint16_t imm_dest_ip = concat(p[3], p[4]);
+    uint16_t dest_ip = concat(p[5], p[6]);
+    uint8_t timestamp = p[7];
+
+    if (ptype == PING) {
+        if (dest_ip == 0) {
+            dest_ip = source_ip;
+            source_ip = ip;
+            PacketBuffer pnew = format_packet(source_ip, dest_ip, dest_ip, 0, PING);
+            uBit.radio.datagram.send(pnew);
+        } else if (imm_dest_ip == ip) {
+            struct router_info neighbour;
+            neighbour.ip = source_ip;
+            neighbour.distance = uBit.radio.getRSSI();
+            neighbours.push_back(neighbour);
+            print_neighbours();
+        }
+    }
+
     uBit.display.printAsync("!!");
+}
+
+void print_neighbours() {
+    serial.printf("======= NEIGHBOURS =====\n\r");
+    for (router_info info : neighbours) {
+        serial.printf("%i: %i\n\r", info.ip, info.distance);
+    }
+    serial.printf("==== END NEIGHBOURS ====\n\r");
+
 }
 
 void onClick(MicroBitEvent e) {

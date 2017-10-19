@@ -5,3 +5,8 @@ enum packet_type {
     MESSAGE = 2,
     DNS = 3
 };
+
+struct router_info {
+    uint16_t ip;
+    int distance;
+};
