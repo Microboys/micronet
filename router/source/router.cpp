@@ -4,6 +4,7 @@ MicroBit uBit;
 MicroBitSerial serial(USBTX, USBRX);
 
 uint16_t ip = 0;
+uint16_t transmit_power = 7;
 
 std::vector<router_info> neighbours;
 
@@ -107,7 +108,7 @@ void send_message(MicroBitEvent e) {
             PacketBuffer p = format_packet(ip, n.ip, target, 0, MESSAGE, MAX_TTL, message);
             uBit.radio.datagram.send(p);
         }
-        
+
         serial.printf("Sending %i to %i...\n\r", message, target);
     }
 }
@@ -115,6 +116,7 @@ void send_message(MicroBitEvent e) {
 void setup() {
     // Generate a random IP, exclude 0
     ip = uBit.random(65534) + 1;
+    uBit.radio.setTransmitPower(transmit_power);
     serial.printf("======= BOOTING ======\n\r");
     serial.printf("Device IP: %i\n\r", ip);
     serial.printf("==== BOOTING DONE ====\n\r");
