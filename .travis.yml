@@ -1,0 +1,21 @@
+addons:
+  apt:
+    packages:
+    - srecord
+    - python-setuptools
+    - cmake
+    - build-essential
+    - ninja-build
+    - python-dev
+    - libffi-dev
+    - libssl-dev
+    - gcc-arm-none-eabi
+
+install:
+    - pip install yotta
+
+script:
+    - cd router
+    - yt target bbc-microbit-classic-gcc
+    - sh fix-config.sh
+    - yt build
