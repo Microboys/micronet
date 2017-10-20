@@ -1,21 +1,19 @@
 {
-  "name": "electron-quick-start",
-  "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "name": "micro-net",
+  "version": "0.0.0",
+  "description": "Desktop client for micro:net",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/Microboys/micronet",
   "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "micro:bit",
+    "education",
+    "networks"
   ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
+  "author": "Microboys",
+  "license": "MIT",
   "devDependencies": {
     "electron": "~1.7.8"
   }
