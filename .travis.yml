@@ -12,7 +12,7 @@ addons:
     - gcc-arm-none-eabi
 
 install:
-    - pip install yotta
+    - sudo pip install yotta
 
 script:
     - cd router
