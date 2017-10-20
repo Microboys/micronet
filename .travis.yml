@@ -17,5 +17,6 @@ install:
 script:
     - cd router
     - yt target bbc-microbit-classic-gcc
+    - yt build
     - sh fix-config.sh
     - yt build
