@@ -61,11 +61,9 @@ void onData(MicroBitEvent e) {
             PacketBuffer pnew = format_packet(source_ip, dest_ip, dest_ip, 0, ptype, ttl-1, payload);
             uBit.radio.datagram.send(pnew);
         } else if (imm_dest_ip == ip) {
-            struct router_info neighbour;
-            neighbour.ip = source_ip;
-            neighbour.distance = uBit.radio.getRSSI();
-            neighbours.push_back(neighbour);
-            print_neighbours();
+            pair<edge, int> p((edge{source_ip,ip}),uBit.radio.getRSSI());
+            graph.insert(p);
+            // TODO: print new neighbours using graph
         }
     } else if (ptype == MESSAGE) {
         if (dest_ip == ip) {
@@ -77,6 +75,10 @@ void onData(MicroBitEvent e) {
                 uBit.radio.datagram.send(pnew);
             }
         }
+    } else if (ptype == LSA) {
+      uint8_t ttl = p[1];
+      payload = p[2];
+      update_graph(p);
     }
 
     uBit.display.printAsync("!!");
@@ -89,6 +91,11 @@ void print_neighbours() {
     }
     serial.printf("==== END NEIGHBOURS ====\n\r");
 
+}
+
+void update_graph(PacketBuffer p) {
+  uint8_t graph_encoded = p[1];
+  // TODO: decode graph and update our graph
 }
 
 void ping(MicroBitEvent e) {
