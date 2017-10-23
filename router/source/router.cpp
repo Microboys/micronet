@@ -79,6 +79,10 @@ void onData(MicroBitEvent e) {
       uint8_t ttl = p[1];
       payload = p[2];
       update_graph(p);
+
+      if (ttl > 0) {
+        send_new_graph(ttl-1);
+      }
     }
 
     uBit.display.printAsync("!!");
@@ -102,6 +106,12 @@ void update_graph(PacketBuffer& p) {
     graph[ed] = distance;
   }
   // TODO: print all values to check with graph
+}
+
+void send_new_graph(int ttl) {
+    //TODO: propogate the packet with new ttl
+    //NOTE: here ttl decide the range of the graph
+    
 }
 
 void ping(MicroBitEvent e) {
