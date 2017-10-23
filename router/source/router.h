@@ -2,9 +2,6 @@
 #include "MicroBit.h"
 #include "packet.h"
 
-#define PACKET_SIZE 32
-#define MAX_TTL 5
-
 uint16_t concat(uint8_t upper, uint8_t lower);
 void print_packet(PacketBuffer p);
 PacketBuffer format_packet(uint16_t source_ip, uint16_t imm_dest_ip,

@@ -8,21 +8,6 @@ uint16_t transmit_power = 7;
 
 std::vector<router_info> neighbours;
 
-uint16_t concat(uint8_t upper, uint8_t lower) {
-    return (upper << 8) | lower;
-}
-
-void print_packet(PacketBuffer p) {
-    serial.printf(" ==== PACKET START ====\n\r");
-    serial.printf("ptype: %i\n\r", p[0]);
-    serial.printf("source_ip: %i\n\r", concat(p[1], p[2]));
-    serial.printf("imm_dest_ip: %i\n\r", concat(p[3], p[4]));
-    serial.printf("dest_ip: %i\n\r", concat(p[5], p[6]));
-    serial.printf("timestamp: %i\n\r", p[7]);
-    serial.printf("RSSI: %i\n\r", uBit.radio.getRSSI());
-    serial.printf(" ==== PACKET END ====\n\r");
-}
-
 PacketBuffer format_packet(uint16_t source_ip, uint16_t imm_dest_ip,
         uint16_t dest_ip, uint8_t timestamp, packet_type ptype, uint8_t ttl,
         uint8_t payload) {
@@ -43,38 +28,40 @@ PacketBuffer format_packet(uint16_t source_ip, uint16_t imm_dest_ip,
 }
 
 void onData(MicroBitEvent e) {
-    PacketBuffer p = uBit.radio.datagram.recv();
-    print_packet(p);
+    PacketBuffer buffer = uBit.radio.datagram.recv();
+    Packet p = Packet(buffer, uBit.radio.getRSSI());
+    p.print_packet(serial);
 
-    packet_type ptype = (packet_type) p[0];
-    uint16_t source_ip = concat(p[1], p[2]);
-    uint16_t imm_dest_ip = concat(p[3], p[4]);
-    uint16_t dest_ip = concat(p[5], p[6]);
-    uint8_t timestamp = p[7];
-    uint8_t ttl = p[8];
-    uint8_t payload = p[9];
+    //packet_type ptype = (packet_type) p[0];
+    //uint16_t source_ip = concat(p[1], p[2]);
+    //uint16_t imm_dest_ip = concat(p[3], p[4]);
+    //uint16_t dest_ip = concat(p[5], p[6]);
+    //uint8_t timestamp = p[7];
+    //uint8_t ttl = p[8];
+    //uint8_t payload = p[9];
 
-    if (ptype == PING) {
-        if (dest_ip == 0) {
-            dest_ip = source_ip;
-            source_ip = ip;
-            PacketBuffer pnew = format_packet(source_ip, dest_ip, dest_ip, 0, ptype, ttl-1, payload);
-            uBit.radio.datagram.send(pnew);
-        } else if (imm_dest_ip == ip) {
+    if (p.ptype == PING) {
+        if (p.dest_ip == 0) {
+            p.dest_ip = p.source_ip;
+            p.source_ip = ip;
+            p.ttl--;
+            uBit.radio.datagram.send(p.format());
+        } else if (p.imm_dest_ip == ip) {
             struct router_info neighbour;
-            neighbour.ip = source_ip;
-            neighbour.distance = uBit.radio.getRSSI();
+            neighbour.ip = p.source_ip;
+            neighbour.distance = p.rssi;
             neighbours.push_back(neighbour);
             print_neighbours();
         }
-    } else if (ptype == MESSAGE) {
-        if (dest_ip == ip) {
-            serial.printf("%i sent me %i!\n\r", source_ip, payload);
-            uBit.display.printAsync(payload);
-        } else if (ttl > 0 && imm_dest_ip == ip) {
+    } else if (p.ptype == MESSAGE) {
+        if (p.dest_ip == ip) {
+            serial.printf("%i sent me %i!\n\r", p.source_ip, p.payload);
+            uBit.display.printAsync(p.payload);
+        } else if (p.ttl > 0 && p.imm_dest_ip == ip) {
+            p.ttl--;
             for (auto n : neighbours) {
-                PacketBuffer pnew = format_packet(source_ip, n.ip, dest_ip, 0, ptype, ttl-1, payload);
-                uBit.radio.datagram.send(pnew);
+                p.imm_dest_ip = n.ip;
+                uBit.radio.datagram.send(p.format());
             }
         }
     }
@@ -92,8 +79,8 @@ void print_neighbours() {
 }
 
 void ping(MicroBitEvent e) {
-    PacketBuffer p = format_packet(ip, 0, 0, 0, PING, MAX_TTL, 0);
-    uBit.radio.datagram.send(p);
+    Packet p(PING, ip, 0, 0, 0, MAX_TTL, 0);
+    uBit.radio.datagram.send(p.format());
     serial.send("pinging...\n\r");
 }
 
@@ -105,8 +92,8 @@ void send_message(MicroBitEvent e) {
         uint8_t message = 99;
 
         for (auto n : neighbours) {
-            PacketBuffer p = format_packet(ip, n.ip, target, 0, MESSAGE, MAX_TTL, message);
-            uBit.radio.datagram.send(p);
+            Packet p(MESSAGE, ip, n.ip, target, 0, MAX_TTL, message);
+            uBit.radio.datagram.send(p.format());
         }
 
         serial.printf("Sending %i to %i...\n\r", message, target);
