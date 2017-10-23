@@ -93,9 +93,15 @@ void print_neighbours() {
 
 }
 
-void update_graph(PacketBuffer p) {
-  uint8_t graph_encoded = p[1];
-  // TODO: decode graph and update our graph
+void update_graph(PacketBuffer& p) {
+  for (size_t i = 2; i < 31; i+=5) {
+    uint16_t from = concat(p[i], p[i+1]);
+    uint16_t to = concat(p[i+2], p[i+3]);
+    int distance = p[i+4];
+    struct edge ed = {from, to};
+    graph[ed] = distance;
+  }
+  // TODO: print all values to check with graph
 }
 
 void ping(MicroBitEvent e) {
