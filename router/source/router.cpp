@@ -32,17 +32,9 @@ void onData(MicroBitEvent e) {
     Packet p = Packet(buffer, uBit.radio.getRSSI());
     p.print_packet(serial);
 
-    //packet_type ptype = (packet_type) p[0];
-    //uint16_t source_ip = concat(p[1], p[2]);
-    //uint16_t imm_dest_ip = concat(p[3], p[4]);
-    //uint16_t dest_ip = concat(p[5], p[6]);
-    //uint8_t timestamp = p[7];
-    //uint8_t ttl = p[8];
-    //uint8_t payload = p[9];
-
     if (p.ptype == PING) {
-        if (p.dest_ip == 0) {
-            p.dest_ip = p.source_ip;
+        if (p.imm_dest_ip == 0) {
+            p.imm_dest_ip = p.source_ip;
             p.source_ip = ip;
             p.ttl--;
             uBit.radio.datagram.send(p.format());
@@ -55,7 +47,7 @@ void onData(MicroBitEvent e) {
         }
     } else if (p.ptype == MESSAGE) {
         if (p.dest_ip == ip) {
-            serial.printf("%i sent me %i!\n\r", p.source_ip, p.payload);
+            serial.printf("%i sent me %s\n\r", p.source_ip, p.payload.toCharArray());
             uBit.display.printAsync(p.payload);
         } else if (p.ttl > 0 && p.imm_dest_ip == ip) {
             p.ttl--;
@@ -81,7 +73,7 @@ void print_neighbours() {
 void ping(MicroBitEvent e) {
     Packet p(PING, ip, 0, 0, 0, MAX_TTL, 0);
     uBit.radio.datagram.send(p.format());
-    serial.send("pinging...\n\r");
+    serial.printf("Pinging...\n\r");
 }
 
 void send_message(MicroBitEvent e) {
@@ -89,14 +81,14 @@ void send_message(MicroBitEvent e) {
         uint16_t target = neighbours[uBit.random(neighbours.size())].ip;
 
         //TODO
-        uint8_t message = 99;
+        ManagedString message = "Hello!";
 
         for (auto n : neighbours) {
             Packet p(MESSAGE, ip, n.ip, target, 0, MAX_TTL, message);
             uBit.radio.datagram.send(p.format());
         }
 
-        serial.printf("Sending %i to %i...\n\r", message, target);
+        serial.printf("Sending %s to %i...\n\r", message.toCharArray(), target);
     }
 }
 

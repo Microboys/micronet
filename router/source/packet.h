@@ -5,6 +5,9 @@
 #define PACKET_SIZE 32
 #define MAX_TTL 5
 
+#define MESSAGE_PAYLOAD_START 9
+#define LSA_PAYLOAD_START 2
+
 // TODO: fragmentation
 
 /*
@@ -43,6 +46,9 @@ struct router_info {
 };
 
 class Packet {
+    private:
+        void encode_payload(PacketBuffer p, ManagedString payload, int start_index);
+        ManagedString decode_payload(PacketBuffer p, int start_index);
     public:
         packet_type ptype;
         uint16_t source_ip = 0;
@@ -50,14 +56,14 @@ class Packet {
         uint16_t dest_ip = 0;
         uint8_t timestamp = 0;
         uint8_t ttl = MAX_TTL;
-        uint8_t payload = 0;
+        ManagedString payload = "";
         int rssi = 0;
 
         void print_packet(MicroBitSerial);
         Packet(PacketBuffer p, int rssi);
         Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip,
             uint16_t dest_ip, uint8_t timestamp, uint8_t ttl,
-            uint8_t payload);
+            ManagedString payload);
         Packet();
         PacketBuffer format();
         //static Packet ping_packet(uint16_t source_ip, uint16_t dest_ip);

@@ -9,7 +9,7 @@ void Packet::print_packet(MicroBitSerial serial) {
             break;
         case LSA:
             serial.printf("ttl: %i\n\r", this->ttl);
-            //TODO payload p[2-31]
+            serial.printf("payload: %s\n\r", this->payload.toCharArray());
             break;
         case MESSAGE:
             serial.printf("ptype: %i\n\r", this->ptype);
@@ -18,6 +18,7 @@ void Packet::print_packet(MicroBitSerial serial) {
             serial.printf("dest_ip: %i\n\r", this->dest_ip);
             serial.printf("ttl: %i\n\r", this->ttl);
             serial.printf("timestamp: %i\n\r", this->timestamp);
+            serial.printf("payload: %s\n\r", this->payload.toCharArray());
             break;
         case DNS:
             //TODO
@@ -29,7 +30,7 @@ void Packet::print_packet(MicroBitSerial serial) {
 // Outgoing packets
 Packet::Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip,
         uint16_t dest_ip, uint8_t timestamp, uint8_t ttl,
-        uint8_t payload) {
+        ManagedString payload) {
 
         this->source_ip = source_ip;
         this->imm_dest_ip = imm_dest_ip;
@@ -45,13 +46,13 @@ Packet::Packet(PacketBuffer p, int rssi) {
     this->ptype = (packet_type)p[0];
     this->rssi = rssi;
     switch (ptype) {
+        case LSA:
+            this->ttl = p[1];
+            this->payload = decode_payload(p, LSA_PAYLOAD_START);
+            break;
         case PING:
             this->source_ip = concat(p[1], p[2]);
             this->imm_dest_ip = concat(p[3], p[4]);
-            break;
-        case LSA:
-            this->ttl = p[1];
-            //TODO payload p[2-31]
             break;
         case MESSAGE:
             this->source_ip = concat(p[1], p[2]);
@@ -59,6 +60,7 @@ Packet::Packet(PacketBuffer p, int rssi) {
             this->dest_ip = concat(p[5], p[6]);
             this->timestamp = p[7];
             this->ttl = p[8];
+            this->payload = decode_payload(p, MESSAGE_PAYLOAD_START);
             break;
         case DNS:
             //TODO
@@ -79,7 +81,7 @@ PacketBuffer Packet::format() {
             break;
         case LSA:
             p[1] = this->ttl;
-            //TODO payload p[2-31]
+            encode_payload(p, payload, LSA_PAYLOAD_START);
             break;
         case MESSAGE:
             p[1] = (uint8_t)(this->source_ip >> 8);
@@ -90,13 +92,30 @@ PacketBuffer Packet::format() {
             p[6] = (uint8_t)(this->dest_ip);
             p[7] = this->timestamp;
             p[8] = this->ttl;
-            p[9] = this->payload;
+            encode_payload(p, payload, MESSAGE_PAYLOAD_START);
             break;
         case DNS:
             //TODO
             break;
     }
     return p;
+}
+
+void Packet::encode_payload(PacketBuffer p, ManagedString payload, int start_index) {
+    int string_index = 0;
+    for (int i = start_index; i < PACKET_SIZE; i++) {
+        char c = payload.charAt(string_index++);
+        p[i] = c;
+    }
+}
+
+ManagedString Packet::decode_payload(PacketBuffer p, int start_index) {
+    char str[PACKET_SIZE];
+    int str_i = 0;
+    for (int i = start_index; i < PACKET_SIZE; i++) {
+        str[str_i++] = p[i];
+    }
+    return ManagedString(str);
 }
 
 //Packet Packet::ping_packet(uint16_t source_ip, uint16_t dest_ip) {
