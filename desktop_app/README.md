@@ -6,6 +6,9 @@ Based on boiilerplate for using [Electron](http://electron.atom.io/), [React](ht
 
 ## Developing 
 
+**At the moment, developing the GUI requires you to be able to build the router hex.
+Please see instructions for setting that up in the router directory.**
+
 From this directory, with node installed, run:
 ```bash
 npm install

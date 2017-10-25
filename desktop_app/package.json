@@ -1,15 +1,17 @@
 {
-  "name": "electron-react-redux-boilerplate",
+  "name": "micronet",
   "version": "0.0.0",
-  "description": "electron-react-redux-boilerplate",
+  "description": "TODO",
   "main": "init.js",
+  "homepage": "TODO",
   "author": {
-    "name": "Jordan Schroter",
-    "email": "email@author.com"
+    "name": "TODO",
+    "email": "TODO"
   },
-  "repository": "https://github.com/jschr/electron-react-redux-boilerplate",
+  "repository": "TODO",
   "license": "MIT",
   "dependencies": {
+    "7zip-bin-linux": "^1.1.0",
     "babel-runtime": "^6.22.0",
     "history": "^4.6.3",
     "prop-types": "^15.5.10",
@@ -45,6 +47,7 @@
     "rimraf": "^2.5.4"
   },
   "scripts": {
+    "prepublish": "sh update-router-hex.sh",
     "postinstall": "electron-builder install-app-deps",
     "develop": "npm run private:compile -- --source-maps true && run-p -r private:watch private:serve",
     "test": "electron-mocha --renderer -R spec --compilers js:babel-core/register test/**/*.spec.js",

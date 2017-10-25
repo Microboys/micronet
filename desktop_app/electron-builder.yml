@@ -1,5 +1,5 @@
 appId: com.electron.micronet
-copyright: Copyright © 2017 Vinamra Agrawal, Daniel Dean, Virain Gupta, Rishabh Jain, Han Thi Nguyen
+copyright: Copyright © 2017 Vinamra Agrawal, Tom Bellingham, Daniel Dean, Virain Gupta, Rishabh Jain, Han Thi Nguyen
 productName: micronet
 
 asar: true
@@ -13,6 +13,7 @@ files:
   - init.js
   - build/
   - node_modules/
+  - router/
 
 dmg:
   contents:

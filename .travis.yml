@@ -9,6 +9,7 @@ addons:
     - python-dev
     - libffi-dev
     - libssl-dev
+    - wine
 
 install:
     - sudo apt-get remove -y binutils-arm-none-eabi gcc-arm-none-eabi
@@ -18,8 +19,10 @@ install:
     - sudo pip install yotta
 
 script:
-    - cd router
-    - yt target bbc-microbit-classic-gcc
-    - yt build
-    - sh fix-config.sh
-    - yt build
+    - test "$TRAVIS_BRANCH" = "router" && cd router && sh ci.sh router.hex
+    - test "$TRAVIS_BRANCH" = "master" || test "$TRAVIS_BRANCH" = "desktop-app"
+                                     && npm install
+                                     && npm install 7zip-bin-linux
+                                     && npm test
+                                     && npm run pack:linux
+                                     && npm run pack:windows
