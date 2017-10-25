@@ -1,6 +1,10 @@
 os: osx
+language: generic
 
 install:
+    # workaround for homebrew ruby version complaint
+    - brew update
+
     # router dependencies
     - brew tap ARMmbed/homebrew-formulae
     - brew install python cmake ninja arm-none-eabi-gcc srecord
