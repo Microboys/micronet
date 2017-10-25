@@ -19,10 +19,12 @@ install:
     - sudo pip install yotta
 
 script:
-    - test "$TRAVIS_BRANCH" = "router" && cd router && sh ci.sh router.hex
-    - test "$TRAVIS_BRANCH" = "master" || test "$TRAVIS_BRANCH" = "desktop-app"
+    - if [ "$TRAVIS_BRANCH" == "router" ] ; then cd router && sh ci.sh router.hex; fi
+    - if [ "$TRAVIS_BRANCH" == "master" ] || [ "$TRAVIS_BRANCH" == "desktop-app" ] ; then
+                                     cd desktop_app
                                      && npm install
                                      && npm install 7zip-bin-linux
                                      && npm test
                                      && npm run pack:linux
                                      && npm run pack:windows
+                                     ; fi
