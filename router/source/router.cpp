@@ -8,25 +8,6 @@ uint16_t transmit_power = 7;
 
 std::vector<router_info> neighbours;
 
-PacketBuffer format_packet(uint16_t source_ip, uint16_t imm_dest_ip,
-        uint16_t dest_ip, uint8_t timestamp, packet_type ptype, uint8_t ttl,
-        uint8_t payload) {
-    PacketBuffer p(PACKET_SIZE);
-    //TODO: fragmentation data
-    //TODO: payload
-    p[0] = ptype;
-    p[1] = (uint8_t)(source_ip >> 8);
-    p[2] = (uint8_t)(source_ip);
-    p[3] = (uint8_t)(imm_dest_ip >> 8);
-    p[4] = (uint8_t)(imm_dest_ip);
-    p[5] = (uint8_t)(dest_ip >> 8);
-    p[6] = (uint8_t)(dest_ip);
-    p[7] = timestamp;
-    p[8] = ttl;
-    p[9] = payload;
-    return p;
-}
-
 void broadcast(Packet p) {
     if (p.ttl > 0) {
         p.ttl--;
@@ -56,6 +37,8 @@ void onData(MicroBitEvent e) {
             neighbour.ip = p.source_ip;
             neighbour.distance = p.rssi;
             neighbours.push_back(neighbour);
+            update_graph(p.source_ip, ip, uBit.radio.getRSSI());
+            // TODO: print new neighbours using graph
             print_neighbours();
         }
     } else if (p.ptype == MESSAGE) {
@@ -64,6 +47,14 @@ void onData(MicroBitEvent e) {
             //uBit.display.printAsync(p.payload);
         } else if (p.imm_dest_ip == ip) {
             broadcast(p);
+        }
+    } else if (p.ptype == LSA) {
+        uint8_t ttl = p.ttl;
+        //payload = buffer[2];
+        update_graph(buffer);
+
+        if (ttl > 0) {
+            send_new_graph(ttl-1);
         }
     }
 
@@ -76,6 +67,30 @@ void print_neighbours() {
         serial.printf("%i: %i\n\r", info.ip, info.distance);
     }
     serial.printf("==== END NEIGHBOURS ====\n\r");
+
+}
+
+// Updates graph from another graph
+void update_graph(PacketBuffer& p) {
+    for (size_t i = 2; i < 31; i += 5) {
+        uint16_t from = concat(p[i], p[i + 1]);
+        uint16_t to = concat(p[i + 2], p[i + 3]);
+        int distance = p[i + 4];
+        struct edge new_edge = {from, to};
+        graph[new_edge] = distance;
+    }
+    // TODO: print all values to check with graph
+}
+
+// Updates graph from ping response
+void update_graph(uint16_t from, uint16_t to, int distance) {
+    pair<edge, int> p((edge{from, to}), distance);
+    graph.insert(p);
+}
+
+void send_new_graph(int ttl) {
+    //TODO: propogate the packet with new ttl
+    //NOTE: here ttl decide the range of the graph
 
 }
 
