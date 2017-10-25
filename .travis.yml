@@ -29,5 +29,5 @@ script:
                                      && npm install 7zip-bin-linux
                                      && npm test
                                      && npm run pack:linux
-                                     && npm run pack:windows
+                                     && npm run pack:win
                                      ; fi
