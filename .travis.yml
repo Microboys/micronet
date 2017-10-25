@@ -1,0 +1,25 @@
+addons:
+  apt:
+    packages:
+    - srecord
+    - python-setuptools
+    - cmake
+    - build-essential
+    - ninja-build
+    - python-dev
+    - libffi-dev
+    - libssl-dev
+
+install:
+    - sudo apt-get remove -y binutils-arm-none-eabi gcc-arm-none-eabi
+    - sudo add-apt-repository -y ppa:team-gcc-arm-embedded/ppa
+    - sudo apt-get -y update
+    - sudo apt-get install -y gcc-arm-embedded
+    - sudo pip install yotta
+
+script:
+    - cd router
+    - yt target bbc-microbit-classic-gcc
+    - yt build
+    - sh fix-config.sh
+    - yt build
