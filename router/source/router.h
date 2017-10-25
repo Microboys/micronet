@@ -3,8 +3,6 @@
 #include "packet.h"
 #include "graph.h"
 
-#define NETWORK_TRANSMISSION_DELAY 100
-
 void print_neighbours();
 void onData(MicroBitEvent e);
 void ping(MicroBitEvent e);

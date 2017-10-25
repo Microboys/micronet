@@ -23,16 +23,18 @@ void onData(MicroBitEvent e) {
     Packet p = Packet(buffer, uBit.radio.getRSSI());
     p.print_packet(serial);
 
+    uBit.sleep(1);
+
     if (p.ptype == PING) {
+        uBit.display.printAsync("!!");
+        // Received new ping packet, send it back to source
         if (p.imm_dest_ip == 0) {
             p.imm_dest_ip = p.source_ip;
             p.source_ip = ip;
             p.ttl--;
-            //serial.printf("sending\n\r");
-            //p.print_packet(serial);
-            uBit.sleep(uBit.random(NETWORK_TRANSMISSION_DELAY));
             uBit.radio.datagram.send(p.format());
         } else if (p.imm_dest_ip == ip) {
+            // Got back our own ping packet
             struct router_info neighbour;
             neighbour.ip = p.source_ip;
             neighbour.distance = p.rssi;
@@ -44,7 +46,7 @@ void onData(MicroBitEvent e) {
     } else if (p.ptype == MESSAGE) {
         if (p.dest_ip == ip) {
             serial.printf("%i sent me %s\n\r", p.source_ip, p.payload.toCharArray());
-            //uBit.display.printAsync(p.payload);
+            uBit.display.printAsync(p.payload);
         } else if (p.imm_dest_ip == ip) {
             broadcast(p);
         }
@@ -57,8 +59,6 @@ void onData(MicroBitEvent e) {
             send_new_graph(ttl-1);
         }
     }
-
-    //uBit.display.printAsync("!!");
 }
 
 void print_neighbours() {
