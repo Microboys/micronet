@@ -1,11 +1,11 @@
 #include "graph.h"
 
 // Updates graph from ping response
-void update_graph(std::unordered_map<struct edge, int> graph, uint16_t from, uint16_t to, int distance) {
+void update_graph(std::unordered_map<struct edge, int> &graph, uint16_t from, uint16_t to, int distance) {
     graph[edge({from, to})] = distance;
 }
 
-void update_graph(std::unordered_map<struct edge, int> graph, Packet* p) {
+void update_graph(std::unordered_map<struct edge, int> &graph, Packet* p) {
     for (auto it : p->graph) {
         graph[it.first] = it.second;
     }

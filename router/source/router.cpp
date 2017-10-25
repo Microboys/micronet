@@ -43,7 +43,7 @@ void onData(MicroBitEvent e) {
             neighbour.ip = p.source_ip;
             neighbour.distance = p.rssi;
             neighbours.push_back(neighbour);
-            update_graph(graph, p.source_ip, ip, uBit.radio.getRSSI());
+            update_graph(graph, ip, p.source_ip, p.rssi);
             // TODO: print new neighbours using graph
             print_neighbours();
         }
