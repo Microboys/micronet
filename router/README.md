@@ -1,7 +1,12 @@
-# Micro:net
+# micro:net router
 
-## Instructions
-1) Make sure you've run 
+The code that actually runs on the micro:bit allowing it to act as a micro:net router.
+
+## Developing
+
+1. Follow the instructions outlined [here](https://lancaster-university.github.io/microbit-docs/offline-toolchains/) for setting up yotta on your platform. 
+
+2. Make sure you've run both
 ```
 yt target bbc-microbit-classic-gcc
 ```
@@ -9,20 +14,19 @@ and
 ```
 yt build
 ```
-at least once in order to set the yotta target and build config.
+at least once in this directory in order to set the yotta target and build config.
 
-2) Disable BLE by setting
+3. Run 
   
 ```
-#define MICROBIT_BLE_ENABLED 0
+fix-config.sh
 ```
-in yotta_modules/microbit-dal/inc/core/MicroBitConfig.h
 
-Alternatively, run fix-config.sh, which replaces the config file with one that has BLE disabled.
+This justs makes sure BLE is disabled since we're using radio.
 
-3) Edit the last argument in flash.sh to point to the folder where your micro:bit is mounted.
+4. Edit the last argument in flash.sh to point to the folder where your micro:bit is mounted.
 
-Afterwards, you can compile and flash a microbit by running
+Afterwards, you can compile and flash a microbit by simply running
 ```
 yt build && flash.sh
 ```
