@@ -2,6 +2,8 @@ addons:
   apt:
     sources:
         - sourceline: 'ppa:team-gcc-arm-embedded/ppa'
+        # deprecated source but still has wine1.8
+        - sourceline: 'ppa:ubuntu-wine/ppa'
     packages:
         # router cross-compiling
         - gcc-arm-embedded
@@ -15,7 +17,7 @@ addons:
         - libffi-dev
         - libssl-dev
         # desktop app windows packaging
-        - wine1.6
+        - wine1.8
 
 install:
     - sudo pip install yotta
