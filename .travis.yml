@@ -2,9 +2,9 @@ addons:
   apt:
     sources:
         # most recent stable wine version
-        - sourceline: https://dl.winehq.org/wine-builds/ubuntu/
-          key_url: https://dl.winehq.org/wine-builds/Release.key
-        - sourceline: ppa:team-gcc-arm-embedded/ppa
+        - sourceline: 'https://dl.winehq.org/wine-builds/ubuntu/'
+          key_url: 'https://dl.winehq.org/wine-builds/Release.key'
+        - sourceline: 'ppa:team-gcc-arm-embedded/ppa'
     packages:
         # router cross-compiling
         - gcc-arm-embedded
