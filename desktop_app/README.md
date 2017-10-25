@@ -4,7 +4,7 @@ The desktop app used to interact with a router micro:bit over serial in order to
 
 Based on boiilerplate for using [Electron](http://electron.atom.io/), [React](https://facebook.github.io/react/) and [Redux](http://redux.js.org/), taken from [this repo](https://raw.githubusercontent.com/jschr/electron-react-redux-boilerplate/master/README.md).
 
-# Developing 
+## Developing 
 
 From this directory, with node installed, run:
 ```bash
@@ -22,22 +22,19 @@ To use DevTools:
 * Linux: <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>I</kbd> or <kbd>F12</kbd>
 * Windows: <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>I</kbd> or <kbd>F12</kbd>
 
-## Packaging
-
-Create a package for OSX, Windows and Linux
+Create a package for OSX, Windows and Linux:
 ```
 npm run pack
 ```
 
-Or target a specific platform
+Or target a specific platform:
 ```
 npm run pack:mac
 npm run pack:win
 npm run pack:linux
 ```
 
-## Tests
-
+To run tests:
 ```
 npm run test
 ```
