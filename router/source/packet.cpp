@@ -4,15 +4,17 @@ void Packet::print_packet(MicroBitSerial serial) {
     serial.printf(" ==== PACKET START ====\n\r");
     switch (ptype) {
         case PING:
+            serial.printf("ptype: PING\n\r");
             serial.printf("source_ip: %i\n\r", this->source_ip);
             serial.printf("imm_dest_ip: %i\n\r", this->imm_dest_ip);
             break;
         case LSA:
+            serial.printf("ptype: LSA\n\r");
             serial.printf("ttl: %i\n\r", this->ttl);
             serial.printf("payload: %s\n\r", this->payload.toCharArray());
             break;
         case MESSAGE:
-            serial.printf("ptype: %i\n\r", this->ptype);
+            serial.printf("ptype: MESSAGE\n\r");
             serial.printf("source_ip: %i\n\r", this->source_ip);
             serial.printf("imm_dest_ip: %i\n\r", this->imm_dest_ip);
             serial.printf("dest_ip: %i\n\r", this->dest_ip);
@@ -21,6 +23,7 @@ void Packet::print_packet(MicroBitSerial serial) {
             serial.printf("payload: %s\n\r", this->payload.toCharArray());
             break;
         case DNS:
+            serial.printf("ptype: DNS\n\r");
             //TODO
             break;
     }

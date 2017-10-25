@@ -27,6 +27,16 @@ PacketBuffer format_packet(uint16_t source_ip, uint16_t imm_dest_ip,
     return p;
 }
 
+void broadcast(Packet p) {
+    if (p.ttl > 0) {
+        p.ttl--;
+        for (auto n : neighbours) {
+            p.imm_dest_ip = n.ip;
+            uBit.radio.datagram.send(p.format());
+        }
+    }
+}
+
 void onData(MicroBitEvent e) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
     Packet p = Packet(buffer, uBit.radio.getRSSI());
@@ -37,6 +47,9 @@ void onData(MicroBitEvent e) {
             p.imm_dest_ip = p.source_ip;
             p.source_ip = ip;
             p.ttl--;
+            //serial.printf("sending\n\r");
+            //p.print_packet(serial);
+            uBit.sleep(uBit.random(NETWORK_TRANSMISSION_DELAY));
             uBit.radio.datagram.send(p.format());
         } else if (p.imm_dest_ip == ip) {
             struct router_info neighbour;
@@ -48,17 +61,13 @@ void onData(MicroBitEvent e) {
     } else if (p.ptype == MESSAGE) {
         if (p.dest_ip == ip) {
             serial.printf("%i sent me %s\n\r", p.source_ip, p.payload.toCharArray());
-            uBit.display.printAsync(p.payload);
-        } else if (p.ttl > 0 && p.imm_dest_ip == ip) {
-            p.ttl--;
-            for (auto n : neighbours) {
-                p.imm_dest_ip = n.ip;
-                uBit.radio.datagram.send(p.format());
-            }
+            //uBit.display.printAsync(p.payload);
+        } else if (p.imm_dest_ip == ip) {
+            broadcast(p);
         }
     }
 
-    uBit.display.printAsync("!!");
+    //uBit.display.printAsync("!!");
 }
 
 void print_neighbours() {
@@ -95,7 +104,7 @@ void send_message(MicroBitEvent e) {
 void setup() {
     // Generate a random IP, exclude 0
     ip = uBit.random(65534) + 1;
-    uBit.radio.setTransmitPower(transmit_power);
+    //uBit.radio.setTransmitPower(transmit_power);
     serial.printf("======= BOOTING ======\n\r");
     serial.printf("Device IP: %i\n\r", ip);
     serial.printf("==== BOOTING DONE ====\n\r");
@@ -104,7 +113,7 @@ void setup() {
 int main() {
     uBit.init();
     setup();
-    uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, onData);
+    uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, onData, MESSAGE_BUS_LISTENER_QUEUE_IF_BUSY);
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, ping);
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, send_message);
     uBit.radio.enable();
