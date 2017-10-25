@@ -1,9 +1,6 @@
 addons:
   apt:
     sources:
-        # most recent stable wine version
-        - sourceline: 'deb https://dl.winehq.org/wine-builds/ubuntu/ main'
-          key_url: 'https://dl.winehq.org/wine-builds/Release.key'
         - sourceline: 'ppa:team-gcc-arm-embedded/ppa'
     packages:
         # router cross-compiling
@@ -18,7 +15,7 @@ addons:
         - libffi-dev
         - libssl-dev
         # desktop app windows packaging
-        - winehq-stable
+        - wine1.6
 
 install:
     - sudo pip install yotta
