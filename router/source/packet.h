@@ -1,12 +1,16 @@
 #pragma once
 #include "util.h"
+#include "graph.h"
 #include "MicroBit.h"
+#include <unordered_map>
 
 #define PACKET_SIZE 32
 #define MAX_TTL 5
 
 #define MESSAGE_PAYLOAD_START 9
-#define LSA_PAYLOAD_START 2
+
+#define LSA_PAYLOAD_START 4
+#define LSA_EDGE_DATA_SIZE 3
 
 // TODO: fragmentation
 
@@ -21,7 +25,8 @@
  * LSA:
  *  p[0] = type,
  *  p[1] = ttl,
- *  p[2-31] = payload
+ *  p[2-3] = source_ip,
+ *  p[4-31] = [neighbour_ip + rssi]
  *  
  * Message:
  *  p[0] = type,
@@ -59,13 +64,19 @@ class Packet {
         ManagedString payload = "";
         int rssi = 0;
 
+        // For LSA packets
+        std::unordered_map<struct edge, int> graph;
+
         void print_packet(MicroBitSerial);
         Packet(PacketBuffer p, int rssi);
         Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip,
             uint16_t dest_ip, uint8_t timestamp, uint8_t ttl,
             ManagedString payload);
+        Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip, uint16_t dest_ip, uint8_t timestamp, uint8_t ttl, std::unordered_map<struct edge, int> graph);
         Packet();
         PacketBuffer format();
+        std::unordered_map<struct edge, int> decode_lsa(PacketBuffer p, uint16_t source_ip);
+        void encode_lsa(PacketBuffer p, std::unordered_map<struct edge, int> graph);
         //static Packet ping_packet(uint16_t source_ip, uint16_t dest_ip);
         //static Packet lsa_packet(uint8_t ttl, uint8_t payload);
         //static Packet message_packet(uint16_t source_ip,
