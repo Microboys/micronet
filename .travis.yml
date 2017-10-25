@@ -18,12 +18,13 @@ install:
     - sudo apt-get install -y gcc-arm-embedded
     - sudo pip install yotta
 
+before_script:
+  - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
+
 script:
     - if [ "$TRAVIS_BRANCH" == "router" ] ; then cd router && sh ci.sh router.hex; fi
     - if [ "$TRAVIS_BRANCH" == "master" ] || [ "$TRAVIS_BRANCH" == "desktop-app" ] ; then
                                      cd desktop_app
-                                     && npm install -g npm-install-peers
-                                     && npm-install-peers
                                      && npm install
                                      && npm install 7zip-bin-linux
                                      && npm test
