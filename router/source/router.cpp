@@ -61,8 +61,7 @@ void onData(MicroBitEvent e) {
             PacketBuffer pnew = format_packet(source_ip, dest_ip, dest_ip, 0, ptype, ttl-1, payload);
             uBit.radio.datagram.send(pnew);
         } else if (imm_dest_ip == ip) {
-            pair<edge, int> p((edge{source_ip,ip}),uBit.radio.getRSSI());
-            graph.insert(p);
+            update_graph(source_ip, ip, uBit.radio.getRSSI());
             // TODO: print new neighbours using graph
         }
     } else if (ptype == MESSAGE) {
@@ -76,13 +75,13 @@ void onData(MicroBitEvent e) {
             }
         }
     } else if (ptype == LSA) {
-      uint8_t ttl = p[1];
-      payload = p[2];
-      update_graph(p);
+        uint8_t ttl = p[1];
+        payload = p[2];
+        update_graph(p);
 
-      if (ttl > 0) {
-        send_new_graph(ttl-1);
-      }
+        if (ttl > 0) {
+            send_new_graph(ttl-1);
+        }
     }
 
     uBit.display.printAsync("!!");
@@ -97,21 +96,28 @@ void print_neighbours() {
 
 }
 
+// Updates graph from another graph
 void update_graph(PacketBuffer& p) {
-  for (size_t i = 2; i < 31; i+=5) {
-    uint16_t from = concat(p[i], p[i+1]);
-    uint16_t to = concat(p[i+2], p[i+3]);
-    int distance = p[i+4];
-    struct edge ed = {from, to};
-    graph[ed] = distance;
-  }
-  // TODO: print all values to check with graph
+    for (size_t i = 2; i < 31; i += 5) {
+        uint16_t from = concat(p[i], p[i + 1]);
+        uint16_t to = concat(p[i + 2], p[i + 3]);
+        int distance = p[i + 4];
+        struct edge new_edge = {from, to};
+        graph[new_edge] = distance;
+    }
+    // TODO: print all values to check with graph
+}
+
+// Updates graph from ping response
+void update_graph(uint16_t from, uint16_t to, int distance) {
+    pair<edge, int> p((edge{from, to}), distance);
+    graph.insert(p);
 }
 
 void send_new_graph(int ttl) {
     //TODO: propogate the packet with new ttl
     //NOTE: here ttl decide the range of the graph
-    
+
 }
 
 void ping(MicroBitEvent e) {

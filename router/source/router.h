@@ -14,6 +14,8 @@ PacketBuffer format_packet(uint16_t source_ip, uint16_t imm_dest_ip,
 void print_neighbours();
 void onData(MicroBitEvent e);
 void update_graph(PacketBuffer& p);
+void update_graph(uint16_t from, uint16_t to, int distance);
+void send_new_graph(int ttl);
 void ping(MicroBitEvent e);
 void send_message(MicroBitEvent e);
 void setup();

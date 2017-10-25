@@ -8,14 +8,12 @@ struct edge {
 };
 
 namespace std {
-  template <>
-  struct hash<edge>
-  {
-    size_t operator()(const edge& e) const
-    {
-      return ((hash<int>()(e.from)) ^ (hash<int>()(e.to)));
-    }
-  };
+    template <>
+    struct hash<edge> {
+        size_t operator()(const edge& e) const {
+            return ((hash<int>()(e.from)) ^ (hash<int>()(e.to)));
+        }
+    };
 }
 
 // TODO: Decide mapped distance type.
