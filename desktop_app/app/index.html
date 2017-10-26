@@ -14,6 +14,12 @@
         script.async = true;
         current.parentNode.insertBefore(script, current);
       }
+
+      //Get serialport reference, print out ports to dev console
+      var serialport = require('serialport');
+      serialport.list((err, ports) => {
+        console.log('ports', ports);
+      });
     </script>
   </body>
 </html>
