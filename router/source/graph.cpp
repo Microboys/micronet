@@ -3,9 +3,12 @@
 // TODO: Decide mapped distance type.
 std::unordered_map<struct edge, int> graph;
 
+int MAX_NEIGHBOURS = 3;
+
 // Updates graph from ping response
 void update_graph(uint16_t from, uint16_t to, int distance) {
     graph[edge({from, to})] = distance;
+    delete_extra_neighbours(from);
 }
 
 void update_graph(Packet* p) {
@@ -14,6 +17,31 @@ void update_graph(Packet* p) {
     for (auto it : p->graph) {
         graph[it.first] = it.second;
     }
+}
+
+void delete_extra_neighbours(uint16_t ip) {
+  int num_edges = 0;
+  int min_strength  = INT_MAX;
+  struct edge weakest_edge;
+  for (auto it : graph) {
+      struct edge cur_edge = it.first;
+      if (cur_edge.from == ip) {
+          num_edges++;
+          if (min_strength > it.second){
+            min_strength = it.second;
+            weakest_edge = cur_edge;
+          }
+      }
+  }
+
+  if (num_edges > MAX_NEIGHBOURS){
+    graph.erase(weakest_edge);
+    num_edges--;
+  }
+
+  if (num_edges > MAX_NEIGHBOURS) {
+    delete_extra_neighbours(ip);
+  }
 }
 
 void delete_all_edges(uint16_t ip) {
