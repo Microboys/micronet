@@ -15,10 +15,6 @@ install:
     # desktop app dependencies
     - brew install wine
 
-
-before_script:
-  - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start # magic required for running electron-mocha tests
-
 script:
     - if [ "$TRAVIS_BRANCH" == "router" ] ; then cd router && sh ci.sh router.hex; fi
     - if [ "$TRAVIS_BRANCH" == "ci-fix" ] || [ "$TRAVIS_BRANCH" == "desktop-app" ] ; then
