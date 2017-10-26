@@ -9,14 +9,20 @@ void update_graph(uint16_t from, uint16_t to, int distance) {
 }
 
 void update_graph(Packet* p) {
+    uint16_t source_ip = p->source_ip;
+    delete_all_edges(source_ip);
     for (auto it : p->graph) {
         graph[it.first] = it.second;
     }
 }
 
-void send_new_graph(int ttl) {
-    //TODO: propogate the packet with new ttl
-    //NOTE: here ttl decide the range of the graph
+void delete_all_edges(uint16_t ip) {
+    for (auto it : graph) {
+        struct edge cur_edge = it.first;
+        if (cur_edge.from == ip) {
+            graph.erase(cur_edge);
+        }
+    }
 }
 
 void print_graph(MicroBitSerial serial) {

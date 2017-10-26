@@ -57,7 +57,8 @@ void onData(MicroBitEvent e) {
         update_graph(&p);
 
         if (ttl > 0) {
-            send_new_graph(ttl-1);
+            p.ttl = p.ttl - 1;
+            uBit.radio.datagram.send(p.format());
         }
     }
 }

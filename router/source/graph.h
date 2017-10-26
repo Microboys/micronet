@@ -26,7 +26,6 @@ namespace std {
 //void update_graph(PacketBuffer& p);
 void update_graph(Packet* p);
 void update_graph(uint16_t from, uint16_t to, int distance);
-void send_new_graph(int ttl);
 void print_graph(MicroBitSerial serial);
 void print_graph(MicroBitSerial serial, std::unordered_map<edge, int> graph);
 std::unordered_map<edge, int> get_lsa_graph(uint16_t ip);
