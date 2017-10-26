@@ -1,7 +1,7 @@
 #include "router.h"
 #include <vector>
 MicroBit uBit;
-MicroBitSerial 
+MicroBitSerial
 
 serial(USBTX, USBRX);
 
@@ -78,6 +78,7 @@ void print_neighbours() {
 void ping(MicroBitEvent e) {
     Packet p(PING, ip, 0, 0, 0, MAX_TTL, 0);
     uBit.radio.datagram.send(p.format());
+    delete_all_edges(ip);
     serial.printf("Pinging...\n\r");
 }
 
