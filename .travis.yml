@@ -13,7 +13,7 @@ install:
     - pip install yotta
 
     # desktop app dependencies
-    - brew install xquartz wine
+    - brew install wine
 
 
 before_script:
