@@ -22,7 +22,7 @@ void update_graph(Packet* p) {
 void delete_extra_neighbours(uint16_t ip) {
   int num_edges = 0;
   int min_strength  = INT_MAX;
-  struct edge weakest_edge;
+  struct edge weakest_edge = {0,0};
   for (auto it : graph) {
       struct edge cur_edge = it.first;
       if (cur_edge.from == ip) {
