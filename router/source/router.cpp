@@ -1,7 +1,9 @@
 #include "router.h"
 #include <vector>
 MicroBit uBit;
-MicroBitSerial serial(USBTX, USBRX);
+MicroBitSerial 
+
+serial(USBTX, USBRX);
 
 uint16_t ip = 0;
 uint16_t transmit_power = 7;
@@ -22,7 +24,6 @@ void onData(MicroBitEvent e) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
     Packet p = Packet(buffer, uBit.radio.getRSSI());
     p.print_packet(serial);
-    print_graph(serial);
     uBit.sleep(1);
 
     if (p.ptype == PING) {
@@ -42,6 +43,7 @@ void onData(MicroBitEvent e) {
             update_graph(ip, p.source_ip, p.rssi);
             // TODO: print new neighbours using graph
             print_neighbours();
+            print_graph(serial);
         }
     } else if (p.ptype == MESSAGE) {
         if (p.dest_ip == ip) {
@@ -55,6 +57,7 @@ void onData(MicroBitEvent e) {
         //payload = buffer[2];
         //update_graph(buffer);
         update_graph(&p);
+        print_graph(serial);
 
         if (ttl > 0) {
             p.ttl = p.ttl - 1;

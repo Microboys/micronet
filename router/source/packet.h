@@ -6,11 +6,28 @@
 
 #define PACKET_SIZE 32
 #define MAX_TTL 5
+#define BYTE_SIZE 8
 
-#define MESSAGE_PAYLOAD_START 9
+#define F_PTYPE 0
 
-#define LSA_PAYLOAD_START 4
+// Ping
+#define F_PING_SOURCE_IP 1
+#define F_PING_IMM_DEST_IP 3
+
+// LSA
 #define LSA_EDGE_DATA_SIZE 3
+
+// Message
+#define F_MESSAGE_SOURCE_IP 1
+#define F_MESSAGE_IMM_DEST_IP 3
+#define F_MESSAGE_DEST_IP 5
+#define F_MESSAGE_TIMESTAMP 7
+#define F_MESSAGE_TTL 8
+#define F_MESSAGE_PAYLOAD 9
+
+#define F_LSA_TTL 1
+#define F_LSA_SOURCE_IP 2
+#define F_LSA_PAYLOAD 4
 
 // TODO: fragmentation
 
