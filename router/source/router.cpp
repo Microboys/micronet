@@ -8,9 +8,6 @@ uint16_t transmit_power = 7;
 
 std::vector<router_info> neighbours;
 
-// TODO: Decide mapped distance type.
-std::unordered_map<struct edge, int> graph;
-
 void broadcast(Packet p) {
     if (p.ttl > 0) {
         p.ttl--;
@@ -25,8 +22,7 @@ void onData(MicroBitEvent e) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
     Packet p = Packet(buffer, uBit.radio.getRSSI());
     p.print_packet(serial);
-    print_graph(serial, graph);
-
+    print_graph(serial);
     uBit.sleep(1);
 
     if (p.ptype == PING) {
@@ -43,7 +39,7 @@ void onData(MicroBitEvent e) {
             neighbour.ip = p.source_ip;
             neighbour.distance = p.rssi;
             neighbours.push_back(neighbour);
-            update_graph(graph, ip, p.source_ip, p.rssi);
+            update_graph(ip, p.source_ip, p.rssi);
             // TODO: print new neighbours using graph
             print_neighbours();
         }
@@ -58,7 +54,7 @@ void onData(MicroBitEvent e) {
         uint8_t ttl = p.ttl;
         //payload = buffer[2];
         //update_graph(buffer);
-        update_graph(graph, &p);
+        update_graph(&p);
 
         if (ttl > 0) {
             send_new_graph(ttl-1);
@@ -98,12 +94,7 @@ void send_message(MicroBitEvent e) {
 }
 
 void send_lsa(MicroBitEvent e) {
-    std::unordered_map<edge, int> to_send;
-    for (auto it : graph) {
-        if (it.first.from == ip) {
-            to_send[it.first] = it.second;
-        }
-    }
+    std::unordered_map<edge, int> to_send = get_lsa_graph(ip);
     Packet p(LSA, ip, 0, 0, 0, MAX_TTL, to_send);
     uBit.radio.datagram.send(p.format());
 }
