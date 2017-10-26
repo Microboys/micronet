@@ -1,7 +1,7 @@
 #include "packet.h"
 
 void Packet::print_packet(MicroBitSerial serial) {
-    serial.printf(" ==== PACKET START ====\n\r");
+    serial.printf("===== PACKET START ====\n\r");
     switch (ptype) {
         case PING:
             serial.printf("ptype: PING\n\r");
@@ -28,7 +28,7 @@ void Packet::print_packet(MicroBitSerial serial) {
             //TODO
             break;
     }
-    serial.printf(" ==== PACKET END ====\n\r");
+    serial.printf("===== PACKET END ====\n\r");
 }
 
 // Outgoing packets
@@ -60,25 +60,25 @@ Packet::Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip,
 }
 // Incoming packets
 Packet::Packet(PacketBuffer p, int rssi) {
-    this->ptype = (packet_type)p[0];
+    this->ptype = (packet_type)p[F_PTYPE];
     this->rssi = rssi;
     switch (ptype) {
         case LSA:
-            this->ttl = p[1];
-            this->source_ip = concat(p[2], p[3]);
+            this->ttl = p[F_LSA_TTL];
+            this->source_ip = concat(p[F_LSA_SOURCE_IP], p[F_LSA_SOURCE_IP + 1]);
             this->graph = decode_lsa(p, this->source_ip);
             break;
         case PING:
-            this->source_ip = concat(p[1], p[2]);
-            this->imm_dest_ip = concat(p[3], p[4]);
+            this->source_ip = concat(p[F_PING_SOURCE_IP], p[F_PING_SOURCE_IP + 1]);
+            this->imm_dest_ip = concat(p[F_PING_IMM_DEST_IP], p[F_PING_IMM_DEST_IP + 1]);
             break;
         case MESSAGE:
-            this->source_ip = concat(p[1], p[2]);
-            this->imm_dest_ip = concat(p[3], p[4]);
-            this->dest_ip = concat(p[5], p[6]);
-            this->timestamp = p[7];
-            this->ttl = p[8];
-            this->payload = decode_payload(p, MESSAGE_PAYLOAD_START);
+            this->source_ip = concat(p[F_MESSAGE_SOURCE_IP], p[F_MESSAGE_SOURCE_IP + 1]);
+            this->imm_dest_ip = concat(p[F_MESSAGE_IMM_DEST_IP], p[F_MESSAGE_IMM_DEST_IP + 1]);
+            this->dest_ip = concat(p[F_MESSAGE_DEST_IP], p[F_MESSAGE_DEST_IP + 1]);
+            this->timestamp = p[F_MESSAGE_TIMESTAMP];
+            this->ttl = p[F_MESSAGE_TTL];
+            this->payload = decode_payload(p, F_MESSAGE_PAYLOAD);
             break;
         case DNS:
             //TODO
@@ -87,32 +87,32 @@ Packet::Packet(PacketBuffer p, int rssi) {
 }
 
 PacketBuffer Packet::format() {
-    PacketBuffer p = PacketBuffer(32);
-    p[0] = this->ptype;
+    PacketBuffer p = PacketBuffer(PACKET_SIZE);
+    p[F_PTYPE] = this->ptype;
 
     switch (ptype) {
         case PING:
-            p[1] = (uint8_t)(this->source_ip >> 8);
-            p[2] = (uint8_t)(this->source_ip);
-            p[3] = (uint8_t)(this->imm_dest_ip >> 8);
-            p[4] = (uint8_t)(this->imm_dest_ip);
+            p[F_PING_SOURCE_IP] = (uint8_t)(this->source_ip >> BYTE_SIZE);
+            p[F_PING_SOURCE_IP + 1] = (uint8_t)(this->source_ip);
+            p[F_PING_IMM_DEST_IP] = (uint8_t)(this->imm_dest_ip >> BYTE_SIZE);
+            p[F_PING_IMM_DEST_IP + 1] = (uint8_t)(this->imm_dest_ip);
             break;
         case LSA:
-            p[1] = this->ttl;
-            p[2] = (uint8_t)(this->source_ip >> 8);
-            p[3] = (uint8_t)(this->source_ip);
+            p[F_LSA_TTL] = this->ttl;
+            p[F_LSA_SOURCE_IP] = (uint8_t)(this->source_ip >> BYTE_SIZE);
+            p[F_LSA_SOURCE_IP + 1] = (uint8_t)(this->source_ip);
             encode_lsa(p, this->graph);
             break;
         case MESSAGE:
-            p[1] = (uint8_t)(this->source_ip >> 8);
-            p[2] = (uint8_t)(this->source_ip);
-            p[3] = (uint8_t)(this->imm_dest_ip >> 8);
-            p[4] = (uint8_t)(this->imm_dest_ip);
-            p[5] = (uint8_t)(this->dest_ip >> 8);
-            p[6] = (uint8_t)(this->dest_ip);
-            p[7] = this->timestamp;
-            p[8] = this->ttl;
-            encode_payload(p, payload, MESSAGE_PAYLOAD_START);
+            p[F_MESSAGE_SOURCE_IP] = (uint8_t)(this->source_ip >> BYTE_SIZE);
+            p[F_MESSAGE_SOURCE_IP + 1] = (uint8_t)(this->source_ip);
+            p[F_MESSAGE_IMM_DEST_IP] = (uint8_t)(this->imm_dest_ip >> BYTE_SIZE);
+            p[F_MESSAGE_IMM_DEST_IP + 1] = (uint8_t)(this->imm_dest_ip);
+            p[F_MESSAGE_DEST_IP] = (uint8_t)(this->dest_ip >> BYTE_SIZE);
+            p[F_MESSAGE_DEST_IP + 1] = (uint8_t)(this->dest_ip);
+            p[F_MESSAGE_TIMESTAMP] = this->timestamp;
+            p[F_MESSAGE_TTL] = this->ttl;
+            encode_payload(p, payload, F_MESSAGE_PAYLOAD);
             break;
         case DNS:
             //TODO
@@ -140,7 +140,7 @@ ManagedString Packet::decode_payload(PacketBuffer p, int start_index) {
 
 std::unordered_map<edge, int> Packet::decode_lsa(PacketBuffer p, uint16_t source_ip) {
     std::unordered_map<edge, int> graph;
-    for (size_t i = LSA_PAYLOAD_START; i < PACKET_SIZE - LSA_EDGE_DATA_SIZE; i += LSA_EDGE_DATA_SIZE) {
+    for (size_t i = F_LSA_PAYLOAD; i < PACKET_SIZE - LSA_EDGE_DATA_SIZE; i += LSA_EDGE_DATA_SIZE) {
         uint16_t to = concat(p[i], p[i + 1]);
         if (to == 0) {
             break;
@@ -154,7 +154,7 @@ std::unordered_map<edge, int> Packet::decode_lsa(PacketBuffer p, uint16_t source
 }
 
 void Packet::encode_lsa(PacketBuffer p, std::unordered_map<edge, int> graph) {
-    int index = LSA_PAYLOAD_START;
+    int index = F_LSA_PAYLOAD;
     for (std::pair<edge, int> it : graph) {
         if (index > PACKET_SIZE - LSA_EDGE_DATA_SIZE) {
             uint16_t to = it.first.to;
