@@ -40,15 +40,17 @@
     "electron-builder": "^19.17.0",
     "electron-devtools-installer": "^2.1.0",
     "electron-mocha": "^4.0.0",
+    "electron-rebuild": "^1.6.0",
     "eslint": "^4.3.0",
     "eslint-plugin-react": "^7.1.0",
     "npm-run-all": "^4.0.1",
     "redux-mock-store": "^1.2.2",
-    "rimraf": "^2.5.4"
+    "rimraf": "^2.5.4",
+    "serialport": "^6.0.4"
   },
   "scripts": {
     "prepublish": "sh update-router-hex.sh",
-    "postinstall": "electron-builder install-app-deps",
+    "postinstall": "electron-rebuild electron-builder install-app-deps",
     "develop": "npm run private:compile -- --source-maps true && run-p -r private:watch private:serve",
     "test": "electron-mocha --renderer -R spec --compilers js:babel-core/register test/**/*.spec.js",
     "lint": "eslint --no-ignore scripts app test *.js",
