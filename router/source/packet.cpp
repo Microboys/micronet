@@ -167,6 +167,9 @@ void Packet::encode_lsa(PacketBuffer p, std::unordered_map<edge, int> graph) {
             break;
         }
     }
+    for (int i = index; i < PACKET_SIZE; i++) {
+        p[i] = 0;
+    }
 }
 
 //Packet Packet::ping_packet(uint16_t source_ip, uint16_t dest_ip) {
