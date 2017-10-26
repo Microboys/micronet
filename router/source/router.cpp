@@ -1,7 +1,9 @@
 #include "router.h"
 #include <vector>
 MicroBit uBit;
-MicroBitSerial serial(USBTX, USBRX);
+MicroBitSerial 
+
+serial(USBTX, USBRX);
 
 uint16_t ip = 0;
 uint16_t transmit_power = 7;
@@ -102,7 +104,7 @@ void send_lsa(MicroBitEvent e) {
 void setup() {
     // Generate a random IP, exclude 0
     ip = uBit.random(65534) + 1;
-    //uBit.radio.setTransmitPower(transmit_power);
+    uBit.radio.setTransmitPower(transmit_power);
     serial.printf("======= BOOTING ======\n\r");
     serial.printf("Device IP: %i\n\r", ip);
     serial.printf("==== BOOTING DONE ====\n\r");

@@ -140,12 +140,12 @@ ManagedString Packet::decode_payload(PacketBuffer p, int start_index) {
 
 std::unordered_map<edge, int> Packet::decode_lsa(PacketBuffer p, uint16_t source_ip) {
     std::unordered_map<edge, int> graph;
-    for (size_t i = F_LSA_PAYLOAD; i < PACKET_SIZE - LSA_EDGE_DATA_SIZE; i += LSA_EDGE_DATA_SIZE) {
+    for (size_t i = F_LSA_PAYLOAD; i <= PACKET_SIZE - LSA_EDGE_DATA_SIZE; i += LSA_EDGE_DATA_SIZE) {
         uint16_t to = concat(p[i], p[i + 1]);
         if (to == 0) {
             break;
         }
-        int distance = p[i + 2];
+        int distance = (int8_t)(p[i + 2]);
         edge new_edge = {source_ip, to};
         pair<edge, int> p(new_edge, distance);
         graph.insert(p);
@@ -156,9 +156,9 @@ std::unordered_map<edge, int> Packet::decode_lsa(PacketBuffer p, uint16_t source
 void Packet::encode_lsa(PacketBuffer p, std::unordered_map<edge, int> graph) {
     int index = F_LSA_PAYLOAD;
     for (std::pair<edge, int> it : graph) {
-        if (index > PACKET_SIZE - LSA_EDGE_DATA_SIZE) {
+        if (index <= PACKET_SIZE - LSA_EDGE_DATA_SIZE) {
             uint16_t to = it.first.to;
-            uint8_t to_upper = (uint8_t)(to >> 8);
+            uint8_t to_upper = (uint8_t)(to >> BYTE_SIZE);
             uint8_t to_lower = (uint8_t)(to);
             p[index++] = to_upper;
             p[index++] = to_lower;
