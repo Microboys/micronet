@@ -6,8 +6,10 @@ install:
     - brew update
 
     # router dependencies
+    #   we also need python and cmake but it is already on the image and attempting
+    #   to 'brew install' them causes an error
     - brew tap ARMmbed/homebrew-formulae
-    - brew install python cmake ninja arm-none-eabi-gcc srecord
+    - brew install ninja arm-none-eabi-gcc srecord
     - pip install yotta
 
     # desktop app dependencies
