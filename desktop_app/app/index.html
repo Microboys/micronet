@@ -2,11 +2,20 @@
 <html>
   <head>
     <title>My App</title>
+    <link href="../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+      //Initialise modules
+      var serialport = require('serialport');
+      var jQuery = require('jquery');
+      require('bootstrap');
+    </script>
   </head>
   <body>
     <div id="app"></div>
     <script src="./app.js" data-container="#app"></script>
     <script>
+      //Initialise modules
+
       if (process.env.BROWSER_SYNC_CLIENT_URL) {
         const current = document.currentScript;
         const script = document.createElement('script');
@@ -15,11 +24,11 @@
         current.parentNode.insertBefore(script, current);
       }
 
-      //Get serialport reference, print out ports to dev console
-      var serialport = require('serialport');
+      //Print out ports to dev console
       serialport.list((err, ports) => {
         console.log('ports', ports);
       });
     </script>
+    <button type="button" class="btn btn-primary">Bootstrap Button (Test)</button>
   </body>
 </html>

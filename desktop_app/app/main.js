@@ -6,7 +6,6 @@ const isDevelopment = (process.env.NODE_ENV === 'development');
 
 let mainWindow = null;
 let forceQuit = false;
-
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
   const extensions = [
@@ -103,4 +102,8 @@ app.on('ready', async () => {
       }]).popup(mainWindow);
     });
   }
+
+  //Init jQuery and plugins (requires window to be initialised first)
+  var jQuery = require('jquery')(mainWindow);
+  require('bootstrap');
 });
