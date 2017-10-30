@@ -96,6 +96,4 @@ class Packet {
         ManagedString to_json();
         std::unordered_map<struct edge, int> decode_lsa(PacketBuffer p, uint16_t source_ip);
         void encode_lsa(PacketBuffer p, std::unordered_map<struct edge, int> graph);
-        ManagedString format_attr(ManagedString attr, ManagedString val, bool last=false);
-        ManagedString format_attr(ManagedString attr, int val, bool last=false);
 };

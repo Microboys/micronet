@@ -74,3 +74,27 @@ std::unordered_map<edge, int> get_lsa_graph(uint16_t ip) {
     }
     return to_send;
 }
+
+ManagedString graph_to_json(std::unordered_map<struct edge, int> graph) {
+    ManagedString result = "[";
+    unsigned int index = 0;
+    for (auto it = graph.begin(); it != graph.end(); ++it) {
+        result = result + "{";
+        result = result + format_attr("from", it->first.from);
+        result = result + format_attr("to", it->first.to);
+        result = result + format_attr("distance", it->second, true);
+        result = result + "}";
+        index++;
+        if (index < graph.size()) {
+            result = result + ",";
+        }
+    }
+    return result + "]";
+}
+
+ManagedString topology_json() {
+    ManagedString result = "{";
+    result = result + format_attr("type", "graph");
+    result = result + format_attr("graph", graph_to_json(graph), true);
+    return result + "}\0";
+}

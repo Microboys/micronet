@@ -184,7 +184,8 @@ ManagedString Packet::to_json() {
         case LSA:
             result = result + format_attr("ptype", "LSA");
             result = result + format_attr("ttl", this->ttl);
-            result = result + format_attr("source_ip", this->source_ip, true);
+            result = result + format_attr("source_ip", this->source_ip);
+            result = result + format_attr("payload", graph_to_json(this->graph), true);
             break;
         case MESSAGE:
             result = result + format_attr("source_ip", this->source_ip);
@@ -201,28 +202,4 @@ ManagedString Packet::to_json() {
     }
     result = result + "}\0";
     return ManagedString(result);
-}
-
-ManagedString Packet::format_attr(ManagedString attr, ManagedString val, bool last) {
-    ManagedString result = ManagedString("\"") 
-        + ManagedString(attr) 
-        + ManagedString("\":") 
-        + ManagedString("\"") 
-        + ManagedString(val) 
-        + ManagedString("\"");
-    if (last)
-        return result;
-    else
-        return result + ",";
-}
-
-ManagedString Packet::format_attr(ManagedString attr, int val, bool last) {
-    ManagedString result = ManagedString("\"") 
-        + ManagedString(attr) 
-        + ManagedString("\":") 
-        + ManagedString(val);
-    if (last)
-        return result;
-    else
-        return result + ",";
 }
