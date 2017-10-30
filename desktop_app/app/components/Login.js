@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Button } from 'reactstrap';
 import PropTypes from 'prop-types';
 
 export default class Login extends Component {
@@ -21,6 +22,7 @@ export default class Login extends Component {
         <h2>Login</h2>
         <input ref={(ref) => { this._inputRef = ref; }} type="text" />
         <button onClick={this.handleLogin}>Log In</button>
+        <Button color='primary'>Test</Button>
       </div>
     );
   }
