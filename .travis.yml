@@ -1,36 +1,27 @@
-addons:
-  apt:
-    packages:
-    - srecord
-    - python-setuptools
-    - cmake
-    - build-essential
-    - ninja-build
-    - python-dev
-    - libffi-dev
-    - libssl-dev
+os: osx
+language: generic
 
 install:
-    - wget -nc https://dl.winehq.org/wine-builds/Release.key
-    - sudo apt-key add Release.key
-    - sudo apt-add-repository https://dl.winehq.org/wine-builds/ubuntu/
-    - sudo apt-get install -y --install-recommends winehq-stable
-    - sudo apt-get remove -y binutils-arm-none-eabi gcc-arm-none-eabi
-    - sudo add-apt-repository -y ppa:team-gcc-arm-embedded/ppa
-    - sudo apt-get -y update
-    - sudo apt-get install -y gcc-arm-embedded
-    - sudo pip install yotta
+    # workaround for homebrew ruby version complaint
+    - brew update
 
-before_script:
-  - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
+    # router dependencies
+    #   we also need python and cmake but it is already on the image and attempting
+    #   to 'brew install' them causes an error
+    - brew tap ARMmbed/homebrew-formulae
+    - brew install ninja arm-none-eabi-gcc srecord
+    - pip install yotta
+
+    # desktop app dependencies
+    - brew install wine
 
 script:
     - if [ "$TRAVIS_BRANCH" == "router" ] ; then cd router && sh ci.sh router.hex; fi
-    - if [ "$TRAVIS_BRANCH" == "master" ] || [ "$TRAVIS_BRANCH" == "desktop-app" ] ; then
-                                     cd desktop_app
-                                     && npm install
-                                     && npm install 7zip-bin-linux
-                                     && npm test
-                                     && npm run pack:linux
-                                     && npm run pack:win
-                                     ; fi
+    - if [ "$TRAVIS_BRANCH" == "ci-fix" ] || [ "$TRAVIS_BRANCH" == "desktop-app" ] ; then
+        cd desktop_app
+        && npm install
+        && npm test
+        && npm run pack:mac
+        && npm run pack:win
+        && npm run pack:linux
+        ; fi

@@ -1,3 +1,3 @@
-mkdir -p router \
+mkdir -p app/router \
 && cd ../router \
-&& sh ci.sh ../desktop_app/router/router.hex
+&& sh ci.sh ../desktop_app/app/router/router.hex
