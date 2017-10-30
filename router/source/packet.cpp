@@ -172,24 +172,57 @@ void Packet::encode_lsa(PacketBuffer p, std::unordered_map<edge, int> graph) {
     }
 }
 
-//Packet Packet::ping_packet(uint16_t source_ip, uint16_t dest_ip) {
-    //Packet p;
-    //p.ptype = PING;
-    //p.source_ip = source_ip;
-    //p.dest_ip = dest_ip;
-    //return p;
-//}
+ManagedString Packet::to_json() {
+    ManagedString result = "{";
+    result = result + format_attr("type", "packet");
+    switch (ptype) {
+        case PING:
+            result = result + format_attr("ptype", "PING");
+            result = result + format_attr("source_ip", this->source_ip);
+            result = result + format_attr("imm_dest_ip", this->imm_dest_ip, true);
+            break;
+        case LSA:
+            result = result + format_attr("ptype", "LSA");
+            result = result + format_attr("ttl", this->ttl);
+            result = result + format_attr("source_ip", this->source_ip, true);
+            break;
+        case MESSAGE:
+            result = result + format_attr("source_ip", this->source_ip);
+            result = result + format_attr("imm_dest_ip", this->imm_dest_ip);
+            result = result + format_attr("dest_ip", this->dest_ip);
+            result = result + format_attr("ttl", this->ttl);
+            result = result + format_attr("timestamp", this->timestamp);
+            result = result + format_attr("payload", this->payload.toCharArray(), true);
+            break;
+        case DNS:
+            result = result + format_attr("ptype", "DNS", true);
+            //TODO
+            break;
+    }
+    result = result + "}\0";
+    return ManagedString(result);
+}
 
-//Packet Packet::lsa_packet(uint8_t ttl, uint8_t payload) {
-    //Packet p;
-    //p.ptype = LSA;
-    //p.ttl = ttl;
-    //p.payload = payload;
-    //return p;
-//}
+ManagedString Packet::format_attr(ManagedString attr, ManagedString val, bool last) {
+    ManagedString result = ManagedString("\"") 
+        + ManagedString(attr) 
+        + ManagedString("\":") 
+        + ManagedString("\"") 
+        + ManagedString(val) 
+        + ManagedString("\"");
+    if (last)
+        return result;
+    else
+        return result + ",";
+}
 
-//Packet Packet::message_packet(uint16_t source_ip,
-        //uint16_t imm_dest_ip, uint16_t dest_ip, uint8_t timestamp,
-        //uint8_t ttl, uint8_t payload) {
-    //return Packet(MESSAGE, source_ip, imm_dest_ip, dest_ip, timestamp, ttl, payload);
-//}
+ManagedString Packet::format_attr(ManagedString attr, int val, bool last) {
+    ManagedString result = ManagedString("\"") 
+        + ManagedString(attr) 
+        + ManagedString("\":") 
+        + ManagedString(val);
+    if (last)
+        return result;
+    else
+        return result + ",";
+}

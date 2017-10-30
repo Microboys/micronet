@@ -3,6 +3,7 @@
 #include "graph.h"
 #include "MicroBit.h"
 #include <unordered_map>
+#include <string>
 
 #define PACKET_SIZE 32
 #define MAX_TTL 5
@@ -92,11 +93,9 @@ class Packet {
         Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip, uint16_t dest_ip, uint8_t timestamp, uint8_t ttl, std::unordered_map<struct edge, int> graph);
         Packet();
         PacketBuffer format();
+        ManagedString to_json();
         std::unordered_map<struct edge, int> decode_lsa(PacketBuffer p, uint16_t source_ip);
         void encode_lsa(PacketBuffer p, std::unordered_map<struct edge, int> graph);
-        //static Packet ping_packet(uint16_t source_ip, uint16_t dest_ip);
-        //static Packet lsa_packet(uint8_t ttl, uint8_t payload);
-        //static Packet message_packet(uint16_t source_ip,
-            //uint16_t imm_dest_ip, uint16_t dest_ip, uint8_t timestamp,
-            //uint8_t ttl, uint8_t payload);
+        ManagedString format_attr(ManagedString attr, ManagedString val, bool last=false);
+        ManagedString format_attr(ManagedString attr, int val, bool last=false);
 };
