@@ -6,16 +6,12 @@
     <script>
       //Initialise modules
       var serialport = require('serialport');
-      var jQuery = require('jquery');
-      require('bootstrap');
     </script>
   </head>
   <body>
     <div id="app"></div>
     <script src="./app.js" data-container="#app"></script>
     <script>
-      //Initialise modules
-
       if (process.env.BROWSER_SYNC_CLIENT_URL) {
         const current = document.currentScript;
         const script = document.createElement('script');
@@ -26,8 +22,22 @@
 
       //Print out ports to dev console
       serialport.list((err, ports) => {
-        console.log('ports', ports);
+        for (var i = 0; i < ports.length; i++) {
+          console.log(ports[i].comName);
+        }
       });
+
+      var port = new serialport('/dev/ttyACM0', { autoOpen: true, baudRate : 115200 });
+      // port.on('data', function(data) {
+      //   console.log("Data:" + data.toString()); 
+      //   console.log("Size: " + data.length);
+      // });
+      port.on('readable', function() {
+        var read = port.read().toString();
+        console.log("Read: " + read);
+        console.log("Size: " + read.length);
+      });
+
     </script>
     <button type="button" class="btn btn-primary">Bootstrap Button (Test)</button>
   </body>
