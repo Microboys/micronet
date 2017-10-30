@@ -2,7 +2,6 @@
 <html>
   <head>
     <title>My App</title>
-    <link href="../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <script>
       //Initialise modules
       var serialport = require('serialport');
@@ -28,17 +27,14 @@
       });
 
       var port = new serialport('/dev/ttyACM0', { autoOpen: true, baudRate : 115200 });
-      // port.on('data', function(data) {
-      //   console.log("Data:" + data.toString()); 
-      //   console.log("Size: " + data.length);
-      // });
-      port.on('readable', function() {
-        var read = port.read().toString();
-        console.log("Read: " + read);
-        console.log("Size: " + read.length);
+      port.write('test\n', function(err) {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        console.log("Message written");
       });
 
     </script>
-    <button type="button" class="btn btn-primary">Bootstrap Button (Test)</button>
   </body>
 </html>

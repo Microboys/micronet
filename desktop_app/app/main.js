@@ -102,8 +102,4 @@ app.on('ready', async () => {
       }]).popup(mainWindow);
     });
   }
-
-  //Init jQuery and plugins (requires window to be initialised first)
-  var jQuery = require('jquery')(mainWindow);
-  require('bootstrap');
 });
