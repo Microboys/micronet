@@ -109,7 +109,7 @@ void echo_message(MicroBitEvent e) {
     uBit.display.printAsync(in);
 }
 
-void send_graph_update(MicroBitEvent e) {
+void send_graph_update() {
     serial.printf("%s", topology_json().toCharArray());
 }
 
@@ -122,26 +122,28 @@ void setup() {
     serial.printf("==== BOOTING DONE ====\n\r");
 }
 
+void onMessage(MicroBitEvent e) {
+    ManagedString message = serial.readUntil(DELIMITER);
+    // TODO: Parse message and trigger actions
+    if (message == GRAPH_REQUEST) {
+        send_graph_update();
+    }
+    serial.eventOn(DELIMITER);
+};
+
+void initSerialRead() {
+    uBit.messageBus.listen(MICROBIT_ID_SERIAL, MICROBIT_SERIAL_EVT_DELIM_MATCH, onMessage);
+    serial.eventOn(DELIMITER);
+    serial.setRxBufferSize(200);
+}
+
 int main() {
     uBit.init();
     setup();
     uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, onData, MESSAGE_BUS_LISTENER_QUEUE_IF_BUSY);
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, ping);
-    //uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, send_message);
+    initSerialRead();
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_AB, MICROBIT_BUTTON_EVT_CLICK, send_lsa);
-    uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, send_graph_update);
     uBit.radio.enable();
-
-    //uBit.sleep(1000);
-    //while(true) {
-        //MicroBitEvent e;
-        //send_lsa(e);
-        //uBit.sleep(1000);
-        //print_graph(serial);
-        //uBit.sleep(1000);
-        //ping(e);
-        //uBit.sleep(5000);
-    //}
-
     release_fiber();
 }

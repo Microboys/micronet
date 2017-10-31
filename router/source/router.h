@@ -2,6 +2,8 @@
 #include "MicroBit.h"
 #include "packet.h"
 #include "graph.h"
+#define DELIMITER "\r\n"
+#define GRAPH_REQUEST "GRAPH"
 
 void print_neighbours();
 void onData(MicroBitEvent e);
