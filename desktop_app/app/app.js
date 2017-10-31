@@ -38,4 +38,4 @@ ReactDOM.render(
 );
 
 /* TODO: how often should we poll? Can we be reactive to changes instead? */
-setInterval(updateGraph, 5000);
+setInterval(updateGraph, 1000);

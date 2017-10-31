@@ -6,7 +6,6 @@ export default class NetworkGraph extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      graph: props.graph,
       options: {
         autoResize: true,
         width: '100%',
@@ -18,7 +17,7 @@ export default class NetworkGraph extends Component {
 
   render() {
     return (
-      <Graph graph={this.state.graph} options={this.state.options} events={this.state.events} />
+      <Graph graph={this.props.graph} options={this.state.options} events={this.state.events} />
     );
   }
 }
