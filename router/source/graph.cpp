@@ -52,11 +52,7 @@ std::unordered_map<uint16_t,int> distance_for_node;
 std::unordered_map<uint16_t,bool> if_computed;
 
 void calculate_syn_tree(uint16_t source) {
-
     distance_for_node[source] = 0;
-
-    //get min distance and edge for next iteration
-    uint16_t min_edge = 0;
 
     //get distance and write path for neighbours
     for (auto it : graph) {
@@ -65,9 +61,13 @@ void calculate_syn_tree(uint16_t source) {
             int distance = abs(it.second);
             distance_for_node[cur_edge.to] = distance;
             path_for_node[cur_edge.to] = cur_edge.to;
+            if_computed[cur_edge.to] = false;
         }
     }
     if_computed[source] = true;
+
+    //get min distance and edge for next iteration
+    uint16_t min_edge = 0;
 
     //write iterative for rest
     while(true){
@@ -104,8 +104,9 @@ uint16_t find_min_edge() {
   uint16_t min_edge = 0;
 
   for (auto it : distance_for_node) {
-      if (it.second <= min_distance && !if_computed[it.first]) {
+      if (abs(it.second) <= min_distance && !if_computed[it.first]) {
           min_edge = it.first;
+          min_distance = abs(it.second);
       }
   }
   return min_edge;
