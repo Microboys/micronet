@@ -43,11 +43,13 @@ app.on('ready', async () => {
   }
 
   mainWindow = new BrowserWindow({ 
-    width: 1000, 
-    height: 800,
-    minWidth: 640,
-    minHeight: 480,
-    show: false 
+    show: false,
+    //frame: false,
+    backgroundColor: 0x000000,
+    darkTheme: true,
+    webPreferences: {
+      zoomFactor: 1
+    }
   });
 
   mainWindow.loadURL(url.format({
