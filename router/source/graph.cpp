@@ -120,7 +120,7 @@ bool if_all_nodes_computed(std::unordered_map<uint16_t,bool> if_computated){
   return true;
 }
 
-int16_t get_node_for_path(int16_t target){
+int16_t get_path_for_node(int16_t target){
   for (auto it : path_for_node) {
       if (it.first == target) {
           return it.second;
