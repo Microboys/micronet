@@ -26,11 +26,10 @@
 //});
 
 const randomInteger = (start, end) => {
-  return Math.floor(Math.random() * (1 + start - end)) + 1;
+  return Math.floor(Math.random() * (1 - start + end)) + 1;
 };
 
 const getGraph = () => {
-
   return {
     nodes: [
       {id: 1, label: 'Node 1'},
