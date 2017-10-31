@@ -123,11 +123,16 @@ void setup() {
 }
 
 void onMessage(MicroBitEvent e) {
-    ManagedString message = serial.readUntil(DELIMITER);
+    ManagedString request = serial.readUntil(DELIMITER);
     // TODO: Parse message and trigger actions
-    if (message == GRAPH_REQUEST) {
+    if (request == GRAPH_REQUEST) {
         send_graph_update();
+    } else if (request == IP_REQUEST) {
+        serial.printf("%i\n", ip);
+    } else if (request == PING_REQUEST) {
+        ping(MicroBitEvent());
     }
+
     serial.eventOn(DELIMITER);
 };
 
