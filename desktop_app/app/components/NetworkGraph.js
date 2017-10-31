@@ -13,6 +13,12 @@ export default class NetworkGraph extends Component {
         nodes: {
           shape: 'image',
           image: './assets/microbit.png'
+        },
+        edges: {
+          font: {
+            align: 'horizontal',
+            vadjust: -10
+          }
         }
       },
       events: {}
