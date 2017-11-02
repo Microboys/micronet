@@ -95,6 +95,6 @@ ManagedString graph_to_json(std::unordered_map<struct edge, int> graph) {
 ManagedString topology_json() {
     ManagedString result = "{";
     result = result + format_attr("type", "graph");
-    result = result + format_attr("graph", graph_to_json(graph), true);
+    result = result + "\"graph\":" + graph_to_json(graph);
     return result + "}\0";
 }
