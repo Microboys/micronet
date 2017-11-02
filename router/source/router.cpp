@@ -1,15 +1,14 @@
 #include "router.h"
 #include <vector>
 MicroBit uBit;
-MicroBitSerial serial(USBTX, USBRX);
+MicroBitSerial
+
+serial(USBTX, USBRX);
 
 uint16_t ip = 0;
 uint16_t transmit_power = 7;
 
 std::vector<router_info> neighbours;
-
-// TODO: Decide mapped distance type.
-std::unordered_map<struct edge, int> graph;
 
 void broadcast(Packet p) {
     if (p.ttl > 0) {
@@ -24,9 +23,8 @@ void broadcast(Packet p) {
 void onData(MicroBitEvent e) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
     Packet p = Packet(buffer, uBit.radio.getRSSI());
-    p.print_packet(serial);
-    print_graph(serial, graph);
-
+    //p.print_packet(serial);
+    serial.printf("%s", p.to_json().toCharArray());
     uBit.sleep(1);
 
     if (p.ptype == PING) {
@@ -39,13 +37,13 @@ void onData(MicroBitEvent e) {
             uBit.radio.datagram.send(p.format());
         } else if (p.imm_dest_ip == ip) {
             // Got back our own ping packet
-            struct router_info neighbour;
-            neighbour.ip = p.source_ip;
+            struct router_info neighbour; neighbour.ip = p.source_ip;
             neighbour.distance = p.rssi;
             neighbours.push_back(neighbour);
-            update_graph(graph, ip, p.source_ip, p.rssi);
+            update_graph(ip, p.source_ip, p.rssi);
             // TODO: print new neighbours using graph
-            print_neighbours();
+            //print_neighbours();
+            //print_graph(serial);
         }
     } else if (p.ptype == MESSAGE) {
         if (p.dest_ip == ip) {
@@ -56,12 +54,12 @@ void onData(MicroBitEvent e) {
         }
     } else if (p.ptype == LSA) {
         uint8_t ttl = p.ttl;
-        //payload = buffer[2];
-        //update_graph(buffer);
-        update_graph(graph, &p);
+        update_graph(&p);
+        print_graph(serial);
 
         if (ttl > 0) {
-            send_new_graph(ttl-1);
+            p.ttl = p.ttl - 1;
+            uBit.radio.datagram.send(p.format());
         }
     }
 }
@@ -78,6 +76,8 @@ void print_neighbours() {
 void ping(MicroBitEvent e) {
     Packet p(PING, ip, 0, 0, 0, MAX_TTL, 0);
     uBit.radio.datagram.send(p.format());
+    delete_all_edges(ip);
+    neighbours.clear();
     serial.printf("Pinging...\n\r");
 }
 
@@ -98,14 +98,19 @@ void send_message(MicroBitEvent e) {
 }
 
 void send_lsa(MicroBitEvent e) {
-    std::unordered_map<edge, int> to_send;
-    for (auto it : graph) {
-        if (it.first.from == ip) {
-            to_send[it.first] = it.second;
-        }
-    }
+    std::unordered_map<edge, int> to_send = get_lsa_graph(ip);
     Packet p(LSA, ip, 0, 0, 0, MAX_TTL, to_send);
     uBit.radio.datagram.send(p.format());
+}
+
+void echo_message(MicroBitEvent e) {
+    ManagedString in = serial.readUntil("\n\0");
+    serial.printf("UBit: received %s", in.toCharArray());
+    uBit.display.printAsync(in);
+}
+
+void send_graph_update() {
+    serial.printf("%s", topology_json().toCharArray());
 }
 
 void setup() {
@@ -117,12 +122,32 @@ void setup() {
     serial.printf("==== BOOTING DONE ====\n\r");
 }
 
+void onMessage(MicroBitEvent e) {
+    ManagedString request = serial.readUntil(DELIMITER);
+    // TODO: Parse message and trigger actions
+    if (request == GRAPH_REQUEST) {
+        send_graph_update();
+    } else if (request == IP_REQUEST) {
+        serial.printf("%i\n", ip);
+    } else if (request == PING_REQUEST) {
+        ping(MicroBitEvent());
+    }
+
+    serial.eventOn(DELIMITER);
+};
+
+void initSerialRead() {
+    uBit.messageBus.listen(MICROBIT_ID_SERIAL, MICROBIT_SERIAL_EVT_DELIM_MATCH, onMessage);
+    serial.eventOn(DELIMITER);
+    serial.setRxBufferSize(200);
+}
+
 int main() {
     uBit.init();
     setup();
     uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, onData, MESSAGE_BUS_LISTENER_QUEUE_IF_BUSY);
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, ping);
-    uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, send_message);
+    initSerialRead();
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_AB, MICROBIT_BUTTON_EVT_CLICK, send_lsa);
     uBit.radio.enable();
     release_fiber();

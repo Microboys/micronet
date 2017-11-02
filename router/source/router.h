@@ -2,6 +2,10 @@
 #include "MicroBit.h"
 #include "packet.h"
 #include "graph.h"
+#define DELIMITER "\r\n"
+#define GRAPH_REQUEST "GRAPH"
+#define PING_REQUEST "PING"
+#define IP_REQUEST "IP"
 
 void print_neighbours();
 void onData(MicroBitEvent e);

@@ -2,7 +2,7 @@
 
 The desktop app used to interact with a router micro:bit over serial in order to visualise the network, send custom packets and more.
 
-Based on boiilerplate for using [Electron](http://electron.atom.io/), [React](https://facebook.github.io/react/) and [Redux](http://redux.js.org/), taken from [this repo](https://raw.githubusercontent.com/jschr/electron-react-redux-boilerplate/master/README.md).
+Based on boilerplate for using [Electron](http://electron.atom.io/), [React](https://facebook.github.io/react/) and [Redux](http://redux.js.org/), taken from [this repo](https://raw.githubusercontent.com/jschr/electron-react-redux-boilerplate/master/README.md).
 
 ## Developing 
 

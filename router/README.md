@@ -22,7 +22,7 @@ at least once in this directory in order to set the yotta target and build confi
 fix-config.sh
 ```
 
-This justs makes sure BLE is disabled since we're using radio.
+This just makes sure BLE is disabled since we're using radio.
 
 4. Edit the last argument in flash.sh to point to the folder where your micro:bit is mounted.
 
