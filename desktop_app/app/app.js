@@ -15,7 +15,11 @@ const syncHistoryWithStore = (store, history) => {
   }
 };
 
-const initialState = {};
+const initialState = { "graph" : {
+    "nodes" : [],
+    "edges" : []
+  }
+};
 const routerHistory = createMemoryHistory();
 const store = configureStore(initialState, routerHistory);
 syncHistoryWithStore(store, routerHistory);
