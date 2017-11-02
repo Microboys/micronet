@@ -141,7 +141,7 @@ void onMessage(MicroBitEvent e) {
             ManagedString ip_string = request.substring(MESSAGE_REQUEST_LENGTH + 1, delim - MESSAGE_REQUEST_LENGTH - 1);
             ManagedString message = request.substring(delim + 1, request.length() - delim - 1);
             uint16_t ip = atoi(ip_string);
-            send_message(ip, message);
+            send_payload(ip, message);
         }
 
     } else {
