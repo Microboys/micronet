@@ -8,13 +8,12 @@ serial(USBTX, USBRX);
 uint16_t ip = 0;
 uint16_t transmit_power = 7;
 
-std::vector<router_info> neighbours;
-
 void broadcast(Packet p) {
     if (p.ttl > 0) {
         p.ttl--;
+        std::vector<uint16_t> neighbours = get_neighbours(ip);
         for (auto n : neighbours) {
-            p.imm_dest_ip = n.ip;
+            p.imm_dest_ip = ip;
             uBit.radio.datagram.send(p.format());
         }
     }
@@ -37,13 +36,7 @@ void onData(MicroBitEvent e) {
             uBit.radio.datagram.send(p.format());
         } else if (p.imm_dest_ip == ip) {
             // Got back our own ping packet
-            struct router_info neighbour; neighbour.ip = p.source_ip;
-            neighbour.distance = p.rssi;
-            neighbours.push_back(neighbour);
             update_graph(ip, p.source_ip, p.rssi);
-            // TODO: print new neighbours using graph
-            //print_neighbours();
-            //print_graph(serial);
         }
     } else if (p.ptype == MESSAGE) {
         if (p.dest_ip == ip) {
@@ -64,36 +57,36 @@ void onData(MicroBitEvent e) {
     }
 }
 
-void print_neighbours() {
-    //serial.printf("======= NEIGHBOURS =====\n\r");
-    for (router_info info : neighbours) {
-        //serial.printf("%i: %i\n\r", info.ip, info.distance);
-    }
-    //serial.printf("==== END NEIGHBOURS ====\n\r");
-
-}
-
 void ping(MicroBitEvent e) {
     Packet p(PING, ip, 0, 0, 0, MAX_TTL, 0);
     uBit.radio.datagram.send(p.format());
     delete_all_edges(ip);
-    neighbours.clear();
-    //serial.printf("Pinging...\n\r");
 }
 
 void send_message(MicroBitEvent e) {
+    std::vector<uint16_t> neighbours = get_neighbours(ip);
     if (!neighbours.empty()) {
-        uint16_t target = neighbours[uBit.random(neighbours.size())].ip;
+        uint16_t target = neighbours[uBit.random(neighbours.size())];
 
         //TODO
         ManagedString message = "Hello!";
 
         for (auto n : neighbours) {
-            Packet p(MESSAGE, ip, n.ip, target, 0, MAX_TTL, message);
+            Packet p(MESSAGE, ip, n, target, 0, MAX_TTL, message);
             uBit.radio.datagram.send(p.format());
         }
 
         //serial.printf("Sending %s to %i...\n\r", message.toCharArray(), target);
+    }
+}
+
+void send_payload(uint16_t dest_ip, ManagedString message) {
+    std::vector<uint16_t> neighbours = get_neighbours(ip);
+    if (!neighbours.empty()) {
+        for (auto n : neighbours) {
+            Packet p(MESSAGE, ip, n, dest_ip, 0, MAX_TTL, message);
+            uBit.radio.datagram.send(p.format());
+        }
     }
 }
 

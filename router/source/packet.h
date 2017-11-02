@@ -63,11 +63,6 @@ enum packet_type {
     DNS = 3
 };
 
-struct router_info {
-    uint16_t ip;
-    int distance;
-};
-
 class Packet {
     private:
         void encode_payload(PacketBuffer p, ManagedString payload, int start_index);
