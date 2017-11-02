@@ -9,7 +9,17 @@ export default class NetworkGraph extends Component {
       options: {
         autoResize: true,
         width: '100%',
-        height: '100%'
+        height: '100%',
+        nodes: {
+          shape: 'image',
+          image: './assets/microbit.png'
+        },
+        edges: {
+          font: {
+            align: 'horizontal',
+            vadjust: -10
+          }
+        }
       },
       events: {}
     };

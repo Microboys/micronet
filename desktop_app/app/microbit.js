@@ -29,6 +29,43 @@ const randomInteger = (start, end) => {
   return Math.floor(Math.random() * (1 - start + end)) + 1;
 };
 
+function transformGraphJSON(graphJSON) {
+  var obj = JSON.parse(graphJSON);
+  if (obj.type === 'graph') {
+    var graph = obj.graph;
+    var nodes = [];
+    var edges = [];
+    for (var i = 0; i < graph.length; i++) {
+      var arc = graph[i];
+      addNode(nodes, arc.from, "Node " + arc.from);
+      addNode(nodes, arc.to, "Node " + arc.to);
+      edges.push({from: arc.from, to: arc.to, label: arc.distance.toString()});
+    }
+    return {
+      nodes: nodes,
+      edges: edges
+    };
+  } else {
+    throw new Error("Non-graph JSON passed to transformGraphJSON");
+  }
+}
+
+function addNode(nodes, id, label) {
+  var obj = {id: id, label: label};
+  if (!nodeExists(nodes, id)) {
+    nodes.push({id: id, label: label});
+  }
+}
+
+function nodeExists(nodes, id) {
+  for (var i = 0; i < nodes.length; i++) {
+    if (nodes[i].id == id) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const getGraph = () => {
   return {
     nodes: [
