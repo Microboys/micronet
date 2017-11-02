@@ -24,7 +24,7 @@ void onData(MicroBitEvent e) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
     Packet p = Packet(buffer, uBit.radio.getRSSI());
     //p.print_packet(serial);
-    serial.printf("%s", p.to_json().toCharArray());
+    //serial.printf("%s", p.to_json().toCharArray());
     uBit.sleep(1);
 
     if (p.ptype == PING) {
@@ -47,7 +47,7 @@ void onData(MicroBitEvent e) {
         }
     } else if (p.ptype == MESSAGE) {
         if (p.dest_ip == ip) {
-            serial.printf("%i sent me %s\n\r", p.source_ip, p.payload.toCharArray());
+            //serial.printf("%i sent me %s\n\r", p.source_ip, p.payload.toCharArray());
             uBit.display.printAsync(p.payload);
         } else if (p.imm_dest_ip == ip) {
             broadcast(p);
@@ -65,11 +65,11 @@ void onData(MicroBitEvent e) {
 }
 
 void print_neighbours() {
-    serial.printf("======= NEIGHBOURS =====\n\r");
+    //serial.printf("======= NEIGHBOURS =====\n\r");
     for (router_info info : neighbours) {
-        serial.printf("%i: %i\n\r", info.ip, info.distance);
+        //serial.printf("%i: %i\n\r", info.ip, info.distance);
     }
-    serial.printf("==== END NEIGHBOURS ====\n\r");
+    //serial.printf("==== END NEIGHBOURS ====\n\r");
 
 }
 
@@ -78,7 +78,7 @@ void ping(MicroBitEvent e) {
     uBit.radio.datagram.send(p.format());
     delete_all_edges(ip);
     neighbours.clear();
-    serial.printf("Pinging...\n\r");
+    //serial.printf("Pinging...\n\r");
 }
 
 void send_message(MicroBitEvent e) {
@@ -93,7 +93,7 @@ void send_message(MicroBitEvent e) {
             uBit.radio.datagram.send(p.format());
         }
 
-        serial.printf("Sending %s to %i...\n\r", message.toCharArray(), target);
+        //serial.printf("Sending %s to %i...\n\r", message.toCharArray(), target);
     }
 }
 
@@ -105,7 +105,7 @@ void send_lsa(MicroBitEvent e) {
 
 void echo_message(MicroBitEvent e) {
     ManagedString in = serial.readUntil("\n\0");
-    serial.printf("UBit: received %s", in.toCharArray());
+    //serial.printf("UBit: received %s", in.toCharArray());
     uBit.display.printAsync(in);
 }
 
@@ -117,9 +117,9 @@ void setup() {
     // Generate a random IP, exclude 0
     ip = uBit.random(65534) + 1;
     //uBit.radio.setTransmitPower(transmit_power);
-    serial.printf("======= BOOTING ======\n\r");
-    serial.printf("Device IP: %i\n\r", ip);
-    serial.printf("==== BOOTING DONE ====\n\r");
+    //serial.printf("======= BOOTING ======\n\r");
+    //serial.printf("Device IP: %i\n\r", ip);
+    //serial.printf("==== BOOTING DONE ====\n\r");
 }
 
 void onMessage(MicroBitEvent e) {

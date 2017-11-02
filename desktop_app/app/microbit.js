@@ -5,26 +5,44 @@ const microbitProductId = "0204";
 const microbitVendorId = "0d28";
 const microbitBaudRate = 115200;
 
+var microbitPort = null;
+var locating = false;
+
 const getGraph = (store) => {
-  console.log("Getting the graph...");
+  if (microbitPort) {
+    console.log("Sending the graph command");
+    microbitPort.write("GRAPH\n", function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("Sent the graph command");
+        var response = microbitPort.read();
+	if (response) {
+	  transformGraphJSON(response);
+	  console.log("Response is: " + response);
+	} else {
+	  console.log("No response");
+	}
+        //const action = graphActions.drawGraph();
+        //store.dispatch(action)
+      }
+    });
+  } else if (!locating) {
+    locatePort();
+  }
+}
+
+function locatePort() {
+  console.log("locating the port...");
+  locating = true;
   const promise = SerialPort.list();
   promise.then((ports) => {
     for (let port of ports) {
       if (port.productId === microbitProductId && port.vendorId === microbitVendorId) {
-        console.log("Found the microbit");
         var microbitCom = port.comName;
-	var microbitPort = new SerialPort(microbitCom, {baudRate : microbitBaudRate, autoOpen: true});
-	microbitPort.write("GRAPH\n", function(err) {
-	  if (err) {
-	    console.log(err);
-	  } else {
-            console.log("Sent the graph command");
-	    var response = microbitPort.read(1000000);
-            console.log("Read the response " + response);
-            //const action = graphActions.drawGraph();
-            //store.dispatch(action)
-	  }
-	});
+	microbitPort = new SerialPort(microbitCom, {baudRate : microbitBaudRate, autoOpen: true});
+        console.log("found it");
+	locating = false;
       }
     }
   });
