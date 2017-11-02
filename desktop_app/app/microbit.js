@@ -15,13 +15,28 @@ const getGraph = (store) => {
         console.log(err);
       } else {
         var response = microbitPort.read();
-	if (response) {
-	  console.log("Response is " + response);
-	  var transformed = transformGraphJSON(response);
-	  store.dispatch(graphActions.drawGraph(transformed));
-	}
+      	if (response) {
+      	  console.log("Response is " + response);
+      	  var transformed = transformGraphJSON(response);
+      	  store.dispatch(graphActions.drawGraph(transformed));
+      	}
       }
     });
+  } else if (!locating) {
+    locatePort();
+  }
+}
+
+const sendMsg = (to, msg) => {
+  console.log(msg);
+  if (microbitPort) {
+    microbitPort.write("MSG\t" + to + "\t" + msg + "\n", function(err) {
+      if(err) {
+        console.log(err);
+      } else {
+        console.log("Message sent!");
+      }
+    })
   } else if (!locating) {
     locatePort();
   }
@@ -81,4 +96,4 @@ function nodeExists(nodes, id) {
   return false;
 }
 
-export { getGraph };
+export { getGraph, sendMsg };
