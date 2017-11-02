@@ -55,7 +55,7 @@ void onData(MicroBitEvent e) {
     } else if (p.ptype == LSA) {
         uint8_t ttl = p.ttl;
         update_graph(&p);
-        print_graph(serial);
+        //print_graph(serial);
 
         if (ttl > 0) {
             p.ttl = p.ttl - 1;

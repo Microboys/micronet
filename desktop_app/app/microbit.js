@@ -10,21 +10,16 @@ var locating = false;
 
 const getGraph = (store) => {
   if (microbitPort) {
-    console.log("Sending the graph command");
     microbitPort.write("GRAPH\n", function(err) {
       if (err) {
         console.log(err);
       } else {
-        console.log("Sent the graph command");
         var response = microbitPort.read();
 	if (response) {
-	  transformGraphJSON(response);
-	  console.log("Response is: " + response);
-	} else {
-	  console.log("No response");
+	  console.log("Response is " + response);
+	  var transformed = transformGraphJSON(response);
+	  store.dispatch(graphActions.drawGraph(transformed));
 	}
-        //const action = graphActions.drawGraph();
-        //store.dispatch(action)
       }
     });
   } else if (!locating) {
@@ -33,7 +28,6 @@ const getGraph = (store) => {
 }
 
 function locatePort() {
-  console.log("locating the port...");
   locating = true;
   const promise = SerialPort.list();
   promise.then((ports) => {
@@ -41,7 +35,6 @@ function locatePort() {
       if (port.productId === microbitProductId && port.vendorId === microbitVendorId) {
         var microbitCom = port.comName;
 	microbitPort = new SerialPort(microbitCom, {baudRate : microbitBaudRate, autoOpen: true});
-        console.log("found it");
 	locating = false;
       }
     }
