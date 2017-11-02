@@ -6,7 +6,6 @@ import { createMemoryHistory } from 'history';
 
 import routes from './routes';
 import configureStore from './store';
-import graphActions from './actions/graph';
 import { getGraph } from './microbit.js';
 
 const syncHistoryWithStore = (store, history) => {
@@ -14,11 +13,6 @@ const syncHistoryWithStore = (store, history) => {
   if(routing && routing.location) {
     history.replace(routing.location);
   }
-};
-
-const updateGraph = () => {
-  const action = graphActions.drawGraph(getGraph());
-  store.dispatch(action);
 };
 
 const initialState = {};
@@ -38,4 +32,4 @@ ReactDOM.render(
 );
 
 /* TODO: how often should we poll? Can we be reactive to changes instead? */
-setInterval(updateGraph, 1000);
+setInterval(getGraph(store), 1000);
