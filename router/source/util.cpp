@@ -27,3 +27,13 @@ ManagedString format_attr(ManagedString attr, int val, bool last) {
     else
         return result + ",";
 }
+
+uint16_t atoi(ManagedString s) {
+    uint16_t result = 0;
+    for (int i = 0; i < s.length(); i++) {
+        char c = s.charAt(i);
+        uint16_t value = (uint16_t)(c - '0');
+        result = result * 10 + value;
+    }
+    return result;
+}

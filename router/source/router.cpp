@@ -81,19 +81,12 @@ void ping(MicroBitEvent e) {
     //serial.printf("Pinging...\n\r");
 }
 
-void send_message(MicroBitEvent e) {
+void send_message(uint16_t target, ManagedString message) {
     if (!neighbours.empty()) {
-        uint16_t target = neighbours[uBit.random(neighbours.size())].ip;
-
-        //TODO
-        ManagedString message = "Hello!";
-
         for (auto n : neighbours) {
             Packet p(MESSAGE, ip, n.ip, target, 0, MAX_TTL, message);
             uBit.radio.datagram.send(p.format());
         }
-
-        //serial.printf("Sending %s to %i...\n\r", message.toCharArray(), target);
     }
 }
 
@@ -117,6 +110,8 @@ void setup() {
     // Generate a random IP, exclude 0
     ip = uBit.random(65534) + 1;
     //uBit.radio.setTransmitPower(transmit_power);
+
+        //serial.printf("Sending %s to %i...\n\r", message.toCharArray(), target);
     //serial.printf("======= BOOTING ======\n\r");
     //serial.printf("Device IP: %i\n\r", ip);
     //serial.printf("==== BOOTING DONE ====\n\r");
@@ -124,13 +119,32 @@ void setup() {
 
 void onMessage(MicroBitEvent e) {
     ManagedString request = serial.readUntil(DELIMITER);
-    // TODO: Parse message and trigger actions
-    if (request == GRAPH_REQUEST) {
-        send_graph_update();
-    } else if (request == IP_REQUEST) {
-        serial.printf("%i\n", ip);
-    } else if (request == PING_REQUEST) {
-        ping(MicroBitEvent());
+    ManagedString substr = request.substring(0, MESSAGE_REQUEST_LENGTH);
+
+    if (substr == MESSAGE_REQUEST) {
+        int delim = -1;
+        for (int i = MESSAGE_REQUEST_LENGTH + 1; i < request.length(); i++) {
+            if (request.charAt(i) == MESSAGE_DELIMITER) {
+                delim = i;
+                break;
+            }
+        }
+        if (delim > -1) {
+            ManagedString ip_string = request.substring(MESSAGE_REQUEST_LENGTH + 1, delim - MESSAGE_REQUEST_LENGTH - 1);
+            ManagedString message = request.substring(delim + 1, request.length() - delim - 1);
+            uint16_t ip = atoi(ip_string);
+            send_message(ip, message);
+        }
+
+    } else {
+        // TODO: Parse message and trigger actions
+        if (request == GRAPH_REQUEST) {
+            send_graph_update();
+        } else if (request == IP_REQUEST) {
+            serial.printf("%i\n", ip);
+        } else if (request == PING_REQUEST) {
+            ping(MicroBitEvent());
+        }
     }
 
     serial.eventOn(DELIMITER);
