@@ -63,21 +63,6 @@ void ping(MicroBitEvent e) {
     delete_all_edges(ip);
 }
 
-void send_message(MicroBitEvent e) {
-    std::vector<uint16_t> neighbours = get_neighbours(ip);
-    if (!neighbours.empty()) {
-        uint16_t target = neighbours[uBit.random(neighbours.size())];
-
-        //TODO
-        ManagedString message = "Hello!";
-
-        for (auto n : neighbours) {
-            Packet p(MESSAGE, ip, n, target, 0, MAX_TTL, message);
-            uBit.radio.datagram.send(p.format());
-        }
-    }
-}
-
 void send_payload(uint16_t dest_ip, ManagedString message) {
     std::vector<uint16_t> neighbours = get_neighbours(ip);
     if (!neighbours.empty()) {
@@ -131,7 +116,7 @@ void onMessage(MicroBitEvent e) {
             ManagedString ip_string = request.substring(MESSAGE_REQUEST_LENGTH + 1, delim - MESSAGE_REQUEST_LENGTH - 1);
             ManagedString message = request.substring(delim + 1, request.length() - delim - 1);
             uint16_t ip = atoi(ip_string);
-            send_message(ip, message);
+            send_payload(ip, message);
         }
 
     } else {
