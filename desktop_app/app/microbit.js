@@ -65,10 +65,12 @@ function transformGraphJSON(graphJSON) {
     var graph = obj.graph;
     var nodes = [];
     var edges = [];
+    var ip = obj.ip;
+    console.log("Connected micro:bit: " + ip);
     for (var i = 0; i < graph.length; i++) {
       var arc = graph[i];
-      addNode(nodes, arc.from, "Node " + arc.from);
-      addNode(nodes, arc.to, "Node " + arc.to);
+      addNode(nodes, arc.from, "Node " + arc.from, ip);
+      addNode(nodes, arc.to, "Node " + arc.to, ip);
       edges.push({from: arc.from, to: arc.to, label: arc.distance.toString()});
     }
     return {
@@ -80,10 +82,12 @@ function transformGraphJSON(graphJSON) {
   }
 }
 
-function addNode(nodes, id, label) {
-  var obj = {id: id, label: label};
+function addNode(nodes, id, label, ip) {
+  var obj = (ip == id) 
+  ? {id: id, label: label, shadow: {enabled: true, color: "#59B4FF", x: 0, y: 0, size: 20}} 
+  : {id: id, label: label};
   if (!nodeExists(nodes, id)) {
-    nodes.push({id: id, label: label});
+    nodes.push(obj);
   }
 }
 

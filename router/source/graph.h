@@ -20,5 +20,5 @@ void print_graph(MicroBitSerial serial);
 void print_graph(MicroBitSerial serial, std::unordered_map<edge, int> graph);
 std::unordered_map<edge, int> get_lsa_graph(uint16_t ip);
 ManagedString graph_to_json(std::unordered_map<struct edge, int> graph);
-ManagedString topology_json();
+ManagedString topology_json(uint16_t ip);
 std::vector<uint16_t> get_neighbours(uint16_t ip);

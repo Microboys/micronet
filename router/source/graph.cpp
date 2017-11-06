@@ -103,9 +103,10 @@ ManagedString graph_to_json(std::unordered_map<struct edge, int> graph) {
     return result + "]";
 }
 
-ManagedString topology_json() {
+ManagedString topology_json(uint16_t ip) {
     ManagedString result = "{";
     result = result + format_attr("type", "graph");
+    result = result + format_attr("ip", ip);
     result = result + "\"graph\":" + graph_to_json(graph);
     return result + "}\0";
 }
