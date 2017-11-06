@@ -73,16 +73,6 @@ void send_payload(uint16_t dest_ip, ManagedString message) {
     }
 }
 
-void send_payload(uint16_t dest_ip, ManagedString message) {
-    std::vector<uint16_t> neighbours = get_neighbours(ip);
-    if (!neighbours.empty()) {
-        for (auto n : neighbours) {
-            Packet p(MESSAGE, ip, n, dest_ip, 0, MAX_TTL, message);
-            uBit.radio.datagram.send(p.format());
-        }
-    }
-}
-
 void send_lsa(MicroBitEvent e) {
     std::unordered_map<edge, int> to_send = get_lsa_graph(ip);
     Packet p(LSA, ip, 0, 0, 0, MAX_TTL, to_send);
