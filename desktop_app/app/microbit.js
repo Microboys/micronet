@@ -45,7 +45,7 @@ const sendMsg = (to, msg) => {
   }
 }
 
-function locatePort() {
+const locatePort = () => {
   locating = true;
   const promise = SerialPort.list();
   promise.then((ports) => {
@@ -62,7 +62,7 @@ function locatePort() {
   });
 }
 
-function transformGraphJSON(graphJSON) {
+const transformGraphJSON = (graphJSON) => {
   var obj = JSON.parse(graphJSON);
   if (obj.type === 'graph') {
     var graph = obj.graph;
@@ -85,7 +85,7 @@ function transformGraphJSON(graphJSON) {
   }
 }
 
-function addNode(nodes, id, ip) {
+const addNode = (nodes, id, ip) => {
   var obj = {id: id, label: "Node " + id};
   if (ip == id) {
     obj.shadow = {enabled: true, color: "#59B4FF", x: 0, y: 0, size: 20};
@@ -95,7 +95,7 @@ function addNode(nodes, id, ip) {
   }
 }
 
-function nodeExists(nodes, id) {
+const nodeExists = (nodes, id) => {
   for (var i = 0; i < nodes.length; i++) {
     if (nodes[i].id == id) {
       return true;
@@ -104,14 +104,14 @@ function nodeExists(nodes, id) {
   return false;
 }
 
-function RSSIToAbstractDistanceUnits(rssi) {
-  let scaling = -(Math.PI/2) / -255;
-  return Math.round(100 - (Math.abs(Math.cos(rssi * scaling)) * 100));
-}
-
-function addEdge(edges, edge) {
+const addEdge = (edges, edge) => {
   var distance = RSSIToAbstractDistanceUnits(edge.distance);
   edges.push({from: edge.from, to: edge.to, label: distance.toString(), length: minLength + (lengthCoeff * distance)});
+}
+
+const RSSIToAbstractDistanceUnits = (rssi) => {
+  let scaling = -(Math.PI/2) / -255;
+  return Math.round(100 - (Math.abs(Math.cos(rssi * scaling)) * 100));
 }
 
 export { getGraph, sendMsg };
