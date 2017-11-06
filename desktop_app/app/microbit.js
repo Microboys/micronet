@@ -69,9 +69,9 @@ function transformGraphJSON(graphJSON) {
     console.log("Connected micro:bit: " + ip);
     for (var i = 0; i < graph.length; i++) {
       var arc = graph[i];
-      addNode(nodes, arc.from, "Node " + arc.from, ip);
-      addNode(nodes, arc.to, "Node " + arc.to, ip);
-      edges.push({from: arc.from, to: arc.to, label: arc.distance.toString()});
+      addNode(nodes, arc.from, "Node " + arc.from);
+      addNode(nodes, arc.to, "Node " + arc.to);
+      edges.push({from: arc.from, to: arc.to, label: RSSIToAbstractDistanceUnits(arc.distance).toString()});
     }
     return {
       nodes: nodes,
@@ -100,4 +100,13 @@ function nodeExists(nodes, id) {
   return false;
 }
 
+<<<<<<< HEAD
 export { getGraph, sendMsg };
+=======
+function RSSIToAbstractDistanceUnits(rssi) {
+  let scaling = -(Math.PI/2) / -255;
+  return Math.round((Math.abs(Math.cos(rssi * scaling)) * 100));
+}
+
+export { getGraph };
+>>>>>>> Using cos for RSSI mapping to make middle values more varied.
