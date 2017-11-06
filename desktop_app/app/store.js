@@ -1,6 +1,5 @@
 import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import { routerMiddleware, routerReducer as routing, push } from 'react-router-redux';
-import persistState from 'redux-localstorage';
 import thunk from 'redux-thunk';
 
 import graph from './reducers/graph';

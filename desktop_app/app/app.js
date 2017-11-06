@@ -15,10 +15,10 @@ const syncHistoryWithStore = (store, history) => {
   }
 };
 
-const initialState = { "graph" : {
-    "nodes" : [],
-    "edges" : []
-  }
+const initialState = { 'graph' : {
+  'nodes' : [],
+  'edges' : []
+}
 };
 const routerHistory = createMemoryHistory();
 const store = configureStore(initialState, routerHistory);
@@ -36,4 +36,4 @@ ReactDOM.render(
 );
 
 /* TODO: how often should we poll? Can we be reactive to changes instead? */
-setInterval(function() {getGraph(store)}, 1000);
+setInterval(function() {getGraph(store);}, 1000);
