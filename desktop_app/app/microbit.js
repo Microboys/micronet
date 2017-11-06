@@ -54,7 +54,7 @@ function transformGraphJSON(graphJSON) {
       var arc = graph[i];
       addNode(nodes, arc.from, "Node " + arc.from);
       addNode(nodes, arc.to, "Node " + arc.to);
-      edges.push({from: arc.from, to: arc.to, label: arc.distance.toString()});
+      edges.push({from: arc.from, to: arc.to, label: RSSIToAbstractDistanceUnits(arc.distance).toString()});
     }
     return {
       nodes: nodes,
@@ -79,6 +79,11 @@ function nodeExists(nodes, id) {
     }
   }
   return false;
+}
+
+function RSSIToAbstractDistanceUnits(rssi) {
+  let scaling = -(Math.PI/2) / -255;
+  return Math.round((Math.abs(Math.cos(rssi * scaling)) * 100));
 }
 
 export { getGraph };
