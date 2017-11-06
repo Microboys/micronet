@@ -5,6 +5,9 @@ const microbitProductId = "0204";
 const microbitVendorId = "0d28";
 const microbitBaudRate = 115200;
 
+const minLength = 140;
+const lengthCoeff = 2;
+
 var microbitPort = null;
 var locating = false;
 
@@ -69,9 +72,9 @@ function transformGraphJSON(graphJSON) {
     console.log("Connected micro:bit: " + ip);
     for (var i = 0; i < graph.length; i++) {
       var arc = graph[i];
-      addNode(nodes, arc.from, "Node " + arc.from);
-      addNode(nodes, arc.to, "Node " + arc.to);
-      edges.push({from: arc.from, to: arc.to, label: RSSIToAbstractDistanceUnits(arc.distance).toString()});
+      addNode(nodes, arc.from, ip);
+      addNode(nodes, arc.to, ip);
+      addEdge(edges, arc);
     }
     return {
       nodes: nodes,
@@ -82,10 +85,11 @@ function transformGraphJSON(graphJSON) {
   }
 }
 
-function addNode(nodes, id, label, ip) {
-  var obj = (ip == id) 
-  ? {id: id, label: label, shadow: {enabled: true, color: "#59B4FF", x: 0, y: 0, size: 20}} 
-  : {id: id, label: label};
+function addNode(nodes, id, ip) {
+  var obj = {id: id, label: "Node " + id};
+  if (ip == id) {
+    obj.shadow = {enabled: true, color: "#59B4FF", x: 0, y: 0, size: 20};
+  }
   if (!nodeExists(nodes, id)) {
     nodes.push(obj);
   }
@@ -105,7 +109,12 @@ export { getGraph, sendMsg };
 =======
 function RSSIToAbstractDistanceUnits(rssi) {
   let scaling = -(Math.PI/2) / -255;
-  return Math.round((Math.abs(Math.cos(rssi * scaling)) * 100));
+  return Math.round(100 - (Math.abs(Math.cos(rssi * scaling)) * 100));
+}
+
+function addEdge(edges, edge) {
+  var distance = RSSIToAbstractDistanceUnits(edge.distance);
+  edges.push({from: edge.from, to: edge.to, label: distance.toString(), length: minLength + (lengthCoeff * distance)});
 }
 
 export { getGraph };
