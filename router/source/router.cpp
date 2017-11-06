@@ -86,7 +86,7 @@ void echo_message(MicroBitEvent e) {
 }
 
 void send_graph_update() {
-    serial.printf("%s", topology_json().toCharArray());
+    serial.printf("%s", topology_json(ip).toCharArray());
 }
 
 void setup() {
