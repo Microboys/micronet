@@ -16,7 +16,7 @@
 void print_neighbours();
 void onData(MicroBitEvent e);
 void ping(MicroBitEvent e);
-void send_message(uint16_t target, ManagedString message);
+void send_payload(uint16_t target, ManagedString message);
 void send_lsa(MicroBitEvent e);
 void broadcast(Packet p);
 void setup();
