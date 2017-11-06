@@ -63,6 +63,7 @@ void print_graph(MicroBitSerial serial, std::unordered_map<edge, int> graph) {
         int distance = it.second;
         serial.printf("%i --> %i (distance: %i)\n\r", it.first.from, it.first.to, distance);
     }
+    serial.printf("===== GRAPH =====\n");
 }
 
 std::unordered_map<edge, int> get_lsa_graph(uint16_t ip) {
