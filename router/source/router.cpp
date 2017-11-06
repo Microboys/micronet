@@ -104,25 +104,8 @@ void send_lsa(MicroBitEvent e) {
     uBit.radio.datagram.send(p.format());
 }
 
-void echo_message(MicroBitEvent e) {
-    ManagedString in = serial.readUntil("\n\0");
-    //serial.printf("UBit: received %s", in.toCharArray());
-    uBit.display.printAsync(in);
-}
-
 void send_graph_update() {
     serial.printf("%s", topology_json(ip).toCharArray());
-}
-
-void setup() {
-    // Generate a random IP, exclude 0
-    ip = uBit.random(65534) + 1;
-    //uBit.radio.setTransmitPower(transmit_power);
-
-        //serial.printf("Sending %s to %i...\n\r", message.toCharArray(), target);
-    //serial.printf("======= BOOTING ======\n\r");
-    //serial.printf("Device IP: %i\n\r", ip);
-    //serial.printf("==== BOOTING DONE ====\n\r");
 }
 
 void onMessage(MicroBitEvent e) {
@@ -147,7 +130,7 @@ void onMessage(MicroBitEvent e) {
     } else {
         // TODO: Parse message and trigger actions
         if (request == GRAPH_REQUEST) {
-            send_graph_update();
+            //send_graph_update();
         } else if (request == IP_REQUEST) {
             serial.printf("%i\n", ip);
         } else if (request == PING_REQUEST) {
@@ -164,13 +147,38 @@ void initSerialRead() {
     serial.setRxBufferSize(200);
 }
 
+void update() {
+    while(1) {
+        ping(MicroBitEvent());
+        uBit.sleep(300);
+        send_lsa(MicroBitEvent());
+        uBit.sleep(300);
+        send_graph_update();
+        uBit.sleep(1000);
+    }
+}
+
+void setup(MicroBitEvent e) {
+    if (!started) {
+        started = true;
+        // Generate a random IP, exclude 0
+        ip = uBit.random(65534) + 1;
+
+        uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, onData, MESSAGE_BUS_LISTENER_QUEUE_IF_BUSY);
+        uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, ping);
+        initSerialRead();
+        uBit.messageBus.listen(MICROBIT_ID_BUTTON_AB, MICROBIT_BUTTON_EVT_CLICK, send_lsa);
+        uBit.radio.enable();
+
+        send_graph_update();
+        create_fiber(update);
+    }
+}
+
+
 int main() {
     uBit.init();
-    setup();
-    uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, onData, MESSAGE_BUS_LISTENER_QUEUE_IF_BUSY);
-    uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, ping);
-    initSerialRead();
-    uBit.messageBus.listen(MICROBIT_ID_BUTTON_AB, MICROBIT_BUTTON_EVT_CLICK, send_lsa);
-    uBit.radio.enable();
+    uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, setup);
+    uBit.display.print("<");
     release_fiber();
 }
