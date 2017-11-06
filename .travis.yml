@@ -16,12 +16,9 @@ install:
     - brew install wine
 
 script:
-    - if [ "$TRAVIS_BRANCH" == "router" ] ; then cd router && sh ci.sh router.hex; fi
-    - if [ "$TRAVIS_BRANCH" == "ci-fix" ] || [ "$TRAVIS_BRANCH" == "desktop-app" ] ; then
-        cd desktop_app
-        && npm install
-        && npm test
-        && npm run pack:mac
-        && npm run pack:win
-        && npm run pack:linux
-        ; fi
+    - cd desktop_app
+    - && npm install
+    - && npm test
+    - && npm run pack:mac
+    - && npm run pack:win
+    - && npm run pack:linux
