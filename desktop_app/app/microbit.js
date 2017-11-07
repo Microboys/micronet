@@ -89,6 +89,7 @@ function addNode(nodes, id, ip) {
   var obj = {id: id, label: "Node " + id};
   if (ip == id) {
     obj.shadow = {enabled: true, color: "#59B4FF", x: 0, y: 0, size: 20};
+    obj.label += " (connected)"
   }
   if (!nodeExists(nodes, id)) {
     nodes.push(obj);

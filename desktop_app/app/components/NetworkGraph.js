@@ -18,6 +18,15 @@ export default class NetworkGraph extends Component {
           font: {
             align: 'horizontal',
             vadjust: -10
+          },
+          smooth: {
+            type: 'curvedCW',
+            roundness: 0.3
+          }
+        },
+        physics: {
+          barnesHut: {
+            springConstant: 0.01
           }
         }
       },
