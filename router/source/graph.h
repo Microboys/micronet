@@ -5,6 +5,8 @@
 #include "util.h"
 #include "MicroBit.h"
 
+#define MAX_NEIGHBOURS 3
+
 class Packet;
 
 struct edge {
