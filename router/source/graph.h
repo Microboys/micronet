@@ -7,6 +7,8 @@
 #include <limits.h>
 #include <edge.h>
 
+#define MAX_NEIGHBOURS 3
+
 class Packet;
 #include "packet.h"
 

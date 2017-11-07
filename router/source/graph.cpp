@@ -3,8 +3,6 @@
 // TODO: Decide mapped distance type.
 std::unordered_map<struct edge, int> graph;
 
-int MAX_NEIGHBOURS = 3;
-
 // Updates graph from ping response
 void update_graph(uint16_t from, uint16_t to, int distance) {
     graph[edge({from, to})] = distance;

@@ -8,6 +8,7 @@ serial(USBTX, USBRX);
 
 uint16_t ip = 0;
 uint16_t transmit_power = 7;
+bool started = false;
 
 void broadcast(Packet p) {
     if (p.ttl > 0) {
@@ -28,7 +29,7 @@ void onData(MicroBitEvent e) {
     uBit.sleep(1);
 
     if (p.ptype == PING) {
-        uBit.display.printAsync("!!");
+        //uBit.display.printAsync("!!");
         // Received new ping packet, send it back to source
         if (p.imm_dest_ip == 0) {
             p.imm_dest_ip = p.source_ip;
@@ -149,10 +150,12 @@ void initSerialRead() {
 
 void update() {
     while(1) {
+        uBit.display.scrollAsync(ManagedString(ip));
+        uBit.sleep(500);
         ping(MicroBitEvent());
-        uBit.sleep(300);
+        uBit.sleep(1000);
         send_lsa(MicroBitEvent());
-        uBit.sleep(300);
+        uBit.sleep(1000);
         send_graph_update();
         uBit.sleep(1000);
     }
