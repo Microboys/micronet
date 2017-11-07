@@ -23,12 +23,9 @@ void broadcast(Packet p) {
 void onData(MicroBitEvent e) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
     Packet p = Packet(buffer, uBit.radio.getRSSI());
-    //p.print_packet(serial);
-    //serial.printf("%s", p.to_json().toCharArray());
     uBit.sleep(1);
 
     if (p.ptype == PING) {
-        //uBit.display.printAsync("!!");
         // Received new ping packet, send it back to source
         if (p.imm_dest_ip == 0) {
             p.imm_dest_ip = p.source_ip;
@@ -41,7 +38,6 @@ void onData(MicroBitEvent e) {
         }
     } else if (p.ptype == MESSAGE) {
         if (p.dest_ip == ip) {
-            //serial.printf("%i sent me %s\n\r", p.source_ip, p.payload.toCharArray());
             uBit.display.printAsync(p.payload);
         } else if (p.imm_dest_ip == ip) {
             broadcast(p);
@@ -49,7 +45,6 @@ void onData(MicroBitEvent e) {
     } else if (p.ptype == LSA) {
         uint8_t ttl = p.ttl;
         update_graph(&p);
-        //print_graph(serial);
 
         if (ttl > 0) {
             p.ttl = p.ttl - 1;

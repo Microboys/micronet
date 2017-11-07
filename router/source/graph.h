@@ -4,8 +4,7 @@
 #include <limits.h>
 #include "util.h"
 #include "MicroBit.h"
-
-#define MAX_NEIGHBOURS 3
+#include "config.h"
 
 class Packet;
 
