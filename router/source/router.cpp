@@ -92,7 +92,7 @@ void send_lsa(MicroBitEvent e) {
 }
 
 void send_graph_update() {
-    serial.printf("%s", topology_json(ip, uBit.systemTime()).toCharArray());
+    serial.printf("%s", topology_json(ip).toCharArray());
 }
 
 void onMessage(MicroBitEvent e) {
@@ -143,6 +143,7 @@ void update() {
         send_lsa(MicroBitEvent());
         uBit.sleep(1000);
         delete_extra_neighbours(ip);
+        remove_dead_nodes(get_system_time());
         send_graph_update();
         uBit.sleep(1000);
     }
