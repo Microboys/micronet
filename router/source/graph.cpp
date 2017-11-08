@@ -8,12 +8,12 @@ void update_graph(uint16_t from, uint16_t to, int distance) {
     edge e({from, to});
     auto it = graph.find(e);
     if (it != graph.end()) {
-        if (distance > DISCONNECTION_THRESHOLD) {
+        if (distance < DISCONNECTION_THRESHOLD) {
             graph.erase(it);
         } else {
             graph[e] = distance;
         }
-    } else if (distance <= CONNECTION_THRESHOLD) {
+    } else if (distance >= CONNECTION_THRESHOLD) {
         graph[e] = distance;
     }
 }
