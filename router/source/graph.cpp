@@ -124,14 +124,26 @@ ManagedString topology_json(uint16_t ip) {
 }
 
 std::unordered_map<struct edge, int> remove_dead_nodes(std::unordered_map<struct edge, int> graph) {
+    std::unordered_set<uint16_t> dead_nodes;
+    for (auto it : graph) {
+        struct edge cur_edge = it.first;
+        if (!arcs_incoming(cur_edge.from, graph)) {
+            dead_nodes.insert(cur_edge.from);
+        }
+    }
     std::unordered_map<struct edge, int> new_graph;
     for (auto it : graph) {
         struct edge cur_edge = it.first;
-        if (arcs_incoming(cur_edge.from, graph)) {
+        if (!contains(dead_nodes, cur_edge.from) && !contains(dead_nodes, cur_edge.to)) {
             new_graph.insert(it);
         }
     }
-    return new_graph;
+    graph = new_graph;
+    return graph;
+}
+
+bool contains(std::unordered_set<uint16_t> set, uint16_t value) {
+    return set.find(value) != set.end();
 }
 
 bool arcs_incoming(uint16_t ip, std::unordered_map<struct edge, int> graph) {
