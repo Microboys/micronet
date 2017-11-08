@@ -17,8 +17,8 @@ install:
 
 script:
     - cd desktop_app
-    - && npm install
-    - && npm test
-    - && npm run pack:mac
-    - && npm run pack:win
-    - && npm run pack:linux
+      && npm install
+      && npm test
+      && npm run pack:mac
+      && npm run pack:win
+      && npm run pack:linux
