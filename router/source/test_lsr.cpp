@@ -13,6 +13,7 @@
 //  Copyright © 2017 vinamra agrawal. All rights reserved.
 //
 #include "lsr.h"
+#include <stdio.h>
 
 std::unordered_map<struct edge, int> test_graph;
 

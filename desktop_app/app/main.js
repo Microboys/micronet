@@ -89,7 +89,7 @@ app.on('ready', async () => {
       });
     }
   });
-
+  mainWindow.webContents.openDevTools();
   if (isDevelopment) {
     // auto-open dev tools
     mainWindow.webContents.openDevTools();

@@ -77,10 +77,11 @@ function transformGraphJSON(graphJSON) {
     var nodes = [];
     var edges = [];
     var ip = obj.ip;
+    addNode(nodes, ip, true);
     for (var i = 0; i < graph.length; i++) {
       var arc = graph[i];
-      addNode(nodes, arc.from, ip);
-      addNode(nodes, arc.to, ip);
+      addNode(nodes, arc.from, false);
+      addNode(nodes, arc.to, false);
       addEdge(edges, arc);
     }
     return {
@@ -92,17 +93,33 @@ function transformGraphJSON(graphJSON) {
   }
 }
 
-function addNode(nodes, id, ip) {
+function nodeExists(nodes, id) {
+  for (var i = 0; i < nodes.length; i++) {
+    if (nodes[i].id == id) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function addNode(nodes, id, connected) {
+  if (nodeExists(nodes, id)) {
+    return;
+  }
   var node = {id: id, label: "Node " + id};
-  if (ip == id) {
+  if (connected) {
     node.shadow = {enabled: true, color: "#59B4FF", x: 0, y: 0, size: 20};
     node.label += " (connected)"
   }
   node.image = generateMicrobitImage(id);
-  if (!nodeExists(nodes, id)) {
-    nodes.push(node);
-  }
+  nodes.push(node);
 }
+
+function addEdge(edges, edge) {
+  var distance = RSSIToAbstractDistanceUnits(edge.distance);
+  edges.push({from: edge.from, to: edge.to, label: distance.toString(), length: minLength + (lengthCoeff * distance)});
+}
+
 
 //Generates an image of the microbit showing the visual ID derived from code
 //code = denary of ID, converted to binary gives length 25 bin string - each bit
@@ -138,23 +155,9 @@ function generateMicrobitImage(code) {
   return './' + imgPath;
 }
 
-function nodeExists(nodes, id) {
-  for (var i = 0; i < nodes.length; i++) {
-    if (nodes[i].id == id) {
-      return true;
-    }
-  }
-  return false;
-}
-
 function RSSIToAbstractDistanceUnits(rssi) {
   let scaling = -(Math.PI/2) / -255;
   return Math.round(100 - (Math.abs(Math.cos(rssi * scaling)) * 100));
-}
-
-function addEdge(edges, edge) {
-  var distance = RSSIToAbstractDistanceUnits(edge.distance);
-  edges.push({from: edge.from, to: edge.to, label: distance.toString(), length: minLength + (lengthCoeff * distance)});
 }
 
 export { getGraph, sendMsg };

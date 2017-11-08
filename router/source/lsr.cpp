@@ -1,4 +1,5 @@
 #include "lsr.h"
+#include <stdlib.h>
 
 // <node, path node>
 // <node, distance>
