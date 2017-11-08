@@ -16,6 +16,7 @@ void update_graph(uint16_t from, uint16_t to, int distance) {
     } else if (distance >= CONNECTION_THRESHOLD) {
         graph[e] = distance;
     }
+    delete_extra_neighbours(from);
 }
 
 // Update graph from LSA packet
@@ -28,28 +29,21 @@ void update_graph(Packet* p) {
 }
 
 void delete_extra_neighbours(uint16_t ip) {
-  int num_edges = 0;
-  int min_strength  = INT_MAX;
-  struct edge weakest_edge = {0,0};
-  for (auto it : graph) {
-      struct edge cur_edge = it.first;
-      if (cur_edge.from == ip) {
-          num_edges++;
-          if (min_strength > it.second){
-            min_strength = it.second;
-            weakest_edge = cur_edge;
-          }
-      }
-  }
+    std::vector<std::pair<edge, int>> neighbours = get_neighbour_edges(ip);
+    while (neighbours.size() > 0 && neighbours.size() > MAX_NEIGHBOURS) {
+        int min_strength = neighbours[0].second;
+        struct edge weakest_edge = neighbours[0].first;
+        for (auto it : neighbours) {
+            if (it.second < DISCONNECTION_THRESHOLD) {
+                graph.erase(it.first);
+            } else if (min_strength > it.second) {
+                min_strength = it.second;
+                weakest_edge = it.first;
+            }
+        }
 
-  if (num_edges > MAX_NEIGHBOURS){
-    graph.erase(weakest_edge);
-    num_edges--;
-  }
-
-  if (num_edges > MAX_NEIGHBOURS) {
-    delete_extra_neighbours(ip);
-  }
+        graph.erase(weakest_edge);
+    }
 }
 
 void delete_all_edges(uint16_t ip) {
@@ -89,6 +83,16 @@ std::vector<uint16_t> get_neighbours(uint16_t ip) {
     for (auto it : graph) {
         if (it.first.from == ip) {
             neighbours.push_back(it.first.to);
+        }
+    }
+    return neighbours;
+}
+
+std::vector<std::pair<edge, int>> get_neighbour_edges(uint16_t ip) {
+    std::vector<std::pair<edge, int>> neighbours;
+    for (auto it : graph) {
+        if (it.first.from == ip) {
+            neighbours.push_back(it);
         }
     }
     return neighbours;

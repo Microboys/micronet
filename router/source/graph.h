@@ -8,8 +8,6 @@
 #include <edge.h>
 #include "config.h"
 
-#define MAX_NEIGHBOURS 3
-
 class Packet;
 #include "packet.h"
 
@@ -27,3 +25,4 @@ ManagedString topology_json(uint16_t ip);
 std::vector<uint16_t> get_neighbours(uint16_t ip);
 std::unordered_map<struct edge, int> remove_dead_nodes(std::unordered_map<struct edge, int> graph);
 bool arcs_incoming(uint16_t ip, std::unordered_map<struct edge, int> graph);
+std::vector<std::pair<edge, int>> get_neighbour_edges(uint16_t ip);
