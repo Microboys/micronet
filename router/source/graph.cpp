@@ -115,6 +115,28 @@ ManagedString topology_json(uint16_t ip) {
     ManagedString result = "{";
     result = result + format_attr("type", "graph");
     result = result + format_attr("ip", ip);
-    result = result + "\"graph\":" + graph_to_json(graph);
+    result = result + "\"graph\":" + graph_to_json(remove_dead_nodes(graph));
     return result + "}\0";
+}
+
+std::unordered_map<struct edge, int> remove_dead_nodes(std::unordered_map<struct edge, int> graph) {
+    std::unordered_map<struct edge, int> new_graph;
+    for (auto it : graph) {
+        struct edge cur_edge = it.first;
+        if (arcs_incoming(cur_edge.from, graph)) {
+            new_graph.insert(it);
+        }
+    }
+    return new_graph;
+}
+
+bool arcs_incoming(uint16_t ip, std::unordered_map<struct edge, int> graph) {
+    for (auto it : graph) {
+        struct edge cur_edge = it.first;
+        uint16_t to = cur_edge.to;
+        if (to == ip) {
+            return true;
+        }
+    }
+    return false;
 }
