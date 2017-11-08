@@ -124,7 +124,8 @@ ManagedString topology_json(uint16_t ip, unsigned long current_time) {
     ManagedString result = "{";
     result = result + format_attr("type", "graph");
     result = result + format_attr("ip", ip);
-    result = result + "\"graph\":" + graph_to_json(remove_dead_nodes(graph, current_time));
+    graph = remove_dead_nodes(graph, current_time);
+    result = result + "\"graph\":" + graph_to_json(graph);
     return result + "}\0";
 }
 
@@ -138,8 +139,7 @@ std::unordered_map<struct edge, int> remove_dead_nodes(std::unordered_map<struct
             new_graph.insert(it);
         }
     }
-    graph = new_graph;
-    return graph;
+    return new_graph;
 }
 
 bool contains(std::unordered_set<uint16_t> set, uint16_t value) {
