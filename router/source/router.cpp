@@ -1,4 +1,5 @@
 #include "router.h"
+#include "lsr.h"
 #include <vector>
 MicroBit uBit;
 MicroBitSerial
@@ -75,6 +76,20 @@ void send_message(MicroBitEvent e) {
             Packet p(MESSAGE, ip, n, target, 0, MAX_TTL, message);
             uBit.radio.datagram.send(p.format());
         }
+
+        //serial.printf("Sending %s to %i...\n\r", message.toCharArray(), target);
+    }
+}
+
+void send_message_via_routing(MicroBitEvent e) {
+    std::vector<uint16_t> neighbours = get_neighbours(ip);
+    if (!neighbours.empty()) {
+        uint16_t target = neighbours[uBit.random(neighbours.size())];
+
+        //TODO
+        ManagedString message = "Hello!";
+        uint16_t next_node = get_path_for_node(target);
+        Packet p(MESSAGE, ip, next_node, target, 0, MAX_TTL, message);
 
         //serial.printf("Sending %s to %i...\n\r", message.toCharArray(), target);
     }
