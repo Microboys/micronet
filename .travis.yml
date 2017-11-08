@@ -33,5 +33,3 @@ script:
           && npm install
           && npm install 7zip-bin-linux
           && npm test
-          && npm run pack:linux
-          && npm run pack:win
