@@ -2,6 +2,7 @@
 #include "MicroBit.h"
 #include "packet.h"
 #include "graph.h"
+#include "config.h"
 #define DELIMITER "\r\n"
 
 #define GRAPH_REQUEST "GRAPH"

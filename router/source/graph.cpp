@@ -5,10 +5,20 @@ std::unordered_map<struct edge, int> graph;
 
 // Updates graph from ping response
 void update_graph(uint16_t from, uint16_t to, int distance) {
-    graph[edge({from, to})] = distance;
-    delete_extra_neighbours(from);
+    edge e({from, to});
+    auto it = graph.find(e);
+    if (it != graph.end()) {
+        if (distance > DISCONNECTION_THRESHOLD) {
+            graph.erase(it);
+        } else {
+            graph[e] = distance;
+        }
+    } else if (distance <= CONNECTION_THRESHOLD) {
+        graph[e] = distance;
+    }
 }
 
+// Update graph from LSA packet
 void update_graph(Packet* p) {
     uint16_t source_ip = p->source_ip;
     delete_all_edges(source_ip);

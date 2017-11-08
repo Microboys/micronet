@@ -6,6 +6,7 @@
 #include "MicroBit.h"
 #include <limits.h>
 #include <edge.h>
+#include "config.h"
 
 #define MAX_NEIGHBOURS 3
 

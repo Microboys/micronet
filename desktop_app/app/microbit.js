@@ -147,9 +147,6 @@ function nodeExists(nodes, id) {
   return false;
 }
 
-<<<<<<< HEAD
-export { getGraph, sendMsg };
-=======
 function RSSIToAbstractDistanceUnits(rssi) {
   let scaling = -(Math.PI/2) / -255;
   return Math.round(100 - (Math.abs(Math.cos(rssi * scaling)) * 100));
@@ -160,5 +157,4 @@ function addEdge(edges, edge) {
   edges.push({from: edge.from, to: edge.to, label: distance.toString(), length: minLength + (lengthCoeff * distance)});
 }
 
-export { getGraph };
->>>>>>> Using cos for RSSI mapping to make middle values more varied.
+export { getGraph, sendMsg };
