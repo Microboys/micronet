@@ -1,8 +1,8 @@
 import { handleActions } from 'redux-actions';
-import actions from '../actions/user';
+import actions from '../actions/graph.js';
 
 export default handleActions({
-  [actions.login]: (state, action) => {
+  [actions.drawGraph]: (state, action) => {
     return { ...state, ...action.payload };
   }
 }, {});

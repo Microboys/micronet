@@ -3,8 +3,10 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'react-router-redux';
 import { createMemoryHistory } from 'history';
+
 import routes from './routes';
 import configureStore from './store';
+import { getGraph } from './microbit.js';
 
 const syncHistoryWithStore = (store, history) => {
   const { routing } = store.getState();
@@ -13,7 +15,11 @@ const syncHistoryWithStore = (store, history) => {
   }
 };
 
-const initialState = {};
+const initialState = { "graph" : {
+    "nodes" : [],
+    "edges" : []
+  }
+};
 const routerHistory = createMemoryHistory();
 const store = configureStore(initialState, routerHistory);
 syncHistoryWithStore(store, routerHistory);
@@ -28,3 +34,6 @@ ReactDOM.render(
   </Provider>,
   rootElement
 );
+
+/* TODO: how often should we poll? Can we be reactive to changes instead? */
+setInterval(function() {getGraph(store)}, 1000);

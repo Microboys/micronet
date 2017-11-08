@@ -6,7 +6,6 @@ const isDevelopment = (process.env.NODE_ENV === 'development');
 
 let mainWindow = null;
 let forceQuit = false;
-
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
   const extensions = [
@@ -44,11 +43,13 @@ app.on('ready', async () => {
   }
 
   mainWindow = new BrowserWindow({ 
-    width: 1000, 
-    height: 800,
-    minWidth: 640,
-    minHeight: 480,
-    show: false 
+    show: false,
+    //frame: false,
+    backgroundColor: 0x000000,
+    darkTheme: true,
+    webPreferences: {
+      zoomFactor: 1
+    }
   });
 
   mainWindow.loadURL(url.format({
@@ -88,7 +89,7 @@ app.on('ready', async () => {
       });
     }
   });
-
+  mainWindow.webContents.openDevTools();
   if (isDevelopment) {
     // auto-open dev tools
     mainWindow.webContents.openDevTools();

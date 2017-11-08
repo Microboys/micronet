@@ -3,14 +3,32 @@
 #include "graph.h"
 #include "MicroBit.h"
 #include <unordered_map>
+#include <string>
 
 #define PACKET_SIZE 32
-#define MAX_TTL 5
+#define MAX_TTL 10
+#define BYTE_SIZE 8
 
-#define MESSAGE_PAYLOAD_START 9
+#define F_PTYPE 0
 
-#define LSA_PAYLOAD_START 4
+// Ping
+#define F_PING_SOURCE_IP 1
+#define F_PING_IMM_DEST_IP 3
+
+// LSA
 #define LSA_EDGE_DATA_SIZE 3
+
+// Message
+#define F_MESSAGE_SOURCE_IP 1
+#define F_MESSAGE_IMM_DEST_IP 3
+#define F_MESSAGE_DEST_IP 5
+#define F_MESSAGE_TIMESTAMP 7
+#define F_MESSAGE_TTL 8
+#define F_MESSAGE_PAYLOAD 9
+
+#define F_LSA_TTL 1
+#define F_LSA_SOURCE_IP 2
+#define F_LSA_PAYLOAD 4
 
 // TODO: fragmentation
 
@@ -26,7 +44,7 @@
  *  p[0] = type,
  *  p[1] = ttl,
  *  p[2-3] = source_ip,
- *  p[4-31] = [neighbour_ip + rssi]
+ *  p[4-31] = [neighbour_ip + rssi] (maximum of 9)
  *  
  * Message:
  *  p[0] = type,
@@ -43,11 +61,6 @@ enum packet_type {
     LSA = 1,
     MESSAGE = 2,
     DNS = 3
-};
-
-struct router_info {
-    uint16_t ip;
-    int distance;
 };
 
 class Packet {
@@ -75,11 +88,7 @@ class Packet {
         Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip, uint16_t dest_ip, uint8_t timestamp, uint8_t ttl, std::unordered_map<struct edge, int> graph);
         Packet();
         PacketBuffer format();
+        ManagedString to_json();
         std::unordered_map<struct edge, int> decode_lsa(PacketBuffer p, uint16_t source_ip);
         void encode_lsa(PacketBuffer p, std::unordered_map<struct edge, int> graph);
-        //static Packet ping_packet(uint16_t source_ip, uint16_t dest_ip);
-        //static Packet lsa_packet(uint8_t ttl, uint8_t payload);
-        //static Packet message_packet(uint16_t source_ip,
-            //uint16_t imm_dest_ip, uint16_t dest_ip, uint8_t timestamp,
-            //uint8_t ttl, uint8_t payload);
 };

@@ -13,3 +13,5 @@ desktop_app/dist
 desktop_app/build
 desktop_app/.DS_Store
 desktop_app/*.log
+desktop_app/app/router/
+*~

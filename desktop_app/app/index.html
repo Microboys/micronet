@@ -1,19 +1,22 @@
 <!DOCTYPE html>
+<!-- TODO: Styling in our own CSS -->
 <html>
   <head>
-    <title>My App</title>
+    <title>micro:net</title>
+    <link rel='stylesheet' type='text/css' href='../node_modules/bootstrap/dist/css/bootstrap.css'>
+    <link rel='stylesheet' type='text/css' href='index.css'>
   </head>
   <body>
     <div id="app"></div>
     <script src="./app.js" data-container="#app"></script>
     <script>
-      if (process.env.BROWSER_SYNC_CLIENT_URL) {
-        const current = document.currentScript;
-        const script = document.createElement('script');
-        script.src = process.env.BROWSER_SYNC_CLIENT_URL;
-        script.async = true;
-        current.parentNode.insertBefore(script, current);
-      }
+    if (process.env.BROWSER_SYNC_CLIENT_URL) {
+      const current = document.currentScript;
+      const script = document.createElement('script');
+      script.src = process.env.BROWSER_SYNC_CLIENT_URL;
+      script.async = true;
+      current.parentNode.insertBefore(script, current);
+    }
     </script>
   </body>
 </html>
