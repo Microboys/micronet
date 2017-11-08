@@ -1,14 +1,37 @@
-os: osx
-language: generic
+addons:
+  apt:
+    sources:
+        - sourceline: 'ppa:team-gcc-arm-embedded/ppa'
+    packages:
+        # router cross-compiling
+        - gcc-arm-embedded
+        # router yotta dependencies
+        - srecord
+        - python-setuptools
+        - cmake
+        - build-essential
+        - ninja-build
+        - python-dev
+        - libffi-dev
+        - libssl-dev
+
 install:
-- brew update
-- brew tap ARMmbed/homebrew-formulae
-- brew install ninja arm-none-eabi-gcc srecord
-- pip install yotta
-- brew install wine
+    # TODO: move this into sources section
+    - wget https://dl.winehq.org/wine-builds/Release.key
+    - sudo apt-key add Release.key
+    - sudo apt-add-repository 'https://dl.winehq.org/wine-builds/ubuntu/'
+    - sudo apt update
+    - sudo apt-get install --install-recommends winehq-stable
+    - sudo pip install yotta
+
+
+before_script:
+  - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start # magic required for running electron-mocha tests
+
 script:
-- cd desktop_app && npm install && npm test && npm run pack:mac && npm run pack:win
-  && npm run pack:linux
-env:
-  global:
-    secure: A4jl/I1+pbpUXZbrUWXAXVU96INKiINT+8MOKIbuS0csPB7Tlg1WHa38I05xZm4qnjOPicYtcUzViE5SulM4bGiJzsnqXLJ30U3d9Ib85RkkqTRzDYBFQ1TXyn4cvRrSno87oKYN1oNfxa4xNRPLSM/eJCEmyM7IKfgZAA3fCpFCjeWSMU4Zy3vYUzMtSstCFxia8wE/ZmLpYc+D9joHcUkMCTPhcmmG8aA0pRcjnhZmHgCwY+E3ytGqfYrCbkvXtjH4xhOWmN4GUVYFZEetP1PflSBsd9h4f9MP6KZYknma5reqAghuc+v2XgSruE3TWJuA4+scYM69FhnhIdcfIINqjlPQo9HvgD1C7bKIbzU1TfS3T/pM7j9REpda5Z7/8243LFkkKm/6Cxo7Y46oz3inZ/nO3gA5l6mMioBwNJHYWUQ4R+zwttN5eO2/PWyMAsF+a4NNwINsbKHkNXaM0bDDX1AE6T5ee2jFqSQ7xZjCj8wpAFpcy5O4sw+H9KoOi9N0F3fQwXS5x2IrLdhGCsii8ILoxxBq1C78f5lz0wUKY0XF0+6SuFe5op5jsbzGvsj39JaNe5HFCnYsr7RcxZKgp6V4AF1RHqCROzkl16GZ+pYxG4cLCYkdwGbyk8OOhK9CjlF36HboUiK5qHelutf476nJICwpw6iY5s9T05o=
+    -  cd desktop_app
+          && npm install
+          && npm install 7zip-bin-linux
+          && npm test
+          && npm run pack:linux
+          && npm run pack:win
