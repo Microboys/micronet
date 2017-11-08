@@ -1,4 +1,12 @@
-html, body, #app {
+html, body, #app, #mainContainer {
 	height: 100% !important;
 	width: 100% !important;
+}
+
+.graph {
+	height: 70%;
+}
+
+.msg {
+	height: 30%;
 }

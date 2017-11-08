@@ -3,14 +3,22 @@
 // TODO: Decide mapped distance type.
 std::unordered_map<struct edge, int> graph;
 
-int MAX_NEIGHBOURS = 3;
-
 // Updates graph from ping response
 void update_graph(uint16_t from, uint16_t to, int distance) {
-    graph[edge({from, to})] = distance;
-    delete_extra_neighbours(from);
+    edge e({from, to});
+    auto it = graph.find(e);
+    if (it != graph.end()) {
+        if (distance < DISCONNECTION_THRESHOLD) {
+            graph.erase(it);
+        } else {
+            graph[e] = distance;
+        }
+    } else if (distance >= CONNECTION_THRESHOLD) {
+        graph[e] = distance;
+    }
 }
 
+// Update graph from LSA packet
 void update_graph(Packet* p) {
     uint16_t source_ip = p->source_ip;
     delete_all_edges(source_ip);
@@ -63,6 +71,7 @@ void print_graph(MicroBitSerial serial, std::unordered_map<edge, int> graph) {
         int distance = it.second;
         serial.printf("%i --> %i (distance: %i)\n\r", it.first.from, it.first.to, distance);
     }
+    serial.printf("===== GRAPH =====\n");
 }
 
 std::unordered_map<edge, int> get_lsa_graph(uint16_t ip) {
@@ -73,6 +82,16 @@ std::unordered_map<edge, int> get_lsa_graph(uint16_t ip) {
         }
     }
     return to_send;
+}
+
+std::vector<uint16_t> get_neighbours(uint16_t ip) {
+    std::vector<uint16_t> neighbours;
+    for (auto it : graph) {
+        if (it.first.from == ip) {
+            neighbours.push_back(it.first.to);
+        }
+    }
+    return neighbours;
 }
 
 ManagedString graph_to_json(std::unordered_map<struct edge, int> graph) {
@@ -92,9 +111,32 @@ ManagedString graph_to_json(std::unordered_map<struct edge, int> graph) {
     return result + "]";
 }
 
-ManagedString topology_json() {
+ManagedString topology_json(uint16_t ip) {
     ManagedString result = "{";
     result = result + format_attr("type", "graph");
-    result = result + "\"graph\":" + graph_to_json(graph);
+    result = result + format_attr("ip", ip);
+    result = result + "\"graph\":" + graph_to_json(remove_dead_nodes(graph));
     return result + "}\0";
+}
+
+std::unordered_map<struct edge, int> remove_dead_nodes(std::unordered_map<struct edge, int> graph) {
+    std::unordered_map<struct edge, int> new_graph;
+    for (auto it : graph) {
+        struct edge cur_edge = it.first;
+        if (arcs_incoming(cur_edge.from, graph)) {
+            new_graph.insert(it);
+        }
+    }
+    return new_graph;
+}
+
+bool arcs_incoming(uint16_t ip, std::unordered_map<struct edge, int> graph) {
+    for (auto it : graph) {
+        struct edge cur_edge = it.first;
+        uint16_t to = cur_edge.to;
+        if (to == ip) {
+            return true;
+        }
+    }
+    return false;
 }

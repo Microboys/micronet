@@ -6,7 +6,7 @@
 #include <string>
 
 #define PACKET_SIZE 32
-#define MAX_TTL 5
+#define MAX_TTL 10
 #define BYTE_SIZE 8
 
 #define F_PTYPE 0
@@ -44,7 +44,7 @@
  *  p[0] = type,
  *  p[1] = ttl,
  *  p[2-3] = source_ip,
- *  p[4-31] = [neighbour_ip + rssi]
+ *  p[4-31] = [neighbour_ip + rssi] (maximum of 9)
  *  
  * Message:
  *  p[0] = type,
@@ -61,11 +61,6 @@ enum packet_type {
     LSA = 1,
     MESSAGE = 2,
     DNS = 3
-};
-
-struct router_info {
-    uint16_t ip;
-    int distance;
 };
 
 class Packet {
