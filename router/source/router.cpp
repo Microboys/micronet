@@ -36,6 +36,7 @@ void onData(MicroBitEvent e) {
         } else if (p.imm_dest_ip == ip) {
             // Got back our own ping packet
             update_graph(ip, p.source_ip, p.rssi);
+            recalculate_graph(ip);
         }
     } else if (p.ptype == MESSAGE) {
         if (p.dest_ip == ip) {
@@ -46,6 +47,7 @@ void onData(MicroBitEvent e) {
     } else if (p.ptype == LSA) {
         uint8_t ttl = p.ttl;
         update_graph(&p);
+        recalculate_graph(ip);
 
         if (ttl > 0) {
             p.ttl = p.ttl - 1;
@@ -92,6 +94,10 @@ void send_lsa(MicroBitEvent e) {
 
 void send_graph_update() {
     serial.printf("%s", topology_json(ip).toCharArray());
+}
+
+void send_path_update() {
+    serial.printf("%s", path_json(ip).toCharArray());
 }
 
 void onMessage(MicroBitEvent e) {
@@ -142,6 +148,7 @@ void update() {
         send_lsa(MicroBitEvent());
         uBit.sleep(1000);
         send_graph_update();
+        send_path_update();
         uBit.sleep(1000);
     }
 }
@@ -159,6 +166,7 @@ void setup(MicroBitEvent e) {
         uBit.radio.enable();
 
         send_graph_update();
+        send_path_update();
         create_fiber(update);
     }
 }

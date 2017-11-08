@@ -1,4 +1,5 @@
 #include "graph.h"
+#include "lsr.h"
 
 // TODO: Decide mapped distance type.
 std::unordered_map<struct edge, int> graph;
@@ -26,6 +27,10 @@ void update_graph(Packet* p) {
     for (auto it : p->graph) {
         graph[it.first] = it.second;
     }
+}
+
+void recalculate_graph(uint16_t source) {
+    calculate_syn_tree(source, graph);
 }
 
 void delete_extra_neighbours(uint16_t ip) {
@@ -115,11 +120,38 @@ ManagedString graph_to_json(std::unordered_map<struct edge, int> graph) {
     return result + "]";
 }
 
+
+ManagedString sink_tree_to_json(std::unordered_map<struct edge, int> graph) {
+    ManagedString result = "[";
+    unsigned int index = 0;
+    for (auto it = graph.begin(); it != graph.end(); ++it) {
+        result = result + "{";
+        result = result + format_attr("to", it->first.to);
+        std::vector<uint16_t> path = get_full_path_for_node(it->first.to);
+        result = result + format_attr("path", path, true);
+        result = result + "}";
+        index++;
+        if (index < graph.size()) {
+            result = result + ",";
+        }
+    }
+    return result + "]";
+}
+
 ManagedString topology_json(uint16_t ip) {
     ManagedString result = "{";
     result = result + format_attr("type", "graph");
     result = result + format_attr("ip", ip);
     result = result + "\"graph\":" + graph_to_json(remove_dead_nodes(graph));
+    return result + "}\0";
+}
+
+ManagedString path_json(uint16_t ip) {
+    recalculate_graph(ip);
+    ManagedString result = "{";
+    result = result + format_attr("type", "sink-tree");
+    result = result + format_attr("ip", ip);
+    result = result + "\"sink-tree\":" + sink_tree_to_json(remove_dead_nodes(graph));
     return result + "}\0";
 }
 
