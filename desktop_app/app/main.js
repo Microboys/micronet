@@ -89,7 +89,10 @@ app.on('ready', async () => {
       });
     }
   });
-  mainWindow.webContents.openDevTools();
+  
+  //For testing packaged app
+  // mainWindow.webContents.openDevTools();
+
   if (isDevelopment) {
     // auto-open dev tools
     mainWindow.webContents.openDevTools();

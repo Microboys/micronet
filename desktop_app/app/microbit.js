@@ -1,8 +1,11 @@
 import SerialPort from 'serialport';
 import graphActions from './actions/graph';
 
-var fs = require('electron').remote.require('fs');
-var Jimp = require("jimp");
+const remote = require('electron').remote;
+const fs = remote.require('fs');
+const assetPath = remote.app.getAppPath() + "/build/assets";
+const tempAssetPath = remote.app.getPath('appData') + "/micronet/temp";
+const Jimp = require("jimp");
 
 const microbitProductId = "0204";
 const microbitVendorId = "0d28";
@@ -71,25 +74,30 @@ function locatePort() {
 }
 
 function transformGraphJSON(graphJSON) {
-  var obj = JSON.parse(graphJSON);
-  if (obj.type === 'graph') {
-    var graph = obj.graph;
-    var nodes = [];
-    var edges = [];
-    var ip = obj.ip;
-    addNode(nodes, ip, true);
-    for (var i = 0; i < graph.length; i++) {
-      var arc = graph[i];
-      addNode(nodes, arc.from, false);
-      addNode(nodes, arc.to, false);
-      addEdge(edges, arc);
+  try {
+    var obj = JSON.parse(graphJSON);
+    if (obj.type === 'graph') {
+      var graph = obj.graph;
+      var nodes = [];
+      var edges = [];
+      var ip = obj.ip;
+      addNode(nodes, ip, true);
+      for (var i = 0; i < graph.length; i++) {
+        var arc = graph[i];
+        addNode(nodes, arc.from, false);
+        addNode(nodes, arc.to, false);
+        addEdge(edges, arc);
+      }
+      return {
+        nodes: nodes,
+        edges: edges
+      };
+    } else {
+      throw new Error("Non-graph JSON passed to transformGraphJSON");
     }
-    return {
-      nodes: nodes,
-      edges: edges
-    };
-  } else {
-    throw new Error("Non-graph JSON passed to transformGraphJSON");
+  } catch(err) {
+    console.log("Invalid graph obtained. Ignoring:");
+    console.log(err);
   }
 }
 
@@ -126,33 +134,36 @@ function addEdge(edges, edge) {
 //represents 1 LED (e.g. code = '2' = 0b10 = 000...0010, second last LED is lit)
 function generateMicrobitImage(code) {
   //First check if image exists for this ID
-  var codeImgPath = 'assets/microbit-' + code + '.png';
+  var codeImgPath = tempAssetPath + '/microbit-' + code + '.png';
   var imgPath = codeImgPath;
   try {
-    fs.readdir('.', (err, items) => {console.log(items);})
-    fs.accessSync('./build/' + imgPath);
+    fs.accessSync(imgPath);
   } catch(err) {
-    //Image doesn't exist, create using Jimp and use default img for now
-    imgPath = 'assets/microbit.png';
-    Jimp.read('./build/assets/microbit.png', (err, microbit) => {
-      if (err) {
-        throw err;
-      }
-      Jimp.read('./build/assets/led.png', (err, led) => {
+    //Image doesn't exist, create using Jimp (async) and use default img for now
+    imgPath = assetPath + '/microbit.png';
+    try {
+      Jimp.read(imgPath, (err, microbit) => {
         if (err) {
           throw err;
         }
-        var newImg = microbit.clone();
-        var codeBin = parseInt(code).toString(2);
-        for (var i = 24; i > 24 - codeBin.length; i--) {
-          if (codeBin[codeBin.length - (25 - i)] == '1') newImg.blit(led, imgLEDX + (i % 5) * imgOffsetX, imgLEDY + Math.floor(i / 5) * imgOffsetY);
-        }
-        newImg.write('./build/' + codeImgPath);
-      })
-    });
+        Jimp.read(assetPath + '/led.png', (err, led) => {
+          if (err) {
+            throw err;
+          }
+          var newImg = microbit.clone();
+          var codeBin = parseInt(code).toString(2);
+          for (var i = 24; i > 24 - codeBin.length; i--) {
+            if (codeBin[codeBin.length - (25 - i)] == '1') newImg.blit(led, imgLEDX + (i % 5) * imgOffsetX, imgLEDY + Math.floor(i / 5) * imgOffsetY);
+          }
+          newImg.write(codeImgPath);
+        });
+      });
+    } catch(err) {
+      console.log(err);
+    }
   }
 
-  return './' + imgPath;
+  return imgPath;
 }
 
 function RSSIToAbstractDistanceUnits(rssi) {
