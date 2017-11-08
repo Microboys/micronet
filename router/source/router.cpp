@@ -15,7 +15,7 @@ void broadcast(Packet p) {
         p.ttl--;
         std::vector<uint16_t> neighbours = get_neighbours(ip);
         for (auto n : neighbours) {
-            p.imm_dest_ip = ip;
+            p.imm_dest_ip = n;
             uBit.radio.datagram.send(p.format());
         }
     }
@@ -44,10 +44,9 @@ void onData(MicroBitEvent e) {
             broadcast(p);
         }
     } else if (p.ptype == LSA) {
-        uint8_t ttl = p.ttl;
         update_graph(&p);
 
-        if (ttl > 0) {
+        if (p.ttl > 0) {
             p.ttl = p.ttl - 1;
             uBit.radio.datagram.send(p.format());
         }
@@ -69,8 +68,6 @@ void send_message_via_routing(MicroBitEvent e) {
         ManagedString message = "Hello!";
         uint16_t next_node = get_path_for_node(target);
         Packet p(MESSAGE, ip, next_node, target, 0, MAX_TTL, message);
-
-        //serial.printf("Sending %s to %i...\n\r", message.toCharArray(), target);
     }
 }
 
@@ -141,6 +138,7 @@ void update() {
         uBit.sleep(1000);
         send_lsa(MicroBitEvent());
         uBit.sleep(1000);
+        delete_extra_neighbours(ip);
         send_graph_update();
         uBit.sleep(1000);
     }

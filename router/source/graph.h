@@ -12,7 +12,6 @@
 class Packet;
 #include "packet.h"
 
-//void update_graph(PacketBuffer& p);
 void update_graph(Packet* p);
 void update_graph(uint16_t from, uint16_t to, int distance);
 void delete_all_edges(uint16_t ip);
