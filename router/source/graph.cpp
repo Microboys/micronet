@@ -2,6 +2,11 @@
 
 // TODO: Decide mapped distance type.
 std::unordered_map<struct edge, int> graph;
+std::unordered_map<uint16_t, unsigned long> alive_nodes;
+
+void update_alive_nodes(uint16_t ip, unsigned long time) {
+    alive_nodes[ip] = time;
+}
 
 // Updates graph from ping response
 void update_graph(uint16_t from, uint16_t to, int distance) {
@@ -115,22 +120,17 @@ ManagedString graph_to_json(std::unordered_map<struct edge, int> graph) {
     return result + "]";
 }
 
-ManagedString topology_json(uint16_t ip) {
+ManagedString topology_json(uint16_t ip, unsigned long current_time) {
     ManagedString result = "{";
     result = result + format_attr("type", "graph");
     result = result + format_attr("ip", ip);
-    result = result + "\"graph\":" + graph_to_json(remove_dead_nodes(graph));
+    result = result + "\"graph\":" + graph_to_json(remove_dead_nodes(graph, current_time));
     return result + "}\0";
 }
 
-std::unordered_map<struct edge, int> remove_dead_nodes(std::unordered_map<struct edge, int> graph) {
-    std::unordered_set<uint16_t> dead_nodes;
-    for (auto it : graph) {
-        struct edge cur_edge = it.first;
-        if (!arcs_incoming(cur_edge.from, graph)) {
-            dead_nodes.insert(cur_edge.from);
-        }
-    }
+std::unordered_map<struct edge, int> remove_dead_nodes(std::unordered_map<struct edge, int> graph, unsigned long current_time) {
+    std::unordered_set<uint16_t> dead_nodes = get_dead_nodes(current_time);
+
     std::unordered_map<struct edge, int> new_graph;
     for (auto it : graph) {
         struct edge cur_edge = it.first;
@@ -146,13 +146,17 @@ bool contains(std::unordered_set<uint16_t> set, uint16_t value) {
     return set.find(value) != set.end();
 }
 
-bool arcs_incoming(uint16_t ip, std::unordered_map<struct edge, int> graph) {
-    for (auto it : graph) {
-        struct edge cur_edge = it.first;
-        uint16_t to = cur_edge.to;
-        if (to == ip) {
-            return true;
+std::unordered_set<uint16_t> get_dead_nodes(unsigned long current_time) {
+    std::unordered_set<uint16_t> dead_nodes;
+    for (auto it : alive_nodes) {
+        uint16_t ip = it.first;
+        if ((current_time - it.second) > NODE_TTL) {
+            dead_nodes.insert(ip);
         }
     }
-    return false;
+
+    for (uint16_t ip : dead_nodes) {
+        alive_nodes.erase(ip);
+    }
+    return dead_nodes;
 }

@@ -21,11 +21,15 @@ void broadcast(Packet p) {
     }
 }
 
+unsigned long get_system_time() {
+    return uBit.systemTime();
+}
+
 void onData(MicroBitEvent e) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
     Packet p = Packet(buffer, uBit.radio.getRSSI());
     uBit.sleep(1);
-
+    update_alive_nodes(p.source_ip, get_system_time());
     if (p.ptype == PING) {
         // Received new ping packet, send it back to source
         if (p.imm_dest_ip == 0) {
@@ -88,7 +92,7 @@ void send_lsa(MicroBitEvent e) {
 }
 
 void send_graph_update() {
-    serial.printf("%s", topology_json(ip).toCharArray());
+    serial.printf("%s", topology_json(ip, uBit.systemTime()).toCharArray());
 }
 
 void onMessage(MicroBitEvent e) {

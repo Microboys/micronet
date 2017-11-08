@@ -12,6 +12,7 @@
 class Packet;
 #include "packet.h"
 
+void update_alive_nodes(uint16_t ip, unsigned long time);
 void update_graph(Packet* p);
 void update_graph(uint16_t from, uint16_t to, int distance);
 void delete_all_edges(uint16_t ip);
@@ -21,9 +22,10 @@ void print_graph(MicroBitSerial serial);
 void print_graph(MicroBitSerial serial, std::unordered_map<edge, int> graph);
 std::unordered_map<edge, int> get_lsa_graph(uint16_t ip);
 ManagedString graph_to_json(std::unordered_map<struct edge, int> graph);
-ManagedString topology_json(uint16_t ip);
+ManagedString topology_json(uint16_t ip, unsigned long current_time);
 std::vector<uint16_t> get_neighbours(uint16_t ip);
-std::unordered_map<struct edge, int> remove_dead_nodes(std::unordered_map<struct edge, int> graph);
+std::unordered_map<struct edge, int> remove_dead_nodes(std::unordered_map<struct edge, int> graph, unsigned long current_time);
+std::unordered_set<uint16_t> get_dead_nodes(unsigned long current_time);
 bool contains(std::unordered_set<uint16_t> set, uint16_t value);
 bool arcs_incoming(uint16_t ip, std::unordered_map<struct edge, int> graph);
 std::vector<std::pair<edge, int>> get_neighbour_edges(uint16_t ip);
