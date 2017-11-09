@@ -6,10 +6,7 @@
 #include <unordered_map>
 #include <string>
 
-#define PACKET_SIZE 32
-#define MAX_TTL 10
 #define BYTE_SIZE 8
-
 #define F_PTYPE 0
 
 // Ping
@@ -74,7 +71,7 @@ class Packet {
         uint16_t imm_dest_ip = 0;
         uint16_t dest_ip = 0;
         uint8_t timestamp = 0;
-        uint8_t ttl = MAX_TTL;
+        uint8_t ttl = INITIAL_TTL;
         ManagedString payload = "";
         int rssi = 0;
 

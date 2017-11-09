@@ -1,6 +1,16 @@
 #pragma once
 // Global configuration variables.
 
+/* Initial time-to-live value for broadcasted packets. Corresponds to number
+ * of hops before the packet is discarded. 
+ */
+#define INITIAL_TTL 10
+
+/* Size of a single packet. Note that 32B is the maximum size of a single
+ * datagram the microbit can send via radio.
+ */
+#define PACKET_SIZE 32
+
 /* Maximum distance for establishing connection. Expressed as an RSSI value,
  * lower value means farther away (e.g. -40 is closer than -60).
  * Threshold is inclusive.
@@ -25,6 +35,10 @@
 /* 2^16 - 1 */
 #define IP_MAXIMUM 65535
 
+/* Delay in ms before each action in update loop. Note that there are multiple
+ * of these delays in a single loop (e.g. before sending ping and lsa) so one
+ * update cycle will take longer than this value.
+ */
 #define UPDATE_RATE 500
 
 /* Serial read buffer size. */
@@ -35,4 +49,18 @@
  * arc from our graph. */
 #define NODE_LIFESPAN 4000
 
+/* Delimiter for serial communication. */
 #define SERIAL_DELIMITER "\n"
+
+/* Interface for desktop app to tell router to send a message.
+ *
+ * Example:
+ * MSG\t12345\tHello world!\n
+ */
+#define MESSAGE_REQUEST "MSG"
+#define MESSAGE_DELIMITER '\t'
+
+/* Interface for sending a simple 'hello' back over serial to check the
+ * microbit is still alive.
+ */
+#define HELLO_REQUEST "HELLO"
