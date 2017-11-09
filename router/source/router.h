@@ -20,6 +20,7 @@ void ping(MicroBitEvent e);
 void send_payload(uint16_t target, ManagedString message);
 void send_lsa(MicroBitEvent e);
 void broadcast(Packet p);
+unsigned long get_system_time();
 void setup(MicroBitEvent e);
 void update();
 int main();

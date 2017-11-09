@@ -8,6 +8,27 @@ import routes from './routes';
 import configureStore from './store';
 import { listen } from './microbit.js';
 
+//Setup temp folder for microbit images
+const remote = require('electron').remote;
+const fs = remote.require('fs');
+const app = remote.app;
+app.setPath('temp', app.getPath('appData') + '/micronet/temp');
+try {
+  var items = fs.readdirSync(app.getPath('temp'));
+  for (var i = 0; i < items.length; i++) {
+    var item = app.getPath('temp') + '/' + items[i];
+    console.log('Deleting: ' + item);
+    try {
+      fs.unlinkSync(item);
+    } catch(err) {
+      fs.rmdirSync(item);
+    }
+  }
+} catch(err) {
+  console.log(err);
+  fs.mkdirSync(app.getPath('temp'));
+}
+
 const syncHistoryWithStore = (store, history) => {
   const { routing } = store.getState();
   if(routing && routing.location) {

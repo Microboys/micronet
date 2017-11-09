@@ -1,6 +1,7 @@
 #pragma once
 #include "util.h"
 #include "graph.h"
+#include "config.h"
 #include "MicroBit.h"
 #include <unordered_map>
 #include <string>
