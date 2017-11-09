@@ -6,7 +6,7 @@ import { createMemoryHistory } from 'history';
 
 import routes from './routes';
 import configureStore from './store';
-import { listen } from './microbit.js';
+import { init } from './microbit.js';
 
 //Setup temp folder for microbit images
 const remote = require('electron').remote;
@@ -36,10 +36,14 @@ const syncHistoryWithStore = (store, history) => {
   }
 };
 
-const initialState = { 'graph' : {
-  'nodes' : [],
-  'edges' : []
-}
+const initialState = {
+  'graph' : {
+    'nodes' : [],
+    'edges' : []
+  },
+  'connection' : {
+    'open' : true
+  }
 };
 const routerHistory = createMemoryHistory();
 const store = configureStore(initialState, routerHistory);
@@ -56,4 +60,4 @@ ReactDOM.render(
   rootElement
 );
 
-listen(store);
+init(store);

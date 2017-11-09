@@ -4,17 +4,21 @@ import thunk from 'redux-thunk';
 
 import graph from './reducers/graph';
 import graphActions from './actions/graph';
+import connection from './reducers/connection';
+import connectionActions from './actions/connection';
 
 export default function configureStore(initialState, routerHistory) {
   const router = routerMiddleware(routerHistory);
 
   const actionCreators = {
     ...graphActions,
+    ...connectionActions,
     push
   };
 
   const reducers = {
     graph,
+    connection,
     routing
   };
 
