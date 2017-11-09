@@ -13,6 +13,13 @@
 #define MESSAGE_REQUEST "MSG"
 #define MESSAGE_DELIMITER '\t'
 
+#define HELLO_REQUEST "HELLO"
+
+void handle_ping(Packet p);
+void handle_message(Packet p);
+void handle_lsa(Packet p);
+void handle_packet(Packet p);
+
 void print_neighbours();
 void onData(MicroBitEvent e);
 void ping(MicroBitEvent e);

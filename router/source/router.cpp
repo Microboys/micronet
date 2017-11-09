@@ -26,40 +26,57 @@ unsigned long get_system_time() {
     return uBit.systemTime();
 }
 
+/* Handler for receiving a packet. */
 void onData(MicroBitEvent e) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
     Packet p = Packet(buffer, uBit.radio.getRSSI());
     uBit.sleep(1);
     update_alive_nodes(p.source_ip, get_system_time());
 
+    handle_packet(p);
+}
+
+void handle_packet(Packet p) {
     switch (p.ptype) {
         case PING:
-            if (p.imm_dest_ip == 0) {
-                p.imm_dest_ip = p.source_ip;
-                p.source_ip = ip;
-                uBit.radio.datagram.send(p.format());
-            } else if (p.imm_dest_ip == ip) {
-                // Got back our own ping packet
-                update_graph(ip, p.source_ip, p.rssi);
-            }
+            handle_ping(p);
             break;
         case MESSAGE:
-            if (p.dest_ip == ip) {
-                uBit.display.printAsync(p.payload);
-            } else if (p.imm_dest_ip == ip) {
-                broadcast(p);
-            }
+            handle_message(p);
             break;
         case LSA:
-            update_graph(&p);
-
-            if (p.ttl > 0) {
-                p.ttl = p.ttl - 1;
-                uBit.radio.datagram.send(p.format());
-            }
+            handle_lsa(p);
             break;
         default:
             break;
+    }
+}
+
+void handle_lsa(Packet p) {
+    update_graph(&p);
+
+    if (p.ttl > 0) {
+        p.ttl = p.ttl - 1;
+        uBit.radio.datagram.send(p.format());
+    }
+}
+
+void handle_message(Packet p) {
+    if (p.dest_ip == ip) {
+        uBit.display.printAsync(p.payload);
+    } else if (p.imm_dest_ip == ip) {
+        broadcast(p);
+    }
+}
+
+void handle_ping(Packet p) {
+    if (p.imm_dest_ip == 0) {
+        p.imm_dest_ip = p.source_ip;
+        p.source_ip = ip;
+        uBit.radio.datagram.send(p.format());
+    } else if (p.imm_dest_ip == ip) {
+        // Got back our own ping packet
+        update_graph(ip, p.source_ip, p.rssi);
     }
 }
 
@@ -106,7 +123,6 @@ void onMessage(MicroBitEvent e) {
     ManagedString substr = request.substring(0, header_length);
 
     if (substr == MESSAGE_REQUEST) {
-
         /* Find the delimiter character between IP and payload */
         int delim = -1;
         for (int i = header_length + 1; i < request.length(); i++) {
@@ -121,7 +137,8 @@ void onMessage(MicroBitEvent e) {
             uint16_t ip = atoi(ip_string);
             send_payload(ip, message);
         }
-
+    } else if (request == HELLO_REQUEST) {
+        serial.printf("{\"type\" : \"hello\"}" + SERIAL_DELIMITER);
     }
 
     serial.eventOn(DELIMITER);
@@ -171,6 +188,7 @@ void setup(MicroBitEvent e) {
 int main() {
     uBit.init();
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, setup);
-    uBit.display.print("<");
+    MicroBitImage arrow("0,0,255,0,0\n0,255,0,0,0\n255,255,255,255,255\n0,255,0,0,0\n0,0,255,0,0\n");
+    uBit.display.print(arrow);
     release_fiber();
 }
