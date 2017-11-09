@@ -17,7 +17,7 @@ void send_payload(uint16_t dest_ip, ManagedString message);
 void send_lsa(MicroBitEvent e);
 void send_graph_update();
 void on_serial(MicroBitEvent e);
-void initSerialRead();
+void init_serial_read();
 void update();
 void setup(MicroBitEvent e);
 int main();
