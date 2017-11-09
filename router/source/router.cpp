@@ -138,7 +138,8 @@ void on_serial(MicroBitEvent e) {
             send_payload(ip, message);
         }
     } else if (request == HELLO_REQUEST) {
-        serial.printf("{\"type\" : \"hello\"}" + SERIAL_DELIMITER);
+        ManagedString hello("{\"type\" : \"hello\"}");
+        serial.printf((hello + SERIAL_DELIMITER).toCharArray());
     }
 
     serial.eventOn(SERIAL_DELIMITER);
