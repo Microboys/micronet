@@ -1,27 +1,35 @@
-os: osx
-language: generic
+addons:
+  apt:
+    sources:
+        - sourceline: 'ppa:team-gcc-arm-embedded/ppa'
+    packages:
+        # router cross-compiling
+        - gcc-arm-embedded
+        # router yotta dependencies
+        - srecord
+        - python-setuptools
+        - cmake
+        - build-essential
+        - ninja-build
+        - python-dev
+        - libffi-dev
+        - libssl-dev
 
 install:
-    # workaround for homebrew ruby version complaint
-    - brew update
+    # TODO: move this into sources section
+    - wget https://dl.winehq.org/wine-builds/Release.key
+    - sudo apt-key add Release.key
+    - sudo apt-add-repository 'https://dl.winehq.org/wine-builds/ubuntu/'
+    - sudo apt update
+    - sudo apt-get install --install-recommends winehq-stable
+    - sudo pip install yotta
 
-    # router dependencies
-    #   we also need python and cmake but it is already on the image and attempting
-    #   to 'brew install' them causes an error
-    - brew tap ARMmbed/homebrew-formulae
-    - brew install ninja arm-none-eabi-gcc srecord
-    - pip install yotta
 
-    # desktop app dependencies
-    - brew install wine
+before_script:
+  - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start # magic required for running electron-mocha tests
 
 script:
-    - if [ "$TRAVIS_BRANCH" == "router" ] ; then cd router && sh ci.sh router.hex; fi
-    - if [ "$TRAVIS_BRANCH" == "ci-fix" ] || [ "$TRAVIS_BRANCH" == "desktop-app" ] ; then
-        cd desktop_app
-        && npm install
-        && npm test
-        && npm run pack:mac
-        && npm run pack:win
-        && npm run pack:linux
-        ; fi
+    -  cd desktop_app
+          && npm install
+          && npm install 7zip-bin-linux
+          && npm test

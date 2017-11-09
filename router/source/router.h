@@ -2,6 +2,7 @@
 #include "MicroBit.h"
 #include "packet.h"
 #include "graph.h"
+#include "config.h"
 #define DELIMITER "\r\n"
 
 #define GRAPH_REQUEST "GRAPH"
@@ -16,8 +17,9 @@
 void print_neighbours();
 void onData(MicroBitEvent e);
 void ping(MicroBitEvent e);
-void send_message(uint16_t target, ManagedString message);
+void send_payload(uint16_t target, ManagedString message);
 void send_lsa(MicroBitEvent e);
 void broadcast(Packet p);
-void setup();
+void setup(MicroBitEvent e);
+void update();
 int main();
