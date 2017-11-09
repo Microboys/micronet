@@ -25,7 +25,7 @@
 /* 2^16 - 1 */
 #define IP_MAXIMUM 65535
 
-#define UPDATE_RATE 1000
+#define UPDATE_RATE 500
 
 /* Serial read buffer size. */
 #define RX_BUFFER_SIZE 200

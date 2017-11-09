@@ -1,93 +1,101 @@
 import SerialPort from 'serialport';
 import graphActions from './actions/graph';
-var fs = require('electron').remote.require('fs'); // TODO: Daniel, should these be import statements?
-var Jimp = require('jimp'); // TODO: as above
-
-/* Locating and maintaining connection micro:bit. */
-const remote = require('electron').remote;
+const remote = require('electron').remote; // TODO: Daniel - should these all be imports?
 const fs = remote.require('fs');
 const assetPath = remote.app.getAppPath() + "/build/assets";
 const tempAssetPath = remote.app.getPath('appData') + "/micronet/temp";
 const Jimp = require("jimp");
 
+
+/* Locating and maintaining connection micro:bit. */
 const microbitProductId = '0204';
 const microbitVendorId = '0d28';
 const microbitBaudRate = 115200;
 
 var microbitPort = null;
+var microbitPortOpen = false;
 
 async function locatePort() {
-  var portName = null;
-  while (!portName) {
-    let portNames =  await SerialPort.list();
-    portName = portNames.find(function (port) {
+  var port = null;
+  while (!port) {
+    let ports =  await SerialPort.list();
+    port = ports.find(function (port) {
       return port.productId === microbitProductId && port.vendorId === microbitVendorId;
     });
   }
-  return portName;
+  return port.comName;
 }
 
 function close() {
   microbitPort.pause();  // stop listening to events
   microbitPort.flush();  // clear all received data
   microbitPort = null;
+  microbitPortOpen = false;
 }
 
-function listen(store) {
-  locatePort()
-    .then((portName) => {
-      microbitPort = new SerialPort(portName, { baudRate: microbitBaudRate });
-      const parser = SerialPort.parsers.Readline;
-      microbitPort.pipe(parser);
-      microbitPort.on('error', function(err) {
+async function listen(store) {
+  try {
+    let portName = await locatePort();
+    microbitPort = new SerialPort(portName, { baudRate: microbitBaudRate });
+    const parser = new SerialPort.parsers.Readline();
+    microbitPort.pipe(parser);
+    microbitPort.on('open', function(err) {
+      console.log("OPEN FOOKIN SESAME");
+      microbitPortOpen = true;
+    });
+    microbitPort.on('error', function(err) {
+      console.log("ERROR SHMERROR");
+      if (microbitPortOpen) {
         console.log('Error on using the port: ' + err);
         close();
         listen();
-      });
-      microbitPort.on('close', function() {
+      }
+    });
+    microbitPort.on('close', function() {
+      console.log("CLOSE CALL");
+      if (microbitPortOpen) {
         close();
         listen();
-      });
-      microbitPort.on('open', function() {
-        close();
-        listen();
-      });
-      parser.on('data', function(data) {
-        try {
-          var dataJSON = JSON.parse(data);
-        } catch (err) {
-          console.log('Failed to parse JSON with: ' + err);
-        }
+      }
+    });
+    parser.on('data', function(data) {
+      console.log("GOT ME SOME DATA IT LOOKS LIKE THIS: " + data);
+      try {
+        var dataJSON = JSON.parse(data);
+      } catch (err) {
+        console.log('Failed to parse JSON with: ' + err);
+      }
 
-        if (!dataJSON.hasOwnProperty('type')) {
-          console.log('Expecting a type field in JSON received from micro:bit, got: ' + dataJSON);
-          return;
-        }
+      if (!dataJSON.hasOwnProperty('type')) {
+        console.log('Expecting a type field in JSON received from micro:bit, got: ' + dataJSON);
+        return;
+      }
 
-        switch (dataJSON.type) {
-        case 'graph':
+      switch (dataJSON.type) {
+      case 'graph':
 
-          if (!dataJSON.hasOwnProperty('graph')) {
-            console.log('Expecting a graph field in JSON received with type \'graph\' from micro:bit, got: '
-              + dataJSON);
-            break;
-          }
-
-          if (!dataJSON.hasOwnProperty('ip')) {
-            console.log('Expecting a ip field in JSON received with type \'graph\' from micro:bit, got: '
-              + dataJSON);
-            break;
-          }
-
-          var transformed = transformGraphJSON(dataJSON.graph, dataJSON.ip);
-          store.dispatch(graphActions.drawGraph(transformed));
+        if (!dataJSON.hasOwnProperty('graph')) {
+          console.log('Expecting a graph field in JSON received with type \'graph\' from micro:bit, got: '
+            + dataJSON);
           break;
-        default:
-          console.log('Unrecognised JSON type from micro:bit: ' + dataJSON.type);
         }
-      });
-    })
-    .catch(err => console.log('Finding the port failed with: ' + err));
+
+        if (!dataJSON.hasOwnProperty('ip')) {
+          console.log('Expecting a ip field in JSON received with type \'graph\' from micro:bit, got: '
+            + dataJSON);
+          break;
+        }
+
+        var transformed = transformGraphJSON(dataJSON.graph, dataJSON.ip);
+        store.dispatch(graphActions.drawGraph(transformed));
+        break;
+      default:
+        console.log('Unrecognised JSON type from micro:bit: ' + dataJSON.type);
+      }
+    });
+  } catch (err) {
+    console.log("Error on locating the micro:bit port " + err); 
+  }
 }
 
 /* Functions for sending commands to the micro:bit. */
