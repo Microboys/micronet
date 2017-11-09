@@ -65,6 +65,8 @@ class Packet {
     private:
         void encode_payload(PacketBuffer p, ManagedString payload, int start_index);
         ManagedString decode_payload(PacketBuffer p, int start_index);
+        std::unordered_map<struct edge, int> decode_lsa(PacketBuffer p, uint16_t source_ip);
+        void encode_lsa(PacketBuffer p, std::unordered_map<struct edge, int> graph);
     public:
         packet_type ptype;
         uint16_t source_ip = 0;
@@ -87,6 +89,4 @@ class Packet {
         Packet();
         PacketBuffer format();
         ManagedString to_json();
-        std::unordered_map<struct edge, int> decode_lsa(PacketBuffer p, uint16_t source_ip);
-        void encode_lsa(PacketBuffer p, std::unordered_map<struct edge, int> graph);
 };

@@ -11,13 +11,13 @@ uint16_t ip = 0;
 bool started = false;
 
 /* Resends packet to all neighbours. */
-void broadcast(Packet p) {
-    if (p.ttl > 0) {
-        p.ttl--;
+void broadcast(Packet* p) {
+    if (p->ttl > 0) {
+        p->ttl--;
         std::vector<uint16_t> neighbours = get_neighbours(ip);
         for (auto n : neighbours) {
-            p.imm_dest_ip = n;
-            uBit.radio.datagram.send(p.format());
+            p->imm_dest_ip = n;
+            uBit.radio.datagram.send(p->format());
         }
     }
 }
@@ -27,17 +27,17 @@ unsigned long get_system_time() {
 }
 
 /* Handler for receiving a packet. */
-void on_packet(MicroBitEvent e) {
+void on_packet(MicroBitEvent) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
     Packet p = Packet(buffer, uBit.radio.getRSSI());
     uBit.sleep(1);
     update_alive_nodes(p.source_ip, get_system_time());
 
-    handle_packet(p);
+    handle_packet(&p);
 }
 
-void handle_packet(Packet p) {
-    switch (p.ptype) {
+void handle_packet(Packet* p) {
+    switch (p->ptype) {
         case PING:
             handle_ping(p);
             break;
@@ -52,40 +52,40 @@ void handle_packet(Packet p) {
     }
 }
 
-void handle_lsa(Packet p) {
-    update_graph(&p);
+void handle_lsa(Packet* p) {
+    update_graph(p);
 
-    if (p.ttl > 0) {
-        p.ttl = p.ttl - 1;
-        uBit.radio.datagram.send(p.format());
+    if (p->ttl > 0) {
+        p->ttl = p->ttl - 1;
+        uBit.radio.datagram.send(p->format());
     }
 }
 
-void handle_message(Packet p) {
-    if (p.dest_ip == ip) {
-        uBit.display.printAsync(p.payload);
-    } else if (p.imm_dest_ip == ip) {
+void handle_message(Packet* p) {
+    if (p->dest_ip == ip) {
+        uBit.display.printAsync(p->payload);
+    } else if (p->imm_dest_ip == ip) {
         broadcast(p);
     }
 }
 
-void handle_ping(Packet p) {
-    if (p.imm_dest_ip == 0) {
-        p.imm_dest_ip = p.source_ip;
-        p.source_ip = ip;
-        uBit.radio.datagram.send(p.format());
-    } else if (p.imm_dest_ip == ip) {
+void handle_ping(Packet* p) {
+    if (p->imm_dest_ip == 0) {
+        p->imm_dest_ip = p->source_ip;
+        p->source_ip = ip;
+        uBit.radio.datagram.send(p->format());
+    } else if (p->imm_dest_ip == ip) {
         // Got back our own ping packet
-        update_graph(ip, p.source_ip, p.rssi);
+        update_graph(ip, p->source_ip, p->rssi);
     }
 }
 
-void ping(MicroBitEvent e) {
+void ping(MicroBitEvent) {
     Packet p(PING, ip, 0, 0, 0, INITIAL_TTL, 0);
     uBit.radio.datagram.send(p.format());
 }
 
-void send_message_via_routing(MicroBitEvent e) {
+void send_message_via_routing(MicroBitEvent) {
     std::vector<uint16_t> neighbours = get_neighbours(ip);
     if (!neighbours.empty()) {
         uint16_t target = neighbours[uBit.random(neighbours.size())];
@@ -107,7 +107,7 @@ void send_payload(uint16_t dest_ip, ManagedString message) {
     }
 }
 
-void send_lsa(MicroBitEvent e) {
+void send_lsa(MicroBitEvent) {
     std::unordered_map<edge, int> to_send = get_lsa_graph(ip);
     Packet p(LSA, ip, 0, 0, 0, INITIAL_TTL, to_send);
     uBit.radio.datagram.send(p.format());
@@ -117,7 +117,7 @@ void send_graph_update() {
     serial.printf("%s", topology_json(ip).toCharArray());
 }
 
-void on_serial(MicroBitEvent e) {
+void on_serial(MicroBitEvent) {
     ManagedString request = serial.readUntil(SERIAL_DELIMITER);
     int header_length = ManagedString(MESSAGE_REQUEST).length();
     ManagedString substr = request.substring(0, header_length);
@@ -168,7 +168,7 @@ void update() {
     }
 }
 
-void setup(MicroBitEvent e) {
+void setup(MicroBitEvent) {
     if (!started) {
         started = true;
         // Generate a random IP, exclude 0
