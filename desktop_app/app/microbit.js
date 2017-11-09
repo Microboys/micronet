@@ -5,87 +5,101 @@ const microbitProductId = '0204';
 const microbitVendorId = '0d28';
 const microbitBaudRate = 115200;
 
-const minLength = 140;
-const lengthCoeff = 2;
+const minLength = 140; // TODO: Daniel explain
+const lengthCoeff = 2; // TODO: Daniel explain
 
+/* Functions for locating and maintaining connection micro:bit. */
 var microbitPort = null;
-var locating = false;
 
-const getGraph = (store) => {
-  if (microbitPort) {
-    microbitPort.write('GRAPH\n', function(err) {
-      if (err) {
-        console.log(err);
-      } else {
-        var response = microbitPort.read();
-        if (response) {
-          console.log('Response is ' + response);
-          var transformed = transformGraphJSON(response);
-          store.dispatch(graphActions.drawGraph(transformed));
+async function locatePort() {
+  var portName = null;
+  while (!portName) {
+    let portNames =  await SerialPort.list();
+    portName = portNames.find(function (port) {
+      return port.productId === microbitProductId && port.vendorId === microbitVendorId;
+    });
+  }
+  return portName;
+}
+
+function close() {
+  microbitPort.pause();  // stop listening to events
+  microbitPort.flush();  // clear all received data
+  microbitPort = null;
+}
+
+function listen(store) {
+  locatePort()
+    .then((portName) => {
+      microbitPort = new SerialPort(portName, { baudRate: microbitBaudRate });
+      const parser = SerialPort.parsers.Readline;
+      microbitPort.pipe(parser);
+      microbitPort.on('error', function(err) {
+        console.log('Error on using the port: ' + err);
+        close();
+        listen();
+      });
+      microbitPort.on('close', function() {
+        close();
+        listen();
+      });
+      microbitPort.on('open', function() {
+        close();
+        listen();
+      });
+      parser.on('data', function(data) {
+        try {
+          var dataJSON = JSON.parse(data);
+        } catch (err) {
+          console.log('Failed to parse JSON with: ' + err);
         }
-      }
-    });
-  } else if (!locating) {
-    locatePort();
-  }
-};
 
-const sendMsg = (to, msg) => {
-  console.log(msg);
+        if (!dataJSON.hasOwnProperty('type')) {
+          console.log('Expecting a type field in JSON received from micro:bit, got: ' + dataJSON);
+          return;
+        }
+
+        switch (dataJSON.type) {
+        case 'graph':
+          var transformed = transformGraphJSON(dataJSON);
+          store.dispatch(graphActions.drawGraph(transformed));
+          break;
+        default:
+          console.log('Unrecognised JSON type from micro:bit: ' + dataJSON.type);
+        }
+      });
+    })
+    .catch(err => console.log('Finding the port failed with: ' + err));
+}
+
+/* Functions for sending commands to the micro:bit. */
+
+function sendMsg(to, msg) {
   if (microbitPort) {
-    microbitPort.write('MSG\t' + to + '\t' + msg + '\n', function(err) {
-      if(err) {
-        console.log(err);
-      } else {
-        console.log('Message sent!');
-      }
-    });
-  } else if (!locating) {
-    locatePort();
+    microbitPort.write('MSG\t' + to + '\t' + msg + '\n');
   }
-};
+}
 
-const locatePort = () => {
-  locating = true;
-  const promise = SerialPort.list();
-  promise.then((ports) => {
-    for (let port of ports) {
-      if (port.productId === microbitProductId && port.vendorId === microbitVendorId) {
-        var microbitCom = port.comName;
-        microbitPort = new SerialPort(microbitCom, {baudRate : microbitBaudRate, autoOpen: true});
-        locating = false;
-      }
-    }
-  });
-  promise.catch((err) => {
-    console.log(err);
-  });
-};
+/* Functions for transforming received graph data for viewing. */
 
-const transformGraphJSON = (graphJSON) => {
-  var obj = JSON.parse(graphJSON);
-  if (obj.type === 'graph') {
-    var graph = obj.graph;
-    var nodes = [];
-    var edges = [];
-    var ip = obj.ip;
-    console.log('Connected micro:bit: ' + ip);
-    for (var i = 0; i < graph.length; i++) {
-      var arc = graph[i];
-      addNode(nodes, arc.from, ip);
-      addNode(nodes, arc.to, ip);
-      addEdge(edges, arc);
-    }
-    return {
-      nodes: nodes,
-      edges: edges
-    };
-  } else {
-    throw new Error('Non-graph JSON passed to transformGraphJSON');
+function transformGraphJSON(graphJSON) {
+  var graph = graphJSON.graph;
+  var nodes = [];
+  var edges = [];
+  var ip = graphJSON.ip;
+  for (var i = 0; i < graph.length; i++) {
+    var arc = graph[i];
+    addNode(nodes, arc.from, ip);
+    addNode(nodes, arc.to, ip);
+    addEdge(edges, arc);
   }
-};
+  return {
+    nodes: nodes,
+    edges: edges
+  };
+}
 
-const addNode = (nodes, id, ip) => {
+function addNode(nodes, id, ip) {
   var obj = {id: id, label: 'Node ' + id};
   if (ip == id) {
     obj.shadow = {enabled: true, color: '#59B4FF', x: 0, y: 0, size: 20};
@@ -93,25 +107,25 @@ const addNode = (nodes, id, ip) => {
   if (!nodeExists(nodes, id)) {
     nodes.push(obj);
   }
-};
+}
 
-const nodeExists = (nodes, id) => {
+function nodeExists(nodes, id) {
   for (var i = 0; i < nodes.length; i++) {
     if (nodes[i].id == id) {
       return true;
     }
   }
   return false;
-};
+}
 
-const addEdge = (edges, edge) => {
+function addEdge(edges, edge) {
   var distance = RSSIToAbstractDistanceUnits(edge.distance);
   edges.push({from: edge.from, to: edge.to, label: distance.toString(), length: minLength + (lengthCoeff * distance)});
-};
+}
 
-const RSSIToAbstractDistanceUnits = (rssi) => {
+function RSSIToAbstractDistanceUnits(rssi) {
   let scaling = -(Math.PI/2) / -255;
   return Math.round(100 - (Math.abs(Math.cos(rssi * scaling)) * 100));
-};
+}
 
-export { getGraph, sendMsg };
+export { listen, sendMsg };
