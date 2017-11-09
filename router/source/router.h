@@ -18,6 +18,8 @@ void send_lsa(MicroBitEvent e);
 void send_graph_update();
 void on_serial(MicroBitEvent e);
 void init_serial_read();
-void update();
+
+void update_network();
+void update_desktop_app();
 void setup(MicroBitEvent e);
 int main();

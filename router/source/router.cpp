@@ -146,9 +146,8 @@ void init_serial_read() {
     serial.eventOn(SERIAL_DELIMITER);
 }
 
-void update() {
-    while(true) {
-        uBit.display.scrollAsync(ManagedString(ip));
+void update_network() {
+    while(started) {
         ping(MicroBitEvent());
         uBit.sleep(UPDATE_RATE);
 
@@ -157,8 +156,13 @@ void update() {
 
         delete_extra_neighbours(ip);
         remove_dead_nodes(get_system_time());
-        send_graph_update();
+    }
+}
 
+void update_desktop_app() {
+    while(started) {
+        uBit.display.scrollAsync(ip);
+        send_graph_update();
         uBit.sleep(UPDATE_RATE);
     }
 }
@@ -175,7 +179,8 @@ void setup(MicroBitEvent) {
         uBit.radio.enable();
 
         send_graph_update();
-        create_fiber(update);
+        create_fiber(update_network);
+        create_fiber(update_desktop_app);
     }
 }
 
