@@ -2,9 +2,9 @@ import SerialPort from 'serialport';
 import graphActions from './actions/graph';
 const remote = require('electron').remote; // TODO: Daniel - should these all be imports?
 const fs = remote.require('fs');
-const assetPath = remote.app.getAppPath() + "/build/assets";
-const tempAssetPath = remote.app.getPath('appData') + "/micronet/temp";
-const Jimp = require("jimp");
+const assetPath = remote.app.getAppPath() + '/build/assets';
+const tempAssetPath = remote.app.getPath('appData') + '/micronet/temp';
+const Jimp = require('jimp');
 
 
 /* Locating and maintaining connection micro:bit. */
@@ -39,12 +39,10 @@ async function listen(store) {
     microbitPort = new SerialPort(portName, { baudRate: microbitBaudRate });
     const parser = new SerialPort.parsers.Readline();
     microbitPort.pipe(parser);
-    microbitPort.on('open', function(err) {
-      console.log("OPEN FOOKIN SESAME");
+    microbitPort.on('open', function() {
       microbitPortOpen = true;
     });
     microbitPort.on('error', function(err) {
-      console.log("ERROR SHMERROR");
       if (microbitPortOpen) {
         console.log('Error on using the port: ' + err);
         close();
@@ -52,14 +50,12 @@ async function listen(store) {
       }
     });
     microbitPort.on('close', function() {
-      console.log("CLOSE CALL");
       if (microbitPortOpen) {
         close();
         listen();
       }
     });
     parser.on('data', function(data) {
-      console.log("GOT ME SOME DATA IT LOOKS LIKE THIS: " + data);
       try {
         var dataJSON = JSON.parse(data);
       } catch (err) {
@@ -94,7 +90,7 @@ async function listen(store) {
       }
     });
   } catch (err) {
-    console.log("Error on locating the micro:bit port " + err); 
+    console.log('Error on locating the micro:bit port ' + err); 
   }
 }
 
