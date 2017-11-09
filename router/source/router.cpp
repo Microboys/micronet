@@ -6,8 +6,9 @@ MicroBitSerial
 
 serial(USBTX, USBRX);
 
+/* Device IP */
 uint16_t ip = 0;
-uint16_t transmit_power = 7;
+
 bool started = false;
 
 void broadcast(Packet p) {
@@ -60,7 +61,7 @@ void onData(MicroBitEvent e) {
 void ping(MicroBitEvent e) {
     Packet p(PING, ip, 0, 0, 0, MAX_TTL, 0);
     uBit.radio.datagram.send(p.format());
-    delete_all_edges(ip);
+    //delete_all_edges(ip);
 }
 
 void send_message_via_routing(MicroBitEvent e) {
@@ -131,21 +132,22 @@ void onMessage(MicroBitEvent e) {
 void initSerialRead() {
     uBit.messageBus.listen(MICROBIT_ID_SERIAL, MICROBIT_SERIAL_EVT_DELIM_MATCH, onMessage);
     serial.eventOn(DELIMITER);
-    serial.setRxBufferSize(200);
+    serial.setRxBufferSize(RX_BUFFER_SIZE);
 }
 
 void update() {
     while(1) {
         uBit.display.scrollAsync(ManagedString(ip));
-        uBit.sleep(500);
         ping(MicroBitEvent());
-        uBit.sleep(1000);
+        uBit.sleep(UPDATE_RATE);
+
         send_lsa(MicroBitEvent());
-        uBit.sleep(1000);
+        uBit.sleep(UPDATE_RATE);
+
         delete_extra_neighbours(ip);
         remove_dead_nodes(get_system_time());
         send_graph_update();
-        uBit.sleep(1000);
+        uBit.sleep(UPDATE_RATE);
     }
 }
 
@@ -153,7 +155,7 @@ void setup(MicroBitEvent e) {
     if (!started) {
         started = true;
         // Generate a random IP, exclude 0
-        ip = uBit.random(65534) + 1;
+        ip = uBit.random(IP_MAXIMUM - 1) + 1;
 
         uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, onData, MESSAGE_BUS_LISTENER_QUEUE_IF_BUSY);
         uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, ping);

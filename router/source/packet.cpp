@@ -200,6 +200,6 @@ ManagedString Packet::to_json() {
             //TODO
             break;
     }
-    result = result + "}\0";
-    return ManagedString(result);
+    result = result + "}" + SERIAL_DELIMITER;
+    return result;
 }

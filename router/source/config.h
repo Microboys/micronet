@@ -21,3 +21,18 @@
  * distance, we can only fit floor(28/3) = 9 neighbours.
  */
 #define MAX_NEIGHBOURS 9
+
+/* 2^16 - 1 */
+#define IP_MAXIMUM 65535
+
+#define UPDATE_RATE 1000
+
+/* Serial read buffer size. */
+#define RX_BUFFER_SIZE 200
+
+/* Time in ms before deciding a router is dead. If we don't receive a packet
+ * from a router before the time is up, we delete it and every corresponding
+ * arc from our graph. */
+#define NODE_LIFESPAN 4000
+
+#define SERIAL_DELIMITER "\n"
