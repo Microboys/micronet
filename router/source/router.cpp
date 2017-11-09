@@ -31,37 +31,41 @@ void onData(MicroBitEvent e) {
     Packet p = Packet(buffer, uBit.radio.getRSSI());
     uBit.sleep(1);
     update_alive_nodes(p.source_ip, get_system_time());
-    if (p.ptype == PING) {
-        // Received new ping packet, send it back to source
-        if (p.imm_dest_ip == 0) {
-            p.imm_dest_ip = p.source_ip;
-            p.source_ip = ip;
-            p.ttl--;
-            uBit.radio.datagram.send(p.format());
-        } else if (p.imm_dest_ip == ip) {
-            // Got back our own ping packet
-            update_graph(ip, p.source_ip, p.rssi);
-        }
-    } else if (p.ptype == MESSAGE) {
-        if (p.dest_ip == ip) {
-            uBit.display.printAsync(p.payload);
-        } else if (p.imm_dest_ip == ip) {
-            broadcast(p);
-        }
-    } else if (p.ptype == LSA) {
-        update_graph(&p);
 
-        if (p.ttl > 0) {
-            p.ttl = p.ttl - 1;
-            uBit.radio.datagram.send(p.format());
-        }
+    switch (p.ptype) {
+        case PING:
+            if (p.imm_dest_ip == 0) {
+                p.imm_dest_ip = p.source_ip;
+                p.source_ip = ip;
+                uBit.radio.datagram.send(p.format());
+            } else if (p.imm_dest_ip == ip) {
+                // Got back our own ping packet
+                update_graph(ip, p.source_ip, p.rssi);
+            }
+            break;
+        case MESSAGE:
+            if (p.dest_ip == ip) {
+                uBit.display.printAsync(p.payload);
+            } else if (p.imm_dest_ip == ip) {
+                broadcast(p);
+            }
+            break;
+        case LSA:
+            update_graph(&p);
+
+            if (p.ttl > 0) {
+                p.ttl = p.ttl - 1;
+                uBit.radio.datagram.send(p.format());
+            }
+            break;
+        default:
+            break;
     }
 }
 
 void ping(MicroBitEvent e) {
     Packet p(PING, ip, 0, 0, 0, MAX_TTL, 0);
     uBit.radio.datagram.send(p.format());
-    //delete_all_edges(ip);
 }
 
 void send_message_via_routing(MicroBitEvent e) {
@@ -98,32 +102,26 @@ void send_graph_update() {
 
 void onMessage(MicroBitEvent e) {
     ManagedString request = serial.readUntil(DELIMITER);
-    ManagedString substr = request.substring(0, MESSAGE_REQUEST_LENGTH);
+    int header_length = ManagedString(MESSAGE_REQUEST).length();
+    ManagedString substr = request.substring(0, header_length);
 
     if (substr == MESSAGE_REQUEST) {
+
+        /* Find the delimiter character between IP and payload */
         int delim = -1;
-        for (int i = MESSAGE_REQUEST_LENGTH + 1; i < request.length(); i++) {
+        for (int i = header_length + 1; i < request.length(); i++) {
             if (request.charAt(i) == MESSAGE_DELIMITER) {
                 delim = i;
                 break;
             }
         }
         if (delim > -1) {
-            ManagedString ip_string = request.substring(MESSAGE_REQUEST_LENGTH + 1, delim - MESSAGE_REQUEST_LENGTH - 1);
+            ManagedString ip_string = request.substring(header_length + 1, delim - header_length - 1);
             ManagedString message = request.substring(delim + 1, request.length() - delim - 1);
             uint16_t ip = atoi(ip_string);
             send_payload(ip, message);
         }
 
-    } else {
-        // TODO: Parse message and trigger actions
-        if (request == GRAPH_REQUEST) {
-            //send_graph_update();
-        } else if (request == IP_REQUEST) {
-            serial.printf("%i\n", ip);
-        } else if (request == PING_REQUEST) {
-            ping(MicroBitEvent());
-        }
     }
 
     serial.eventOn(DELIMITER);
@@ -136,7 +134,7 @@ void initSerialRead() {
 }
 
 void update() {
-    while(1) {
+    while(true) {
         uBit.display.scrollAsync(ManagedString(ip));
         ping(MicroBitEvent());
         uBit.sleep(UPDATE_RATE);
@@ -147,6 +145,7 @@ void update() {
         delete_extra_neighbours(ip);
         remove_dead_nodes(get_system_time());
         send_graph_update();
+
         uBit.sleep(UPDATE_RATE);
     }
 }

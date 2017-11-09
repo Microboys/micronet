@@ -5,7 +5,7 @@
  * lower value means farther away (e.g. -40 is closer than -60).
  * Threshold is inclusive.
  */
-#define CONNECTION_THRESHOLD -70
+#define CONNECTION_THRESHOLD -60
 
 /* Maximum distance for disconnection. Expressed as an RSSI value,
  * lower value means farther away (e.g. -40 is closer than -60).
@@ -13,7 +13,7 @@
  * constant connections/disconnections when two devices are on the boundary. 
  * Threshold is inclusive.
  */
-#define DISCONNECTION_THRESHOLD -90
+#define DISCONNECTION_THRESHOLD -70
 
 /* Maximum number of neighbours. This limit exists because we want to be able
  * to send all neighbour information in the payload of one LSA packet 
