@@ -35,8 +35,14 @@ export default class NetworkGraph extends Component {
   }
 
   render() {
-    return (
-      <Graph graph={this.props.graph} options={this.state.options} events={this.state.events} />
-    );
+    if (!this.props.connection.established) {
+      return (
+	<h1>Looking for a router micro:bit..</h1>
+      );
+    } else {
+      return (
+        <Graph graph={this.props.graph} options={this.state.options} events={this.state.events} />
+      );
+    }
   }
 }

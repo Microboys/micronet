@@ -7,15 +7,18 @@ const assetPath = remote.app.getAppPath() + '/build/assets';
 const tempAssetPath = remote.app.getPath('appData') + '/micronet/temp';
 const Jimp = require('jimp');
 
+var store = null
 
 /* Locating and maintaining connection micro:bit. */
 const microbitProductId = '0204';
 const microbitVendorId = '0d28';
 const microbitBaudRate = 115200;
+const timeoutTime = 1500;
 
 var microbitPort = null;
-var microbitPortOpen = false;
-var store = null
+var firstMessageReceived = false;
+var messageReceived = false;
+var timeoutCheckId = null;
 
 function init(store_) {
   store = store_;  // TODO: this really shouldn't be necessary...
@@ -49,17 +52,17 @@ async function locatePort() {
 }
 
 function handleOpen() {
-  microbitPortOpen = true;
-  store.dispatch(connectionActions.updateConnection({'open' : true}));
 } 
 
 function handleClose() {
-  microbitPortOpen = true;
-  microbitPort.pause();  // stop listening to events
-  microbitPort.flush();  // clear all received data
-  microbitPort = null;
-  microbitPortOpen = false;
-  store.dispatch(connectionActions.updateConnection({'open' : false}));
+  clearInterval(timeoutCheckId);
+  firstMessageReceived = false;
+  store.dispatch(connectionActions.updateConnection({'established' : false}));
+  if (microbitPort) {
+    microbitPort.pause();  // stop listening to events
+    microbitPort.flush();  // clear all received data
+    microbitPort = null;
+  }
   listen();
 } 
 
@@ -71,7 +74,7 @@ function handleDataLine(data) {
   try {
     var dataJSON = JSON.parse(data);
   } catch (err) {
-    console.log('Failed to parse JSON with: ' + err);
+    console.log('Failed to parse JSON with: ' + err + ' string is ' + dataJSON);
     return;
   }
 
@@ -86,7 +89,17 @@ function handleDataLine(data) {
   }
 
   switch (dataJSON.type) {
+
     case 'graph':
+
+      messageReceived = true;
+
+      if (!firstMessageReceived) {
+	firstMessageReceived = true;
+        store.dispatch(connectionActions.updateConnection({'established' : true}));
+	timeoutCheckId = setInterval(timeoutCheck, timeoutTime);
+      }
+
 
       if (!dataJSON.hasOwnProperty('graph')) {
         console.log('Expecting a graph field in JSON received with type \'graph\' from micro:bit, got: '
@@ -108,6 +121,17 @@ function handleDataLine(data) {
       console.log('Unrecognised JSON type from micro:bit: ' + dataJSON.type);
     }
 } 
+
+function timeoutCheck() {
+  console.log("Checking timeout");
+  if (!messageReceived) {
+    if (microbitPort) {
+      microbitPort.close();
+    }
+  } else {
+    messageReceived = false;
+  }
+}
 
 /* Functions for sending commands to the micro:bit. */
 

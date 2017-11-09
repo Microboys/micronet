@@ -9,14 +9,14 @@ describe('actions', () => {
 
   describe('graph', () => {
     
-    it('should draw the graph', () => {
+    it('should update the graph', () => {
       const store = mockStore({});
       const expectedActions = [{
-        type: 'DRAW_GRAPH',
+        type: 'UPDATE_GRAPH',
         payload: {}
       }];
 
-      store.dispatch(actions.drawGraph({}));
+      store.dispatch(actions.updateGraph({}));
 
       expect(store.getActions()).deep.equal(expectedActions);
     });
