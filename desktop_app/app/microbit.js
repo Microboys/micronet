@@ -123,7 +123,6 @@ function handleDataLine(data) {
 } 
 
 function timeoutCheck() {
-  console.log("Checking timeout");
   if (!messageReceived) {
     if (microbitPort) {
       microbitPort.close();
