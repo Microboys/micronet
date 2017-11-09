@@ -2,9 +2,7 @@
 #include "lsr.h"
 #include <vector>
 MicroBit uBit;
-MicroBitSerial
-
-serial(USBTX, USBRX);
+MicroBitSerial serial(USBTX, USBRX);
 
 /* Device IP */
 uint16_t ip = 0;
@@ -122,7 +120,7 @@ void on_serial(MicroBitEvent) {
     int header_length = ManagedString(MESSAGE_REQUEST).length();
     ManagedString substr = request.substring(0, header_length);
 
-    if (substr == MESSAGE_REQUEST) {
+    if (started && substr == MESSAGE_REQUEST) {
         /* Find the delimiter character between IP and payload */
         int delim = -1;
         for (int i = header_length + 1; i < request.length(); i++) {
@@ -137,18 +135,15 @@ void on_serial(MicroBitEvent) {
             uint16_t ip = atoi(ip_string);
             send_payload(ip, message);
         }
-    } else if (request == HELLO_REQUEST) {
-        ManagedString hello("{\"type\" : \"hello\"}");
-        serial.printf("%s", (hello + SERIAL_DELIMITER).toCharArray());
     }
 
     serial.eventOn(SERIAL_DELIMITER);
 };
 
-void initSerialRead() {
+void init_serial_read() {
+    serial.setRxBufferSize(RX_BUFFER_SIZE);
     uBit.messageBus.listen(MICROBIT_ID_SERIAL, MICROBIT_SERIAL_EVT_DELIM_MATCH, on_serial);
     serial.eventOn(SERIAL_DELIMITER);
-    serial.setRxBufferSize(RX_BUFFER_SIZE);
 }
 
 void update() {
@@ -176,7 +171,6 @@ void setup(MicroBitEvent) {
 
         uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, on_packet, MESSAGE_BUS_LISTENER_QUEUE_IF_BUSY);
         uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, ping);
-        initSerialRead();
         uBit.messageBus.listen(MICROBIT_ID_BUTTON_AB, MICROBIT_BUTTON_EVT_CLICK, send_lsa);
         uBit.radio.enable();
 
@@ -185,9 +179,9 @@ void setup(MicroBitEvent) {
     }
 }
 
-
 int main() {
     uBit.init();
+    init_serial_read();
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, setup);
     MicroBitImage arrow("0,0,255,0,0\n0,255,0,0,0\n255,255,255,255,255\n0,255,0,0,0\n0,0,255,0,0\n");
     uBit.display.print(arrow);
