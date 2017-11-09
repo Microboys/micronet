@@ -114,7 +114,7 @@ void send_lsa(MicroBitEvent) {
 }
 
 void send_graph_update() {
-    serial.printf("%s", topology_json(ip).toCharArray());
+    serial.printf("%s", get_topology_json(ip).toCharArray());
 }
 
 void on_serial(MicroBitEvent) {
@@ -139,7 +139,7 @@ void on_serial(MicroBitEvent) {
         }
     } else if (request == HELLO_REQUEST) {
         ManagedString hello("{\"type\" : \"hello\"}");
-        serial.printf((hello + SERIAL_DELIMITER).toCharArray());
+        serial.printf("%s", (hello + SERIAL_DELIMITER).toCharArray());
     }
 
     serial.eventOn(SERIAL_DELIMITER);
