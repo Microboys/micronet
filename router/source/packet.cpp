@@ -1,36 +1,5 @@
 #include "packet.h"
 
-void Packet::print_packet(MicroBitSerial serial) {
-    serial.printf("===== PACKET START ====\n\r");
-    switch (ptype) {
-        case PING:
-            serial.printf("ptype: PING\n\r");
-            serial.printf("source_ip: %i\n\r", this->source_ip);
-            serial.printf("imm_dest_ip: %i\n\r", this->imm_dest_ip);
-            break;
-        case LSA:
-            serial.printf("ptype: LSA\n\r");
-            serial.printf("ttl: %i\n\r", this->ttl);
-            serial.printf("source_ip: %i\n\r", this->source_ip);
-            print_graph(serial, this->graph);
-            break;
-        case MESSAGE:
-            serial.printf("ptype: MESSAGE\n\r");
-            serial.printf("source_ip: %i\n\r", this->source_ip);
-            serial.printf("imm_dest_ip: %i\n\r", this->imm_dest_ip);
-            serial.printf("dest_ip: %i\n\r", this->dest_ip);
-            serial.printf("ttl: %i\n\r", this->ttl);
-            serial.printf("timestamp: %i\n\r", this->timestamp);
-            serial.printf("payload: %s\n\r", this->payload.toCharArray());
-            break;
-        case DNS:
-            serial.printf("ptype: DNS\n\r");
-            //TODO
-            break;
-    }
-    serial.printf("===== PACKET END ====\n\r");
-}
-
 // Outgoing packets
 Packet::Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip,
         uint16_t dest_ip, uint8_t timestamp, uint8_t ttl,
@@ -203,3 +172,35 @@ ManagedString Packet::to_json() {
     result = result + "}" + SERIAL_DELIMITER;
     return result;
 }
+
+void Packet::print_packet(MicroBitSerial serial) {
+    serial.printf("===== PACKET START ====\n\r");
+    switch (ptype) {
+        case PING:
+            serial.printf("ptype: PING\n\r");
+            serial.printf("source_ip: %i\n\r", this->source_ip);
+            serial.printf("imm_dest_ip: %i\n\r", this->imm_dest_ip);
+            break;
+        case LSA:
+            serial.printf("ptype: LSA\n\r");
+            serial.printf("ttl: %i\n\r", this->ttl);
+            serial.printf("source_ip: %i\n\r", this->source_ip);
+            print_graph(serial, this->graph);
+            break;
+        case MESSAGE:
+            serial.printf("ptype: MESSAGE\n\r");
+            serial.printf("source_ip: %i\n\r", this->source_ip);
+            serial.printf("imm_dest_ip: %i\n\r", this->imm_dest_ip);
+            serial.printf("dest_ip: %i\n\r", this->dest_ip);
+            serial.printf("ttl: %i\n\r", this->ttl);
+            serial.printf("timestamp: %i\n\r", this->timestamp);
+            serial.printf("payload: %s\n\r", this->payload.toCharArray());
+            break;
+        case DNS:
+            serial.printf("ptype: DNS\n\r");
+            //TODO
+            break;
+    }
+    serial.printf("===== PACKET END ====\n\r");
+}
+

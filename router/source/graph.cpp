@@ -3,6 +3,7 @@
 std::unordered_map<struct edge, int> graph;
 std::unordered_map<uint16_t, unsigned long> alive_nodes;
 
+/* Updates node with the time of the last packet. */
 void update_alive_nodes(uint16_t ip, unsigned long time) {
     alive_nodes[ip] = time;
 }
@@ -136,7 +137,7 @@ ManagedString graph_to_json(std::unordered_map<struct edge, int> graph) {
     return result + "]";
 }
 
-ManagedString topology_json(uint16_t ip) {
+ManagedString get_topology_json(uint16_t ip) {
     ManagedString result = "{";
     result = result + format_attr("type", "graph");
     result = result + format_attr("ip", ip);
