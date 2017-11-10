@@ -1,11 +1,12 @@
 import SerialPort from 'serialport';
 import graphActions from './actions/graph';
 import connectionActions from './actions/connection';
-const remote = require('electron').remote; // TODO: Daniel - should these all be imports?
-const fs = remote.require('fs');
+import { fs, remote } from 'electron';
+import Jimp from 'jimp';
+
+/* Get path to prepackaged assets and local temporary storage for new assets */
 const assetPath = remote.app.getAppPath() + '/build/assets';
 const tempAssetPath = remote.app.getPath('appData') + '/micronet/temp';
-const Jimp = require('jimp');
 
 var store = null
 
@@ -142,8 +143,8 @@ function sendMsg(to, msg) {
 
 /* Functions for transforming received graph data for viewing. */
 
-const minLength = 140; // TODO: Daniel explain
-const lengthCoeff = 2; // TODO: Daniel explain
+const minLength = 250; // Minimum possible arc length (on graph)
+const lengthCoeff = 5; // Coefficient for multiplying arc length (on graph)
 
 function transformGraphJSON(graph, ip) {
   var nodes = [];
