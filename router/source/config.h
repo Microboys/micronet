@@ -63,7 +63,10 @@
 #define MESSAGE_REQUEST "MSG"
 #define MESSAGE_DELIMITER '\t'
 
-/* Interface for sending a simple 'hello' back over serial to check the
- * microbit is still alive.
+/* Interface for setting a microbit's name. This will be distributed across the
+ * network and works as a primitive DNS. Uses the same delimiter as message.
+ *
+ * Example:
+ * DNS\tAlice\n
  */
-#define HELLO_REQUEST "HELLO"
+#define DNS_REQUEST "DNS"

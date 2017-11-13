@@ -4,6 +4,8 @@
 MicroBit uBit;
 MicroBitSerial serial(USBTX, USBRX);
 
+unordered_map<uint16_t, ManagedString> name_table;
+
 /* Device IP */
 uint16_t ip = 0;
 bool started = false;
@@ -80,6 +82,7 @@ void handle_packet(Packet* p) {
             handle_lsa(p);
             break;
         default:
+            handle_dns(p);
             break;
     }
 }
@@ -116,6 +119,15 @@ void handle_ping(Packet* p) {
     }
 }
 
+void handle_dns(Packet* p) {
+    name_table[p->source_ip] = p->payload;
+
+    if (p->ttl > 0) {
+        p->ttl = p->ttl - 1;
+        uBit.radio.datagram.send(p->format());
+    }
+}
+
 void ping(MicroBitEvent) {
     Packet p(PING, ip, 0, 0, 0, INITIAL_TTL, 0);
     uBit.radio.datagram.send(p.format());
@@ -146,6 +158,11 @@ void send_lsa(MicroBitEvent) {
     uBit.sleep(1);
 }
 
+void send_dns(ManagedString name) {
+    Packet p(DNS, ip, 0, 0, 0, INITIAL_TTL, name);
+    uBit.radio.datagram.send(p.format());
+}
+
 void send_graph_update() {
     serial.send(get_topology_json(ip));
 }
@@ -156,6 +173,8 @@ void send_path_update() {
 
 void on_serial(MicroBitEvent) {
     ManagedString request = serial.readUntil(SERIAL_DELIMITER);
+
+    // Assume all headers are the same length.
     int header_length = ManagedString(MESSAGE_REQUEST).length();
     ManagedString substr = request.substring(0, header_length);
 
@@ -174,6 +193,11 @@ void on_serial(MicroBitEvent) {
             uint16_t ip = atoi(ip_string);
             send_payload(ip, message);
         }
+    } else if (substr == DNS_REQUEST) {
+        // Advertise own name
+        ManagedString name = request.substring(header_length + 1, request.length() - header_length - 1);
+        name_table[ip] = name;
+        send_dns(name);
     }
 
     serial.eventOn(SERIAL_DELIMITER);
