@@ -22,7 +22,8 @@ export default class NetworkGraph extends Component {
         },
         physics: {
           barnesHut: {
-            springConstant: 0.01
+            springConstant: 0.001,
+            gravitationalConstant: -20000
           }
         }
       },
