@@ -20,6 +20,15 @@ void broadcast(Packet* p) {
     }
 }
 
+void send_message(Packet* p) {
+  if (p->ttl > 0) {
+      p->ttl--;
+      uint16_t next_node = get_path_for_node(p->dest_ip);
+      p->imm_dest_ip = next_node;
+      uBit.radio.datagram.send(p->format());
+  }
+}
+
 unsigned long get_system_time() {
     return uBit.systemTime();
 }
@@ -52,6 +61,7 @@ void handle_packet(Packet* p) {
 
 void handle_lsa(Packet* p) {
     update_graph(p);
+    recalculate_graph(ip);
 
     if (p->ttl > 0) {
         p->ttl = p->ttl - 1;
@@ -63,7 +73,7 @@ void handle_message(Packet* p) {
     if (p->dest_ip == ip) {
         uBit.display.printAsync(p->payload);
     } else if (p->imm_dest_ip == ip) {
-        broadcast(p);
+        send_message(p);
     }
 }
 
@@ -75,6 +85,7 @@ void handle_ping(Packet* p) {
     } else if (p->imm_dest_ip == ip) {
         // Got back our own ping packet
         update_graph(ip, p->source_ip, p->rssi);
+        recalculate_graph(ip);
     }
 }
 
@@ -83,26 +94,20 @@ void ping(MicroBitEvent) {
     uBit.radio.datagram.send(p.format());
 }
 
-void send_message_via_routing(MicroBitEvent) {
-    std::vector<uint16_t> neighbours = get_neighbours(ip);
-    if (!neighbours.empty()) {
-        uint16_t target = neighbours[uBit.random(neighbours.size())];
-
-        //TODO
-        ManagedString message = "Hello!";
-        uint16_t next_node = get_path_for_node(target);
-        Packet p(MESSAGE, ip, next_node, target, 0, INITIAL_TTL, message);
-    }
-}
+// void send_payload(uint16_t dest_ip, ManagedString message) {
+//     std::vector<uint16_t> neighbours = get_neighbours(ip);
+//     if (!neighbours.empty()) {
+//         for (auto n : neighbours) {
+//             Packet p(MESSAGE, ip, n, dest_ip, 0, INITIAL_TTL, message);
+//             uBit.radio.datagram.send(p.format());
+//         }
+//     }
+// }
 
 void send_payload(uint16_t dest_ip, ManagedString message) {
-    std::vector<uint16_t> neighbours = get_neighbours(ip);
-    if (!neighbours.empty()) {
-        for (auto n : neighbours) {
-            Packet p(MESSAGE, ip, n, dest_ip, 0, INITIAL_TTL, message);
-            uBit.radio.datagram.send(p.format());
-        }
-    }
+    uint16_t next_node = get_path_for_node(dest_ip);
+    Packet p(MESSAGE, ip, next_node, dest_ip, 0, INITIAL_TTL, message);
+    uBit.radio.datagram.send(p.format());
 }
 
 void send_lsa(MicroBitEvent) {
