@@ -16,6 +16,10 @@
 // LSA
 #define LSA_EDGE_DATA_SIZE 3
 
+#define F_LSA_TTL 1
+#define F_LSA_SOURCE_IP 2
+#define F_LSA_PAYLOAD 4
+
 // Message
 #define F_MESSAGE_SOURCE_IP 1
 #define F_MESSAGE_IMM_DEST_IP 3
@@ -24,9 +28,10 @@
 #define F_MESSAGE_TTL 8
 #define F_MESSAGE_PAYLOAD 9
 
-#define F_LSA_TTL 1
-#define F_LSA_SOURCE_IP 2
-#define F_LSA_PAYLOAD 4
+// DNS
+#define F_DNS_TTL 1
+#define F_DNS_SOURCE_IP 2
+#define F_DNS_PAYLOAD 4
 
 // TODO: fragmentation
 
@@ -52,6 +57,11 @@
  *  p[7] = timestamp,
  *  p[8] = ttl,
  *  p[9-31] = payload
+ *
+ *  DNS:
+ *  p[0] = type,
+ *  p[1-2] = source_ip,
+ *  p[3-31] = payload
  */
 
 enum packet_type {

@@ -50,7 +50,9 @@ Packet::Packet(PacketBuffer p, int rssi) {
             this->payload = decode_payload(p, F_MESSAGE_PAYLOAD);
             break;
         case DNS:
-            //TODO
+            this->ttl = p[F_DNS_TTL];
+            this->source_ip = concat(p[F_DNS_SOURCE_IP], p[F_DNS_SOURCE_IP + 1]);
+            this->payload = decode_payload(p, F_DNS_PAYLOAD);
             break;
     }
 }
@@ -84,7 +86,10 @@ PacketBuffer Packet::format() {
             encode_payload(p, payload, F_MESSAGE_PAYLOAD);
             break;
         case DNS:
-            //TODO
+            p[F_DNS_TTL] = this->ttl;
+            p[F_DNS_SOURCE_IP] = (uint8_t)(this->source_ip >> BYTE_SIZE);
+            p[F_DNS_SOURCE_IP + 1] = (uint8_t)(this->source_ip);
+            encode_payload(p, payload, F_DNS_PAYLOAD);
             break;
     }
     return p;
@@ -198,7 +203,9 @@ void Packet::print_packet(MicroBitSerial serial) {
             break;
         case DNS:
             serial.printf("ptype: DNS\n\r");
-            //TODO
+            serial.printf("ttl: %i\n\r", this->ttl);
+            serial.printf("source_ip: %i\n\r", this->source_ip);
+            serial.printf("name: %s\n\r", this->payload.toCharArray());
             break;
     }
     serial.printf("===== PACKET END ====\n\r");
