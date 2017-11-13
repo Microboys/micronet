@@ -92,6 +92,10 @@ function handleDataLine(data) {
 
   switch (dataJSON.type) {
 
+    case 'sink-tree':
+        //TODO: Implement sink-tree handling
+        return;
+
     case 'graph':
 
       messageReceived = true;
