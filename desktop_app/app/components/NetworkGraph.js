@@ -74,14 +74,14 @@ export default class NetworkGraph extends Component {
       return (
         <div className='fullSize'>
           <Modal className={this.props.className} isOpen={this.state.modal} toggle={this.toggleModal} fade={false} onEnter={this.focusMsg}>
-            <ModalHeader toggle={this.toggleModal}>Send Message To {this.state.selectedNode}</ModalHeader>
+            <ModalHeader toggle={this.toggleModal}>Send Message to {this.state.selectedNode}</ModalHeader>
             <ModalBody>
               <Form onSubmit={this.handleSend}>
                 <Input id={this.msgId} onChange={this.handleChangeMsg} value={this.state.msg} getRef={(input) => {this.msgInput = input;}}/>
               </Form>
             </ModalBody>
             <ModalFooter>
-              <Button onClick={this.handleSend}>Send Message</Button>
+              <Button onClick={this.handleSend} color='primary'>Send Message</Button>
             </ModalFooter>
           </Modal>
           <Graph graph={this.props.graph} options={this.state.options} events={this.state.events} />
