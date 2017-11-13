@@ -171,7 +171,6 @@ ManagedString get_topology_json(uint16_t ip) {
 }
 
 ManagedString path_json(uint16_t ip) {
-    recalculate_graph(ip);
     ManagedString result = "{";
     result = result + format_attr("type", "sink-tree");
     result = result + format_attr("ip", ip);

@@ -117,11 +117,11 @@ void send_lsa(MicroBitEvent) {
 }
 
 void send_graph_update() {
-    serial.printf("%s", get_topology_json(ip).toCharArray());
+    serial.send(get_topology_json(ip));
 }
 
 void send_path_update() {
-    serial.printf("%s", path_json(ip).toCharArray());
+    serial.send(path_json(ip));
 }
 void on_serial(MicroBitEvent) {
     ManagedString request = serial.readUntil(SERIAL_DELIMITER);
@@ -171,8 +171,8 @@ void update_desktop_app() {
     while(started) {
         uBit.display.scrollAsync(ip);
         send_graph_update();
-        send_path_update();
         uBit.sleep(UPDATE_RATE);
+        send_path_update();
     }
 }
 
