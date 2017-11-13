@@ -8,8 +8,7 @@ std::unordered_map<uint16_t,std::vector<uint16_t>> path_for_node;
 std::unordered_map<uint16_t,int> distance_for_node;
 std::unordered_map<uint16_t,bool> if_computed;
 
-void calculate_syn_tree(uint16_t source,
-   std::unordered_map<struct edge, int> input_graph) {
+void calculate_syn_tree(uint16_t source, std::unordered_map<struct edge, int> input_graph) {
     distance_for_node[source] = 0;
 
     //get distance and write path for neighbours
@@ -51,9 +50,12 @@ void calculate_syn_tree(uint16_t source,
 
               if (distance < distance_for_node[cur_edge.to]){
                 distance_for_node[cur_edge.to] = distance;
-                std::vector<uint16_t> path = path_for_node[min_edge];
-                path.push_back(cur_edge.to);
-                path_for_node[cur_edge.to] = path;
+                if (path_for_node.find(min_edge) == path_for_node.end()) {
+                    std::vector<uint16_t> path = path_for_node[min_edge];
+                    path.push_back(cur_edge.to);
+                    path_for_node[cur_edge.to] = path;
+                }
+                //std::vector<uint16_t> path = path_for_node[min_edge];
               }
           }
        }
@@ -94,5 +96,9 @@ std::vector<uint16_t> get_full_path_for_node(uint16_t target){
 }
 
 int get_distance_for_node(uint16_t target){
-    return distance_for_node[target];
+    if (distance_for_node.find(target) != distance_for_node.end()) {
+        return distance_for_node[target];
+    } else {
+        return -1;
+    }
 }

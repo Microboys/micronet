@@ -164,6 +164,7 @@ void update_network() {
 
         delete_extra_neighbours(ip);
         remove_dead_nodes(get_system_time());
+        recalculate_graph(ip);
     }
 }
 
@@ -171,6 +172,9 @@ void update_desktop_app() {
     while(started) {
         uBit.display.scrollAsync(ip);
         send_graph_update();
+        //send_graph_update();
+        //send_path_update();
+        //send_name_table();
         uBit.sleep(UPDATE_RATE);
         send_path_update();
     }
