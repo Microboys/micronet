@@ -1,4 +1,5 @@
 #include "graph.h"
+#include "lsr.h"
 
 std::unordered_map<struct edge, int> graph;
 std::unordered_map<uint16_t, unsigned long> alive_nodes;
@@ -39,7 +40,12 @@ void update_graph(Packet* p) {
     }
 }
 
-/* Prunes the graph. Deletes arcs to neighbours who are too far away and if we 
+
+void recalculate_graph(uint16_t source) {
+    calculate_syn_tree(source, graph);
+}
+
+/* Prunes the graph. Deletes arcs to neighbours who are too far away and if we
  * have more than MAX_NEIGHBOURS neighbours, we take the strongest MAX_NEIGHBOURS
  * ones and delete the rest.
  */
@@ -86,7 +92,7 @@ void print_graph(MicroBitSerial serial, std::unordered_map<edge, int> graph) {
 }
 
 /* Returns a graph consisting of all outgoing arcs from the given IP, which
- * can be immediately sent as an LSA packet. 
+ * can be immediately sent as an LSA packet.
  */
 std::unordered_map<edge, int> get_lsa_graph(uint16_t ip) {
     std::unordered_map<edge, int> to_send;
@@ -137,6 +143,24 @@ ManagedString graph_to_json(std::unordered_map<struct edge, int> graph) {
     return result + "]";
 }
 
+
+ManagedString sink_tree_to_json(std::unordered_map<struct edge, int> graph) {
+    ManagedString result = "[";
+    unsigned int index = 0;
+    for (auto it = graph.begin(); it != graph.end(); ++it) {
+        result = result + "{";
+        result = result + format_attr("to", it->first.to);
+        std::vector<uint16_t> path = get_full_path_for_node(it->first.to);
+        result = result + format_attr("path", path, true);
+        result = result + "}";
+        index++;
+        if (index < graph.size()) {
+            result = result + ",";
+        }
+    }
+    return result + "]";
+}
+
 ManagedString get_topology_json(uint16_t ip) {
     ManagedString result = "{";
     result = result + format_attr("type", "graph");
@@ -144,6 +168,15 @@ ManagedString get_topology_json(uint16_t ip) {
     result = result + "\"graph\":" + graph_to_json(graph);
     result = result + "}" + SERIAL_DELIMITER;
     return result;
+}
+
+ManagedString path_json(uint16_t ip) {
+    recalculate_graph(ip);
+    ManagedString result = "{";
+    result = result + format_attr("type", "sink-tree");
+    result = result + format_attr("ip", ip);
+    result = result + "\"sink-tree\":" + sink_tree_to_json(graph);
+    return result + "}" + SERIAL_DELIMITER;
 }
 
 /* Prunes graph by deleting 'dead' routers and every arc that contains them.

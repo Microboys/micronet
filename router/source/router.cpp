@@ -115,6 +115,9 @@ void send_graph_update() {
     serial.printf("%s", get_topology_json(ip).toCharArray());
 }
 
+void send_path_update() {
+    serial.printf("%s", path_json(ip).toCharArray());
+}
 void on_serial(MicroBitEvent) {
     ManagedString request = serial.readUntil(SERIAL_DELIMITER);
     int header_length = ManagedString(MESSAGE_REQUEST).length();
@@ -163,6 +166,7 @@ void update_desktop_app() {
     while(started) {
         uBit.display.scrollAsync(ip);
         send_graph_update();
+        send_path_update();
         uBit.sleep(UPDATE_RATE);
     }
 }
