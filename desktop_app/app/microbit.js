@@ -1,10 +1,11 @@
 import SerialPort from 'serialport';
 import graphActions from './actions/graph';
 import connectionActions from './actions/connection';
-import { fs, remote } from 'electron';
+import { remote } from 'electron';
 import Jimp from 'jimp';
 
 /* Get path to prepackaged assets and local temporary storage for new assets */
+const fs = remote.require('fs');
 const assetPath = remote.app.getAppPath() + '/build/assets';
 const tempAssetPath = remote.app.getPath('appData') + '/micronet/temp';
 
@@ -75,6 +76,7 @@ function handleDataLine(data) {
   try {
     var dataJSON = JSON.parse(data);
   } catch (err) {
+    console.log(data);
     console.log('Failed to parse JSON with: ' + err + ' string is ' + dataJSON);
     return;
   }
@@ -186,7 +188,13 @@ function addNode(nodes, id, connected) {
 
 function addEdge(edges, edge) {
   var distance = RSSIToAbstractDistanceUnits(edge.distance);
-  edges.push({from: edge.from, to: edge.to, label: distance.toString(), length: minLength + (lengthCoeff * distance)});
+  for (var i = 0; i < edges.length; i++) {
+    if (edges[i].from == edge.to && edges[i].to == edge.from) {
+      distance = (distance + parseInt(edges[i].label)) / 2;
+      edges[i].label = distance.toString();
+    }
+  }
+  edges.push({from: edge.from, to: edge.to, label: distance.toString()});
 }
 
 function RSSIToAbstractDistanceUnits(rssi) {
