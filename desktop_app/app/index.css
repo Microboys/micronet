@@ -1,4 +1,4 @@
-html, body, #app, #mainContainer {
+html, body, .fullSize, #app, #mainContainer {
 	height: 100% !important;
 	width: 100% !important;
 }
@@ -9,4 +9,13 @@ html, body, #app, #mainContainer {
 
 .msg {
 	height: 30%;
+}
+
+.modal-backdrop {
+	background-color: grey;
+	opacity: 0.3;
+}
+
+h4.modal-title {
+	display: inline-block;
 }
