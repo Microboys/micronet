@@ -128,13 +128,37 @@ void send_dns(ManagedString name) {
     uBit.radio.datagram.send(p.format());
 }
 
+ManagedString name_table_json() {
+    size_t index = 0;
+    ManagedString result = "{";
+    result = result + format_attr("type", "dns");
+    result = result + "\"dns\":[";
+    for (auto it : name_table) {
+        result = result + "{";
+        result = result + format_attr("ip", it.first);
+        result = result + format_attr("name", it.second, true);
+        result = result + "}";
+        index++;
+        if (index < name_table.size()) {
+            result = result + ",";
+        }
+    }
+    result = result + "]";
+    return result + "}" + SERIAL_DELIMITER;
+}
+
 void send_graph_update() {
-    serial.printf("%s", get_topology_json(ip).toCharArray());
+    serial.send(get_topology_json(ip));
 }
 
 void send_path_update() {
-    serial.printf("%s", path_json(ip).toCharArray());
+    serial.send(path_json(ip));
 }
+
+void send_name_table() {
+    serial.send(name_table_json());
+}
+
 void on_serial(MicroBitEvent) {
     ManagedString request = serial.readUntil(SERIAL_DELIMITER);
 
@@ -191,6 +215,7 @@ void update_desktop_app() {
         uBit.display.scrollAsync(ip);
         send_graph_update();
         send_path_update();
+        send_name_table();
         uBit.sleep(UPDATE_RATE);
     }
 }
