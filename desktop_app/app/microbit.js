@@ -76,7 +76,6 @@ function handleDataLine(data) {
   try {
     var dataJSON = JSON.parse(data);
   } catch (err) {
-    console.log(data);
     console.log('Failed to parse JSON with: ' + err + ' string is ' + dataJSON);
     return;
   }
