@@ -19,6 +19,8 @@ void send_payload(uint16_t dest_ip, ManagedString message);
 void send_lsa(MicroBitEvent e);
 void send_dns(ManagedString name);
 void send_graph_update();
+ManagedString name_table_json();
+void send_name_table();
 void on_serial(MicroBitEvent e);
 void init_serial_read();
 
