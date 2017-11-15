@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Graph from 'react-graph-vis';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Input, Form, Button } from 'reactstrap';
+import { Container, Modal, ModalHeader, ModalBody, ModalFooter, Input, Form, Button } from 'reactstrap';
 import { sendMsg } from './../microbit.js';
 
 export default class NetworkGraph extends Component {
@@ -68,24 +68,24 @@ export default class NetworkGraph extends Component {
   render() {
     if (!this.props.connection.established) {
       return (
-	<h1>Looking for a router micro:bit..</h1>
+	  <h1>Looking for a router micro:bit..</h1>
       );
     } else {
       return (
-        <div className='fullSize'>
-          <Modal className={this.props.className} isOpen={this.state.modal} toggle={this.toggleModal} fade={false} onEnter={this.focusMsg}>
-            <ModalHeader toggle={this.toggleModal}>Send Message to {this.state.selectedNode}</ModalHeader>
-            <ModalBody>
-              <Form onSubmit={this.handleSend}>
-                <Input id={this.msgId} onChange={this.handleChangeMsg} value={this.state.msg} getRef={(input) => {this.msgInput = input;}}/>
-              </Form>
-            </ModalBody>
-            <ModalFooter>
-              <Button onClick={this.handleSend} color='primary'>Send Message</Button>
-            </ModalFooter>
-          </Modal>
-          <Graph graph={this.props.graph} options={this.state.options} events={this.state.events} />
-        </div>
+	<div className="graph">
+        <Modal className={this.props.className} isOpen={this.state.modal} toggle={this.toggleModal} fade={false} onEnter={this.focusMsg}>
+          <ModalHeader toggle={this.toggleModal}>Send Message to {this.state.selectedNode}</ModalHeader>
+          <ModalBody>
+            <Form onSubmit={this.handleSend}>
+              <Input id={this.msgId} onChange={this.handleChangeMsg} value={this.state.msg} getRef={(input) => {this.msgInput = input;}}/>
+            </Form>
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick={this.handleSend} color='primary'>Send Message</Button>
+          </ModalFooter>
+	</Modal>
+        <Graph graph={this.props.graph} options={this.state.options} events={this.state.events} />
+	</div>
       );
     }
   }
