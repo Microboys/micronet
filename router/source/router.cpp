@@ -35,12 +35,29 @@ unsigned long get_system_time() {
 
 /* Handler for receiving a packet. */
 void on_packet(MicroBitEvent) {
+    serial.printf("woah a packet\n");
     PacketBuffer buffer = uBit.radio.datagram.recv();
-    Packet p = Packet(buffer, uBit.radio.getRSSI());
     uBit.sleep(1);
-    update_alive_nodes(p.source_ip, get_system_time());
+    serial.printf("yay a packet\n");
+    if (buffer == PacketBuffer::EmptyPacket) {
+        return;
+    }
 
-    handle_packet(&p);
+    if (uBit.radio.getRSSI() == 0) {
+        return;
+    }
+    
+    if (buffer.length() != 32) {
+        return;
+    }
+
+    Packet* p = new Packet(buffer, uBit.radio.getRSSI());
+    p->print_packet(serial);
+    //update_alive_nodes(p.source_ip, get_system_time());
+
+    serial.printf("handling\n");
+    handle_packet(p);
+    serial.printf("handeld\n");
 }
 
 void handle_packet(Packet* p) {
@@ -52,16 +69,21 @@ void handle_packet(Packet* p) {
             handle_message(p);
             break;
         case LSA:
+            serial.printf("lsa handling\n");
             handle_lsa(p);
+            serial.printf("lsa handled\n");
             break;
         default:
             break;
     }
+    delete p;
 }
 
 void handle_lsa(Packet* p) {
+    serial.printf("graph updating\n");
     update_graph(p);
-    recalculate_graph(ip);
+    serial.printf("graph updated\n");
+    //recalculate_graph(ip);
 
     if (p->ttl > 0) {
         p->ttl = p->ttl - 1;
@@ -156,27 +178,25 @@ void init_serial_read() {
 
 void update_network() {
     while(started) {
-        ping(MicroBitEvent());
-        uBit.sleep(UPDATE_RATE);
+        //ping(MicroBitEvent());
+        //uBit.sleep(UPDATE_RATE);
 
         send_lsa(MicroBitEvent());
         uBit.sleep(UPDATE_RATE);
 
-        delete_extra_neighbours(ip);
-        remove_dead_nodes(get_system_time());
-        recalculate_graph(ip);
+        //delete_extra_neighbours(ip);
+        //remove_dead_nodes(get_system_time());
+        //recalculate_graph(ip);
     }
 }
 
 void update_desktop_app() {
     while(started) {
         uBit.display.scrollAsync(ip);
-        send_graph_update();
         //send_graph_update();
         //send_path_update();
         //send_name_table();
         uBit.sleep(UPDATE_RATE);
-        send_path_update();
     }
 }
 
@@ -193,7 +213,7 @@ void setup(MicroBitEvent) {
 
         send_graph_update();
         create_fiber(update_network);
-        create_fiber(update_desktop_app);
+        //create_fiber(update_desktop_app);
     }
 }
 
