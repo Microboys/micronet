@@ -1,14 +1,6 @@
-html, body, .fullSize, #app, #mainContainer {
+html {
 	height: 100% !important;
 	width: 100% !important;
-}
-
-.graph {
-	height: 70%;
-}
-
-.msg {
-	height: 30%;
 }
 
 .modal-backdrop {

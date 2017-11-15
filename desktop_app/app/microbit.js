@@ -142,6 +142,7 @@ function timeoutCheck() {
 
 function sendMsg(to, msg) {
   if (microbitPort) {
+    console.log("Sending message");
     microbitPort.write('MSG\t' + to + '\t' + msg + '\n');
   }
 }
