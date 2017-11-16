@@ -23,7 +23,7 @@ var store = null
 const microbitProductId = '0204';
 const microbitVendorId = '0d28';
 const microbitBaudRate = 115200;
-const timeoutTime = 5000;
+const timeoutTime = 2000;
 const pollSerialTime = 500;
 const parser = jsonlines.parse({ emitInvalidLines : true });
 
@@ -91,6 +91,15 @@ function handleError(err) {
   console.log("Port error: " + err);
 } 
 
+function timeoutUpdate() {
+  messageReceived = true;
+  if (!firstMessageReceived) {
+    firstMessageReceived = true;
+    store.dispatch(connectionActions.updateConnection({'established' : true}));
+    timeoutCheckId = setInterval(timeoutCheck, timeoutTime);
+  }
+}
+
 function handleDataLine(dataJSON) {
 
   if (!dataJSON) {
@@ -106,6 +115,8 @@ function handleDataLine(dataJSON) {
   switch (dataJSON.type) {
 
     case 'packet':
+      timeoutUpdate();
+
       if (!dataJSON.hasOwnProperty('ptype')) {
         console.log('Expecting a ptype field in JSON received with type \'packet\' from micro:bit, got: '
           + dataJSON);
@@ -116,18 +127,13 @@ function handleDataLine(dataJSON) {
       break;
 
     case 'sink-tree':
+      timeoutUpdate();
         //TODO: Implement sink-tree handling
         return;
 
     case 'graph':
+      timeoutUpdate();
       messageReceived = true;
-
-      if (!firstMessageReceived) {
-	firstMessageReceived = true;
-        store.dispatch(connectionActions.updateConnection({'established' : true}));
-	timeoutCheckId = setInterval(timeoutCheck, timeoutTime);
-      }
-
 
       if (!dataJSON.hasOwnProperty('graph')) {
         console.log('Expecting a graph field in JSON received with type \'graph\' from micro:bit, got: '
@@ -144,7 +150,10 @@ function handleDataLine(dataJSON) {
       var transformed = transformGraphJSON(dataJSON.graph, dataJSON.ip);
       store.dispatch(graphActions.updateGraph(transformed));
       break;
+
     case 'dns':
+      timeoutUpdate();
+
       if (!dataJSON.hasOwnProperty('dns')) {
         console.log('Expecting a DNS field in JSON received with type \'dns\' from micro:bit, got: '
           + dataJSON);
