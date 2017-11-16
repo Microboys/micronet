@@ -78,21 +78,16 @@ void delete_extra_neighbours(uint16_t ip) {
     while (neighbours.size() > 0 && neighbours.size() > MAX_NEIGHBOURS) {
         int min_strength = neighbours[0].second;
         struct edge weakest_edge = neighbours[0].first;
-        bool erased = false;
         for (auto it : neighbours) {
             if (it.second < DISCONNECTION_THRESHOLD) {
                 graph.erase(it.first);
-                erased = true;
-                break;
             } else if (min_strength > it.second) {
                 min_strength = it.second;
                 weakest_edge = it.first;
             }
         }
 
-        if (!erased) {
-            graph.erase(weakest_edge);
-        }
+    	graph.erase(weakest_edge);
     }
     unlock_graph();
 }
