@@ -39,10 +39,10 @@
  * of these delays in a single loop (e.g. before sending ping and lsa) so one
  * update cycle will take longer than this value.
  */
-#define UPDATE_RATE 2000
+#define UPDATE_RATE 1000
 
 /* Delay in ms before processing each packet. */
-#define PACKET_PROCESS_RATE 6000
+#define PACKET_PROCESS_RATE 2000
 
 /* Serial read buffer size. */
 #define RX_BUFFER_SIZE 200
