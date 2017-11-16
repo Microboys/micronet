@@ -6,18 +6,22 @@ import graph from './reducers/graph';
 import graphActions from './actions/graph';
 import connection from './reducers/connection';
 import connectionActions from './actions/connection';
+import dns from './reducers/dns';
+import dnsActions from './actions/dns';
 
 export default function configureStore(initialState, routerHistory) {
   const router = routerMiddleware(routerHistory);
 
   const actionCreators = {
     ...graphActions,
+    ...dnsActions,
     ...connectionActions,
     push
   };
 
   const reducers = {
     graph,
+    dns,
     connection,
     routing
   };

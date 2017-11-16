@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Graph from 'react-graph-vis';
 import { Container, Modal, ModalHeader, ModalBody, ModalFooter, Input, Form, Button } from 'reactstrap';
-import { sendMsg } from './../microbit.js';
+import { sendMsg, renameMicrobit } from './../microbit.js';
 
 export default class NetworkGraph extends Component {
   
@@ -33,31 +33,52 @@ export default class NetworkGraph extends Component {
         doubleClick: (event) => {
           if (event.nodes.length != 1) return;
           var node = event.nodes[0];
-          this.setState({modal: !this.state.modal, selectedNode: node});
+          this.setState({selectedNode: node});
+          this.toggleMsgModal();
         }
       },
-      modal: false,
+      msgModal: false,
       selectedNode: "",
       msg: "",
-      msgId:'msgInput'
+      msgId:'msgInput',
+      nameModal: false,
+      name: ""
     };
     this.handleChangeMsg = this.handleChangeMsg.bind(this);
-    this.handleSend = this.handleSend.bind(this);
-    this.toggleModal = this.toggleModal.bind(this);
+    this.handleSendMsg = this.handleSendMsg.bind(this);
+    this.toggleMsgModal = this.toggleMsgModal.bind(this);
+
+    this.handleChangeName = this.handleChangeName.bind(this);
+    this.handleRename = this.handleRename.bind(this);
+    this.toggleNameModal = this.toggleNameModal.bind(this);
   }
 
-  toggleModal() {
-    this.setState({modal: !this.state.modal, msg: ""});
+  toggleMsgModal() {
+    this.setState({msgModal: !this.state.msgModal, msg: ""});
   }
 
   handleChangeMsg(event) {
     this.setState({msg: event.target.value});
   }
 
-  handleSend(event) {
+  handleSendMsg(event) {
     sendMsg(this.state.selectedNode, this.state.msg);
     event.preventDefault();
-    this.toggleModal();
+    this.toggleMsgModal();
+  }
+
+  toggleNameModal() {
+    this.setState({nameModal: !this.state.nameModal});
+  }
+
+  handleChangeName(event) {
+    this.setState({name: event.target.value});
+  }
+
+  handleRename(event) {
+    renameMicrobit(this.state.name);
+    event.preventDefault();
+    this.toggleNameModal();
   }
 
   render() {
@@ -68,15 +89,26 @@ export default class NetworkGraph extends Component {
     } else {
       return (
 	     <div className="graph fullsize">
-        <Modal autoFocus={false} className={this.props.className} isOpen={this.state.modal} toggle={this.toggleModal} fade={false}>
-          <ModalHeader toggle={this.toggleModal}>Send Message to {this.state.selectedNode}</ModalHeader>
+        <Modal autoFocus={false} className={this.props.className} isOpen={this.state.msgModal} toggle={this.toggleMsgModal} fade={false}>
+          <ModalHeader toggle={this.toggleMsgModal}>Send Message to {this.state.selectedNode}</ModalHeader>
           <ModalBody>
-            <Form onSubmit={this.handleSend}>
+            <Form onSubmit={this.handleSendMsg}>
               <Input autoFocus={true} id={this.msgId} onChange={this.handleChangeMsg} value={this.state.msg} />
             </Form>
           </ModalBody>
           <ModalFooter>
-            <Button onClick={this.handleSend} color='primary'>Send Message</Button>
+            <Button onClick={this.handleSendMsg} color='primary'>Send Message</Button>
+          </ModalFooter>
+        </Modal>
+        <Modal autoFocus={false} className={this.props.className} isOpen={this.state.nameModal} toggle={this.toggleNameModal} fade={false}>
+          <ModalHeader toggle={this.toggleNameModal}>Rename Node</ModalHeader>
+          <ModalBody>
+            <Form onSubmit={this.handleRename}>
+              <Input autoFocus={true} onChange={this.handleChangeName} value={this.state.name} />
+            </Form>
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick={this.handleRename} color='primary'>Rename</Button>
           </ModalFooter>
         </Modal>
         <Graph graph={this.props.graph} options={this.state.options} events={this.state.events} />

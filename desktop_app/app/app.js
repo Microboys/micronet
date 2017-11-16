@@ -41,6 +41,9 @@ const initialState = {
     'nodes' : [],
     'edges' : []
   },
+  'dns' : {
+    'entries' : []
+  },
   'connection' : {
     'established' : false
   }
