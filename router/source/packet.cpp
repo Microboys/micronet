@@ -52,6 +52,8 @@ Packet::Packet(PacketBuffer p, int rssi) {
         case DNS:
             //TODO
             break;
+        default:
+            break;
     }
 }
 
@@ -85,6 +87,8 @@ PacketBuffer Packet::format() {
             break;
         case DNS:
             //TODO
+            break;
+        default:
             break;
     }
     return p;
@@ -154,9 +158,11 @@ ManagedString Packet::to_json() {
             result = result + format_attr("ptype", "LSA");
             result = result + format_attr("ttl", this->ttl);
             result = result + format_attr("source_ip", this->source_ip);
-            result = result + format_attr("payload", graph_to_json(this->graph), true);
+            result = result + "\"payload\":" + graph_to_json(this->graph);
+            //result = result + format_attr("payload", graph_to_json(this->graph), true);
             break;
         case MESSAGE:
+            result = result + format_attr("ptype", "MSG");
             result = result + format_attr("source_ip", this->source_ip);
             result = result + format_attr("imm_dest_ip", this->imm_dest_ip);
             result = result + format_attr("dest_ip", this->dest_ip);
@@ -167,6 +173,8 @@ ManagedString Packet::to_json() {
         case DNS:
             result = result + format_attr("ptype", "DNS", true);
             //TODO
+            break;
+        default:
             break;
     }
     result = result + "}" + SERIAL_DELIMITER;
@@ -199,6 +207,8 @@ void Packet::print_packet(MicroBitSerial serial) {
         case DNS:
             serial.printf("ptype: DNS\n\r");
             //TODO
+            break;
+        default:
             break;
     }
     serial.printf("===== PACKET END ====\n\r");

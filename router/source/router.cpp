@@ -7,6 +7,7 @@ MicroBitSerial serial(USBTX, USBRX);
 /* Device IP */
 uint16_t ip = 0;
 bool started = false;
+std::vector<Packet*> packet_queue;
 
 /* Resends packet to all neighbours. */
 void broadcast(Packet* p) {
@@ -16,6 +17,7 @@ void broadcast(Packet* p) {
         for (auto n : neighbours) {
             p->imm_dest_ip = n;
             uBit.radio.datagram.send(p->format());
+            uBit.sleep(1);
         }
     }
 }
@@ -26,6 +28,7 @@ void send_message(Packet* p) {
       uint16_t next_node = get_path_for_node(p->dest_ip);
       p->imm_dest_ip = next_node;
       uBit.radio.datagram.send(p->format());
+      uBit.sleep(1);
   }
 }
 
@@ -36,11 +39,33 @@ unsigned long get_system_time() {
 /* Handler for receiving a packet. */
 void on_packet(MicroBitEvent) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
-    Packet p = Packet(buffer, uBit.radio.getRSSI());
-    uBit.sleep(1);
-    update_alive_nodes(p.source_ip, get_system_time());
+    if (buffer == PacketBuffer::EmptyPacket || uBit.radio.getRSSI() == 0
+            || buffer.length() != PACKET_SIZE) {
+        return;
+    }
 
-    handle_packet(&p);
+    if (packet_queue.size() > 10) {
+        return;
+    }
+
+    packet_queue.push_back(new Packet(buffer, uBit.radio.getRSSI()));
+}
+
+void process_packets() {
+    while (true) {
+        if (!packet_queue.empty()) {
+            Packet* p = packet_queue.front();
+
+            // Update desktop app
+            serial.send(p->to_json());
+
+            update_alive_nodes(p->source_ip, get_system_time());
+            handle_packet(p);
+            packet_queue.erase(packet_queue.begin());
+            delete p;
+        }
+        uBit.sleep(PACKET_PROCESS_RATE);
+    }
 }
 
 void handle_packet(Packet* p) {
@@ -61,11 +86,12 @@ void handle_packet(Packet* p) {
 
 void handle_lsa(Packet* p) {
     update_graph(p);
-    recalculate_graph(ip);
+    //recalculate_graph(ip);
 
     if (p->ttl > 0) {
-        p->ttl = p->ttl - 1;
+        p->ttl--;
         uBit.radio.datagram.send(p->format());
+        uBit.sleep(1);
     }
 }
 
@@ -82,16 +108,18 @@ void handle_ping(Packet* p) {
         p->imm_dest_ip = p->source_ip;
         p->source_ip = ip;
         uBit.radio.datagram.send(p->format());
+        uBit.sleep(1);
     } else if (p->imm_dest_ip == ip) {
         // Got back our own ping packet
         update_graph(ip, p->source_ip, p->rssi);
-        recalculate_graph(ip);
+        //recalculate_graph(ip);
     }
 }
 
 void ping(MicroBitEvent) {
     Packet p(PING, ip, 0, 0, 0, INITIAL_TTL, 0);
     uBit.radio.datagram.send(p.format());
+    uBit.sleep(1);
 }
 
 // void send_payload(uint16_t dest_ip, ManagedString message) {
@@ -108,12 +136,14 @@ void send_payload(uint16_t dest_ip, ManagedString message) {
     uint16_t next_node = get_path_for_node(dest_ip);
     Packet p(MESSAGE, ip, next_node, dest_ip, 0, INITIAL_TTL, message);
     uBit.radio.datagram.send(p.format());
+    uBit.sleep(1);
 }
 
 void send_lsa(MicroBitEvent) {
     std::unordered_map<edge, int> to_send = get_lsa_graph(ip);
     Packet p(LSA, ip, 0, 0, 0, INITIAL_TTL, to_send);
     uBit.radio.datagram.send(p.format());
+    uBit.sleep(1);
 }
 
 void send_graph_update() {
@@ -123,6 +153,7 @@ void send_graph_update() {
 void send_path_update() {
     serial.send(path_json(ip));
 }
+
 void on_serial(MicroBitEvent) {
     ManagedString request = serial.readUntil(SERIAL_DELIMITER);
     int header_length = ManagedString(MESSAGE_REQUEST).length();
@@ -164,6 +195,7 @@ void update_network() {
 
         delete_extra_neighbours(ip);
         remove_dead_nodes(get_system_time());
+        //recalculate_graph(ip);
     }
 }
 
@@ -171,8 +203,9 @@ void update_desktop_app() {
     while(started) {
         uBit.display.scrollAsync(ip);
         send_graph_update();
-        uBit.sleep(UPDATE_RATE);
         send_path_update();
+        //send_name_table();
+        uBit.sleep(UPDATE_RATE);
     }
 }
 
@@ -189,6 +222,7 @@ void setup(MicroBitEvent) {
 
         send_graph_update();
         create_fiber(update_network);
+        create_fiber(process_packets);
         create_fiber(update_desktop_app);
     }
 }

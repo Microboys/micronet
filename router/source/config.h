@@ -4,7 +4,7 @@
 /* Initial time-to-live value for broadcasted packets. Corresponds to number
  * of hops before the packet is discarded. 
  */
-#define INITIAL_TTL 10
+#define INITIAL_TTL 5
 
 /* Size of a single packet. Note that 32B is the maximum size of a single
  * datagram the microbit can send via radio.
@@ -39,7 +39,10 @@
  * of these delays in a single loop (e.g. before sending ping and lsa) so one
  * update cycle will take longer than this value.
  */
-#define UPDATE_RATE 300
+#define UPDATE_RATE 500
+
+/* Delay in ms before processing each packet. */
+#define PACKET_PROCESS_RATE 1
 
 /* Serial read buffer size. */
 #define RX_BUFFER_SIZE 200

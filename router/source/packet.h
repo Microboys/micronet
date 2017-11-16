@@ -58,8 +58,10 @@ enum packet_type {
     PING = 0,
     LSA = 1,
     MESSAGE = 2,
-    DNS = 3
+    DNS = 3,
+    INVALID = 4
 };
+
 
 class Packet {
     private:
@@ -68,7 +70,7 @@ class Packet {
         std::unordered_map<struct edge, int> decode_lsa(PacketBuffer p, uint16_t source_ip);
         void encode_lsa(PacketBuffer p, std::unordered_map<struct edge, int> graph);
     public:
-        packet_type ptype;
+        packet_type ptype = INVALID;
         uint16_t source_ip = 0;
         uint16_t imm_dest_ip = 0;
         uint16_t dest_ip = 0;

@@ -12,6 +12,11 @@
 class Packet;
 #include "packet.h"
 
+#define GRAPH_EVENT_ID 4000
+#define GRAPH_EVENT_UNLOCK 1
+
+void lock_graph();
+void unlock_graph();
 void update_alive_nodes(uint16_t ip, unsigned long time);
 void update_graph(Packet* p);
 void update_graph(uint16_t from, uint16_t to, int distance);
