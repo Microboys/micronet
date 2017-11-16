@@ -89,6 +89,7 @@ app.on('ready', async () => {
       });
     }
   });
+  mainWindow.maximize();
   
   //For testing packaged app
   // mainWindow.webContents.openDevTools();

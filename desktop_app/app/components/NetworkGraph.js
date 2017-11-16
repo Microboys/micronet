@@ -55,7 +55,7 @@ export default class NetworkGraph extends Component {
   }
 
   handleSend(event) {
-    sendMsg(this.state.to, this.state.msg);
+    sendMsg(this.state.selectedNode, this.state.msg);
     event.preventDefault();
     this.toggleModal();
   }
@@ -67,7 +67,7 @@ export default class NetworkGraph extends Component {
       );
     } else {
       return (
-	<div className="graph fullsize">
+	     <div className="graph fullsize">
         <Modal autoFocus={false} className={this.props.className} isOpen={this.state.modal} toggle={this.toggleModal} fade={false}>
           <ModalHeader toggle={this.toggleModal}>Send Message to {this.state.selectedNode}</ModalHeader>
           <ModalBody>
@@ -78,9 +78,9 @@ export default class NetworkGraph extends Component {
           <ModalFooter>
             <Button onClick={this.handleSend} color='primary'>Send Message</Button>
           </ModalFooter>
-	</Modal>
+        </Modal>
         <Graph graph={this.props.graph} options={this.state.options} events={this.state.events} />
-	</div>
+	     </div>
       );
     }
   }
