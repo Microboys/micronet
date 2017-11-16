@@ -27,7 +27,7 @@ void broadcast(Packet* p) {
 void send_message(Packet* p) {
   if (p->ttl > 0) {
       p->ttl--;
-      uint16_t next_node = get_path_for_node(p->dest_ip);
+      uint16_t next_node = get_next_node(p->dest_ip);
       p->imm_dest_ip = next_node;
       uBit.radio.datagram.send(p->format());
       uBit.sleep(1);
@@ -88,12 +88,12 @@ void handle_packet(Packet* p) {
 }
 
 void handle_lsa(Packet* p) {
-    //recalculate_graph(ip);
     if (p->source_ip == ip) {
         return;
     }
 
     update_graph(p);
+    recalculate_graph(ip);
 
     if (p->ttl > 0) {
         p->ttl--;
@@ -118,8 +118,8 @@ void handle_ping(Packet* p) {
         uBit.sleep(1);
     } else if (p->imm_dest_ip == ip) {
         // Got back our own ping packet
-        update_graph(ip, p->source_ip, p->rssi);
-        //recalculate_graph(ip);
+        // update_graph(ip, p->source_ip, p->rssi);
+        recalculate_graph(ip);
     }
 }
 
@@ -246,7 +246,6 @@ void update_network() {
 
         delete_extra_neighbours(ip);
         remove_dead_nodes(get_system_time());
-        //recalculate_graph(ip);
     }
 }
 
