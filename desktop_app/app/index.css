@@ -47,6 +47,19 @@ h4.modal-title {
 	padding: 0;
 }
 
+.card {
+	margin-bottom: 10px;
+}
+
 #packetCol {
 	overflow: auto;
+	margin-top: 10px;
+}
+
+.PING {
+	background-color: #FBC0FF;
+}
+
+.LSA {
+	background-color: #88B3FF;
 }

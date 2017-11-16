@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, ListGroup, ListGroupItem, Badge } from 'reactstrap';
+import { Row, Col, ListGroup, ListGroupItem, Badge, Card, CardBody, CardHeader, CardText } from 'reactstrap';
 import { removeLastPacket } from './../microbit.js';
 
 export default class PacketView extends Component {
@@ -9,14 +9,21 @@ export default class PacketView extends Component {
   }
 
   render() {
-    const packets = this.props.packets.map((packet, index) =>
-      <ListGroupItem key={index}>{packet.ptype}</ListGroupItem>
+    const packets = this.props.packets.reverse().map((packet, index) =>
+      <Card key={index}>
+        <CardHeader>
+          {packet.ptype}
+        </CardHeader>
+        <CardBody className={packet.ptype}>
+          <CardText></CardText>
+        </CardBody>
+      </Card>
     );
 
     return (
-      <ListGroup>
+      <div className='list-group'>
 	{packets}
-      </ListGroup>
+      </div>
     );
   }
 }
