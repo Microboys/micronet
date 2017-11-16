@@ -4,6 +4,8 @@
 #include "graph.h"
 #include "config.h"
 #include "packet_cache.h"
+#include "lsr.h"
+#include <vector>
 
 void broadcast(Packet* p);
 unsigned long get_system_time();
