@@ -41,6 +41,9 @@ const initialState = {
     'nodes' : [],
     'edges' : []
   },
+  'packet' : {
+    'received' : []
+  },
   'connection' : {
     'established' : false
   }

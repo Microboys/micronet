@@ -6,6 +6,7 @@ import GraphPage from './containers/GraphPage';
 import HelpSlidesPage from './containers/HelpSlidesPage';
 
 export default (
+  // TODO: change path back
   <Container fluid={true} id="mainContainer" className='fullsize'>
     <Switch>
       <Route exact path="/graph" component={GraphPage} />

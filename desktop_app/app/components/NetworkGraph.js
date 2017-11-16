@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Graph from 'react-graph-vis';
-import { Container, Modal, ModalHeader, ModalBody, ModalFooter, Input, Form, Button } from 'reactstrap';
+import PacketView from './PacketView';
+import { Row, Col, Container, Modal, ModalHeader, ModalBody, ModalFooter, Input, Form, Button, ListGroup, ListGroupItem, Badge } from 'reactstrap';
 import { sendMsg } from './../microbit.js';
 
 export default class NetworkGraph extends Component {
@@ -63,24 +64,37 @@ export default class NetworkGraph extends Component {
   render() {
     if (!this.props.connection.established) {
       return (
-	  <h1>Looking for a router micro:bit..</h1>
+        <Row className='fullsize justify-content-center'>
+          <Col className='align-self-center'>
+            <center>
+              <b>Looking for a router micro:bit - make sure it's flashed, connected and activated!</b>
+            </center>
+          </Col>
+        </Row>
       );
     } else {
       return (
-	     <div className="graph fullsize">
-        <Modal autoFocus={false} className={this.props.className} isOpen={this.state.modal} toggle={this.toggleModal} fade={false}>
-          <ModalHeader toggle={this.toggleModal}>Send Message to {this.state.selectedNode}</ModalHeader>
-          <ModalBody>
-            <Form onSubmit={this.handleSend}>
-              <Input autoFocus={true} id={this.msgId} onChange={this.handleChangeMsg} value={this.state.msg} />
-            </Form>
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={this.handleSend} color='primary'>Send Message</Button>
-          </ModalFooter>
-        </Modal>
-        <Graph graph={this.props.graph} options={this.state.options} events={this.state.events} />
-	     </div>
+	<div className="graph fullsize">
+	  <Row className="fullsize">
+	    <Col xs="9">
+              <Modal autoFocus={false} className={this.props.className} isOpen={this.state.modal} toggle={this.toggleModal} fade={false}>
+                <ModalHeader toggle={this.toggleModal}>Send Message to {this.state.selectedNode}</ModalHeader>
+                <ModalBody>
+                  <Form onSubmit={this.handleSend}>
+                    <Input autoFocus={true} id={this.msgId} onChange={this.handleChangeMsg} value={this.state.msg} />
+                  </Form>
+                </ModalBody>
+                <ModalFooter>
+                  <Button onClick={this.handleSend} color='primary'>Send Message</Button>
+                </ModalFooter>
+              </Modal>
+              <Graph graph={this.props.graph} options={this.state.options} events={this.state.events} />
+	    </Col>
+	    <Col>
+	      <PacketView packets={this.props.packet.received} />
+	    </Col>
+	  </Row>
+	</div>
       );
     }
   }

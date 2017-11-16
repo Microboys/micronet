@@ -6,19 +6,23 @@ import graph from './reducers/graph';
 import graphActions from './actions/graph';
 import connection from './reducers/connection';
 import connectionActions from './actions/connection';
+import packet from './reducers/packet';
+import packetActions from './actions/packet';
 
 export default function configureStore(initialState, routerHistory) {
   const router = routerMiddleware(routerHistory);
 
   const actionCreators = {
-    ...graphActions,
     ...connectionActions,
+    ...graphActions,
+    ...packetActions,
     push
   };
 
   const reducers = {
-    graph,
     connection,
+    graph,
+    packet,
     routing
   };
 

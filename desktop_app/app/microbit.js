@@ -1,6 +1,8 @@
 import SerialPort from 'serialport';
+import jsonlines from 'jsonlines';
 import graphActions from './actions/graph';
 import connectionActions from './actions/connection';
+import packetActions from './actions/packet';
 import { remote } from 'electron';
 import Jimp from 'jimp';
 
@@ -15,7 +17,9 @@ var store = null
 const microbitProductId = '0204';
 const microbitVendorId = '0d28';
 const microbitBaudRate = 115200;
-const timeoutTime = 2000;
+const timeoutTime = 5000;
+const pollSerialTime = 500;
+const parser = jsonlines.parse({ emitInvalidLines : true });
 
 var microbitPort = null;
 var firstMessageReceived = false;
@@ -25,18 +29,27 @@ var timeoutCheckId = null;
 function init(store_) {
   store = store_;  // TODO: this really shouldn't be necessary...
   listen();
+
+  // Serialport garbles our data if we use they're event based interface, hence the polling.
+  setInterval(() => {
+    if (microbitPort) {
+      let bytes = microbitPort.read();
+      if (bytes) {
+	parser.write(bytes)
+      }
+    }
+  }, pollSerialTime);
 }
 
 async function listen () {
   try {
     let portName = await locatePort();
-    microbitPort = new SerialPort(portName, { baudRate: microbitBaudRate });
-    const parser = new SerialPort.parsers.Readline();
-    microbitPort.pipe(parser);
+    microbitPort = new SerialPort(portName, { baudRate: microbitBaudRate, encoding: 'ascii' });
     microbitPort.on('open', handleOpen);
     microbitPort.on('error', handleError);
     microbitPort.on('close', handleClose);
     parser.on('data', handleDataLine);
+    parser.on('invalid-line', (invalid_line) => { console.log('ignore invalid JSON: ' + invalid_line) });
   } catch (err) {
     console.log('Error on locating the micro:bit port ' + err); 
   }
@@ -72,14 +85,7 @@ function handleError(err) {
   console.log("Port error: " + err);
 } 
 
-function handleDataLine(data) {
-  try {
-    var dataJSON = JSON.parse(data);
-  } catch (err) {
-    console.log(data);
-    console.log('Failed to parse JSON with: ' + err + ' string is ' + dataJSON);
-    return;
-  }
+function handleDataLine(dataJSON) {
 
   if (!dataJSON) {
     console.log('Expecting valid JSON, got: ' + dataJSON);
@@ -93,12 +99,21 @@ function handleDataLine(data) {
 
   switch (dataJSON.type) {
 
+    case 'packet':
+      if (!dataJSON.hasOwnProperty('ptype')) {
+        console.log('Expecting a ptype field in JSON received with type \'packet\' from micro:bit, got: '
+          + dataJSON);
+	break;
+      }
+
+      store.dispatch(packetActions.addPacket(dataJSON));
+      break;
+
     case 'sink-tree':
         //TODO: Implement sink-tree handling
         return;
 
     case 'graph':
-
       messageReceived = true;
 
       if (!firstMessageReceived) {
@@ -140,6 +155,9 @@ function timeoutCheck() {
 }
 
 /* Functions for sending commands to the micro:bit. */
+function removeLastPacket() {
+  store.dispatch(packetActions.removeOldestPacket());
+}
 
 function sendMsg(to, msg) {
   if (microbitPort) {
@@ -252,4 +270,4 @@ function generateMicrobitImage(code) {
 
 /* Exports. */
 
-export { init, sendMsg };
+export { init, sendMsg, removeLastPacket };
