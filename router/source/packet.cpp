@@ -158,7 +158,8 @@ ManagedString Packet::to_json() {
             result = result + format_attr("ptype", "LSA");
             result = result + format_attr("ttl", this->ttl);
             result = result + format_attr("source_ip", this->source_ip);
-            result = result + format_attr("payload", graph_to_json(this->graph), true);
+            result = result + "\"payload\":" + graph_to_json(this->graph);
+            //result = result + format_attr("payload", graph_to_json(this->graph), true);
             break;
         case MESSAGE:
             result = result + format_attr("ptype", "MSG");

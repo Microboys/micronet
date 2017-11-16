@@ -49,13 +49,16 @@ void on_packet(MicroBitEvent) {
     }
 
     packet_queue.push_back(new Packet(buffer, uBit.radio.getRSSI()));
-
 }
 
 void process_packets() {
     while (true) {
         if (!packet_queue.empty()) {
             Packet* p = packet_queue.front();
+
+            // Update desktop app
+            serial.send(p->to_json());
+
             update_alive_nodes(p->source_ip, get_system_time());
             handle_packet(p);
             packet_queue.erase(packet_queue.begin());
