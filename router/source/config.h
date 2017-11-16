@@ -2,7 +2,7 @@
 // Global configuration variables.
 
 /* Initial time-to-live value for broadcasted packets. Corresponds to number
- * of hops before the packet is discarded. 
+ * of hops before the packet is discarded.
  */
 #define INITIAL_TTL 5
 
@@ -20,14 +20,14 @@
 /* Maximum distance for disconnection. Expressed as an RSSI value,
  * lower value means farther away (e.g. -40 is closer than -60).
  * This value should be farther away than CONNECTION_THRESHOLD to prevent
- * constant connections/disconnections when two devices are on the boundary. 
+ * constant connections/disconnections when two devices are on the boundary.
  * Threshold is inclusive.
  */
 #define DISCONNECTION_THRESHOLD -67
 
 /* Maximum number of neighbours. This limit exists because we want to be able
- * to send all neighbour information in the payload of one LSA packet 
- * (which is 28B maximum). Since IPs are 2B each and we need 1B for the 
+ * to send all neighbour information in the payload of one LSA packet
+ * (which is 28B maximum). Since IPs are 2B each and we need 1B for the
  * distance, we can only fit floor(28/3) = 9 neighbours.
  */
 #define MAX_NEIGHBOURS 9
@@ -72,3 +72,4 @@
 #define DNS_REQUEST "DNS"
 
 #define MAX_PACKET_QUEUE_SIZE 12
+#define CACHE_SIZE 10

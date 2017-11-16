@@ -1,6 +1,5 @@
 #include "router.h"
-#include "lsr.h"
-#include <vector>
+
 MicroBit uBit;
 MicroBitSerial serial(USBTX, USBRX);
 
@@ -47,7 +46,16 @@ void on_packet(MicroBitEvent) {
         return;
     }
 
-    if (packet_queue.size() > MAX_PACKET_QUEUE_SIZE && buffer[0] != MESSAGE) {
+    if (buffer[F_PTYPE] == LSA) {
+        uint8_t ttl = buffer[F_LSA_TTL];
+        buffer[F_LSA_TTL] = 0;
+        if (packet_cache_contains(buffer)) {
+            return;
+        } else {
+            buffer[F_LSA_TTL] = ttl;
+        }
+    }
+    if (packet_queue.size() > MAX_PACKET_QUEUE_SIZE && buffer[F_PTYPE] != MESSAGE) {
         return;
     }
 
