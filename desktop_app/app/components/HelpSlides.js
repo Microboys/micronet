@@ -23,9 +23,7 @@ const HelpSlides = () => {
   return (
     <Row className='justify-content-center'>
       <Col className='align-self-center'>
-	<Container>
-          <UncontrolledCarousel items={items} />;
-	</Container>
+        <UncontrolledCarousel items={items} />;
       </Col>
     </Row>
   );

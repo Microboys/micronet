@@ -1,11 +1,11 @@
-html {
-	height: 100% !important;
-	width: 100% !important;
+html, body {
+	height: 100vh !important;
+	width: 100vw !important;
 }
 
-.modal-backdrop {
-	background-color: grey;
-	opacity: 0.3;
+* {
+	height: 100%;
+	width: 100%;
 }
 
 h4.modal-title {
