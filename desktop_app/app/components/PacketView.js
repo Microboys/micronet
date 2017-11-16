@@ -43,9 +43,8 @@ export default class PacketView extends Component {
     const filteredPackets = this.props.packets.reverse()
       .filter((packet) => 
 	    packet.ptype === "DNS" ||
-	    packet.ptype === "MSG"
-      );
-	    //packet.ptype === "LSA");
+	    packet.ptype === "MSG" ||
+	    packet.ptype === "LSA");
     const packetCards = filteredPackets
       .map((packet, index) =>
         <Card key={index}>
