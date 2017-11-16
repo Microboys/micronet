@@ -1,9 +1,16 @@
 import React, { Component } from 'react';
 import { Container, UncontrolledCarousel, Row, Col, Button } from 'reactstrap';
+import PropTypes from 'prop-types';
 
 export default class HelpSlides extends Component {
+  
+  static propTypes = {
+    onSkip: PropTypes.func.isRequired
+  };
+
   constructor(props) {
     super(props);
+
     this.state = {
       items: [
         {
