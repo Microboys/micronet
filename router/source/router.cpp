@@ -27,6 +27,7 @@ void broadcast(Packet* p) {
 void send_message(Packet* p) {
   if (p->ttl > 0) {
       p->ttl--;
+      recalculate_graph(ip);
       uint16_t next_node = get_next_node(p->dest_ip);
       p->imm_dest_ip = next_node;
       uBit.radio.datagram.send(p->format());
@@ -93,7 +94,6 @@ void handle_lsa(Packet* p) {
     }
 
     update_graph(p);
-    recalculate_graph(ip);
 
     if (p->ttl > 0) {
         p->ttl--;
@@ -118,8 +118,7 @@ void handle_ping(Packet* p) {
         uBit.sleep(1);
     } else if (p->imm_dest_ip == ip) {
         // Got back our own ping packet
-        // update_graph(ip, p->source_ip, p->rssi);
-        recalculate_graph(ip);
+        update_graph(ip, p->source_ip, p->rssi);
     }
 }
 
@@ -138,22 +137,23 @@ void ping(MicroBitEvent) {
     uBit.sleep(1);
 }
 
- void send_payload(uint16_t dest_ip, ManagedString message) {
-     std::vector<uint16_t> neighbours = get_neighbours(ip);
-     if (!neighbours.empty()) {
-         for (auto n : neighbours) {
-             Packet p(MESSAGE, ip, n, dest_ip, 0, INITIAL_TTL, message);
-             uBit.radio.datagram.send(p.format());
-         }
-     }
- }
+ // void send_payload(uint16_t dest_ip, ManagedString message) {
+ //     std::vector<uint16_t> neighbours = get_neighbours(ip);
+ //     if (!neighbours.empty()) {
+ //         for (auto n : neighbours) {
+ //             Packet p(MESSAGE, ip, n, dest_ip, 0, INITIAL_TTL, message);
+ //             uBit.radio.datagram.send(p.format());
+ //         }
+ //     }
+ // }
 
-//void send_payload(uint16_t dest_ip, ManagedString message) {
-    //uint16_t next_node = get_path_for_node(dest_ip);
-    //Packet p(MESSAGE, ip, next_node, dest_ip, 0, INITIAL_TTL, message);
-    //uBit.radio.datagram.send(p.format());
-    //uBit.sleep(1);
-//}
+void send_payload(uint16_t dest_ip, ManagedString message) {
+    recalculate_graph(ip);
+    uint16_t next_node = get_next_node(dest_ip);
+    Packet p(MESSAGE, ip, next_node, dest_ip, 0, INITIAL_TTL, message);
+    uBit.radio.datagram.send(p.format());
+    uBit.sleep(1);
+}
 
 void send_lsa(MicroBitEvent) {
     std::unordered_map<edge, int> to_send = get_lsa_graph(ip);
@@ -252,6 +252,8 @@ void update_network() {
 void update_desktop_app() {
     while(started) {
         //uBit.display.scrollAsync(ip);
+        recalculate_graph(ip);
+
         send_graph_update();
         send_path_update();
         send_name_table();
