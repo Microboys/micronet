@@ -42,7 +42,8 @@ const initialState = {
     'edges' : []
   },
   'packet' : {
-    'received' : []
+    'received' : [],
+    'capacity' : 50
   },
   'dns' : {
     'entries' : []
