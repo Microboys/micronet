@@ -21,7 +21,7 @@ const items = [
 
 const HelpSlides = () => {
   return (
-    <Row className='justify-content-center'>
+    <Row id='carouselRow' className='fullsize justify-content-center'>
       <Col className='align-self-center'>
         <UncontrolledCarousel items={items} />;
       </Col>
