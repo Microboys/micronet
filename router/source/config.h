@@ -41,6 +41,9 @@
  */
 #define UPDATE_RATE 300
 
+/* Delay in ms before processing each packet. */
+#define PACKET_PROCESS_RATE 1
+
 /* Serial read buffer size. */
 #define RX_BUFFER_SIZE 200
 

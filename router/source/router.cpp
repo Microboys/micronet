@@ -7,6 +7,7 @@ MicroBitSerial serial(USBTX, USBRX);
 /* Device IP */
 uint16_t ip = 0;
 bool started = false;
+std::vector<Packet*> packet_queue;
 
 /* Resends packet to all neighbours. */
 void broadcast(Packet* p) {
@@ -35,29 +36,27 @@ unsigned long get_system_time() {
 
 /* Handler for receiving a packet. */
 void on_packet(MicroBitEvent) {
-    serial.printf("woah a packet\n");
     PacketBuffer buffer = uBit.radio.datagram.recv();
-    uBit.sleep(1);
-    serial.printf("yay a packet\n");
-    if (buffer == PacketBuffer::EmptyPacket) {
+    if (buffer == PacketBuffer::EmptyPacket || uBit.radio.getRSSI() == 0
+            || buffer.length() != PACKET_SIZE) {
         return;
     }
 
-    if (uBit.radio.getRSSI() == 0) {
-        return;
-    }
-    
-    if (buffer.length() != 32) {
-        return;
-    }
+    packet_queue.push_back(new Packet(buffer, uBit.radio.getRSSI()));
 
-    Packet* p = new Packet(buffer, uBit.radio.getRSSI());
-    p->print_packet(serial);
-    //update_alive_nodes(p.source_ip, get_system_time());
+}
 
-    serial.printf("handling\n");
-    handle_packet(p);
-    serial.printf("handeld\n");
+void process_packets() {
+    while (true) {
+        if (!packet_queue.empty()) {
+            Packet* p = packet_queue.front();
+            update_alive_nodes(p->source_ip, get_system_time());
+            handle_packet(p);
+            packet_queue.erase(packet_queue.begin());
+            delete p;
+        }
+        uBit.sleep(PACKET_PROCESS_RATE);
+    }
 }
 
 void handle_packet(Packet* p) {
@@ -69,21 +68,16 @@ void handle_packet(Packet* p) {
             handle_message(p);
             break;
         case LSA:
-            serial.printf("lsa handling\n");
             handle_lsa(p);
-            serial.printf("lsa handled\n");
             break;
         default:
             break;
     }
-    delete p;
 }
 
 void handle_lsa(Packet* p) {
-    serial.printf("graph updating\n");
     update_graph(p);
-    serial.printf("graph updated\n");
-    //recalculate_graph(ip);
+    recalculate_graph(ip);
 
     if (p->ttl > 0) {
         p->ttl = p->ttl - 1;
@@ -178,23 +172,23 @@ void init_serial_read() {
 
 void update_network() {
     while(started) {
-        //ping(MicroBitEvent());
-        //uBit.sleep(UPDATE_RATE);
+        ping(MicroBitEvent());
+        uBit.sleep(UPDATE_RATE);
 
         send_lsa(MicroBitEvent());
         uBit.sleep(UPDATE_RATE);
 
-        //delete_extra_neighbours(ip);
-        //remove_dead_nodes(get_system_time());
-        //recalculate_graph(ip);
+        delete_extra_neighbours(ip);
+        remove_dead_nodes(get_system_time());
+        recalculate_graph(ip);
     }
 }
 
 void update_desktop_app() {
     while(started) {
         uBit.display.scrollAsync(ip);
-        //send_graph_update();
-        //send_path_update();
+        send_graph_update();
+        send_path_update();
         //send_name_table();
         uBit.sleep(UPDATE_RATE);
     }
@@ -213,7 +207,8 @@ void setup(MicroBitEvent) {
 
         send_graph_update();
         create_fiber(update_network);
-        //create_fiber(update_desktop_app);
+        create_fiber(process_packets);
+        create_fiber(update_desktop_app);
     }
 }
 
