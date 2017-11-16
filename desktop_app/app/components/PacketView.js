@@ -52,7 +52,7 @@ export default class PacketView extends Component {
             {this.getTitle(packet)}
           </CardHeader>
           <CardBody className={packet.ptype}>
-            <CardText>{this.getContent(packet)}</CardText>
+            {this.getContent(packet)}
           </CardBody>
         </Card>
       );
