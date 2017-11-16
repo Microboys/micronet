@@ -4,9 +4,14 @@ import PacketView from './PacketView';
 import ButtonContainer from './ButtonContainer';
 import { Row, Col, Container, Modal, ModalHeader, ModalBody, ModalFooter, Input, Form, Button, ListGroup, ListGroupItem, Badge } from 'reactstrap';
 import { sendMsg, renameMicrobit } from './../microbit.js';
+import PropTypes from 'prop-types';
 
 export default class NetworkGraph extends Component {
   
+  static propTypes = {
+    onHelp: PropTypes.func.isRequired
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -126,7 +131,7 @@ export default class NetworkGraph extends Component {
       	    </Col>
       	    <Col id='packetCol'>
       	      <PacketView packets={this.props.packet.received} />
-              <ButtonContainer showRenameModal={this.toggleNameModal} />
+              <ButtonContainer showRenameModal={this.toggleNameModal} onHelp={this.props.onHelp} />
       	    </Col>
       	  </Row>
       	</div>

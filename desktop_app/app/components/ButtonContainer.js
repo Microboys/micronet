@@ -6,7 +6,8 @@ import PropTypes from 'prop-types';
 export default class ButtonContainer extends Component {
 
   static propTypes = {
-    showRenameModal: PropTypes.func.isRequired
+    showRenameModal: PropTypes.func.isRequired,
+    onHelp: PropTypes.func.isRequired
   };
   
   constructor(props) {
@@ -23,7 +24,7 @@ export default class ButtonContainer extends Component {
           <Button id='flashBtn' onClick={flashMicrobit} className='controlButton'>Flash Microbit</Button>
         </Row>
         <Row className='noMarginRow justify-content-centre'>
-          <Button id='helpBtn' className='controlButton'>Help</Button>
+          <Button id='helpBtn' onClick={this.props.onHelp} className='controlButton'>Help</Button>
         </Row>
       </div>
     );
