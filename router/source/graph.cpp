@@ -62,7 +62,6 @@ void update_graph(Packet* p) {
     unlock_graph();
 }
 
-
 void recalculate_graph(uint16_t source) {
     lock_graph();
     calculate_syn_tree(source, graph);
