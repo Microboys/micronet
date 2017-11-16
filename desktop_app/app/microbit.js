@@ -3,11 +3,16 @@ import graphActions from './actions/graph';
 import connectionActions from './actions/connection';
 import { remote } from 'electron';
 import Jimp from 'jimp';
+import fse from 'fs-extra';
 
 /* Get path to prepackaged assets and local temporary storage for new assets */
 const fs = remote.require('fs');
 const assetPath = remote.app.getAppPath() + '/build/assets';
+const routerPath = remote.app.getAppPath() + '/build/router/router.hex';
 const tempAssetPath = remote.app.getPath('appData') + '/micronet/temp';
+
+/* Get dialog for flashing microbit */
+const dialog = remote.dialog;
 
 var store = null
 
@@ -250,6 +255,22 @@ function generateMicrobitImage(code) {
   return imgPath;
 }
 
+/* Function to flash microbit */
+function flashMicrobit() {
+  var dialogProperties = {
+    properties: ["openDirectory"],
+    title: "Select the connected MICROBIT folder",
+    filters: [
+      { name: 'Directories', extensions: [''] }
+    ]
+  };
+  dialog.showOpenDialog(dialogProperties, function (fileNames) {
+    if (!fileNames) return;
+    var fileName = fileNames[0];
+    fse.copySync(routerPath, fileName + '/router.hex');
+  })
+}
+
 /* Exports. */
 
-export { init, sendMsg };
+export { init, sendMsg, flashMicrobit };
