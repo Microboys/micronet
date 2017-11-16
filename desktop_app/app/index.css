@@ -17,12 +17,12 @@ h4.modal-title {
 	width: 100% !important;
 }
 
-#skipRow {
-	height: 10% !important;
-}
-
 #skipButton {
-	width: 100% !important;
+	width: 25% !important;
+	margin: 0 auto !important;
+	background-color: #63B66E;
+	border-color: #63B66E;
+
 }
 
 .img-fluid {
