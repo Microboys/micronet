@@ -24,7 +24,7 @@ const microbitProductId = '0204';
 const microbitVendorId = '0d28';
 const microbitBaudRate = 115200;
 const timeoutTime = 2000;
-const pollSerialTime = 500;
+const pollSerialTime = 10;
 const parser = jsonlines.parse({ emitInvalidLines : true });
 
 var microbitPort = null;
@@ -178,10 +178,6 @@ function timeoutCheck() {
 }
 
 /* Functions for sending commands to the micro:bit. */
-function removeLastPacket() {
-  store.dispatch(packetActions.removeOldestPacket());
-}
-
 function sendMsg(to, msg) {
   if (microbitPort) {
     console.log("Sending message");
@@ -251,14 +247,12 @@ function addEdge(edges, edge) {
 }
 
 function getLabel(id) {
-  var entries = store.getState().dns.entries;
-  for (var i = 0; i < entries.length; i++) {
-    var entry = entries[i];
-    if (id == entry.ip) {
-      return entry.name;
-    }
+  let name = lookupName(id);
+  if (name) {
+    return name;
+  } else {
+    return 'Node ' + id;
   }
-  return 'Node ' + id;
 }
 
 function RSSIToAbstractDistanceUnits(rssi) {
@@ -309,6 +303,17 @@ function generateMicrobitImage(code) {
   return imgPath;
 }
 
+function lookupName(id) {
+  var entries = store.getState().dns.entries;
+  for (var i = 0; i < entries.length; i++) {
+    var entry = entries[i];
+    if (id == entry.ip) {
+      return entry.name;
+    }
+  }
+  return null;
+}
+
 function flashMicrobit() {
   var dialogProperties = {
     properties: ["openDirectory"],
@@ -326,4 +331,4 @@ function flashMicrobit() {
 
 /* Exports. */
 
-export { init, sendMsg, removeLastPacket, renameMicrobit, flashMicrobit };
+export { init, sendMsg, renameMicrobit, flashMicrobit, lookupName};

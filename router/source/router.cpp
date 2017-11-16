@@ -125,7 +125,6 @@ void handle_ping(Packet* p) {
 
 void handle_dns(Packet* p) {
     name_table[p->source_ip] = p->payload;
-
     if (p->ttl > 0) {
         p->ttl = p->ttl - 1;
         uBit.radio.datagram.send(p->format());
