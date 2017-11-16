@@ -33,8 +33,8 @@ void update_alive_nodes(uint16_t ip, unsigned long time) {
  * we delete the arc from our graph.
  */
 void update_graph(uint16_t from, uint16_t to, int distance) {
-    lock_graph();
     edge e({from, to});
+    lock_graph();
     auto it = graph.find(e);
     if (it != graph.end()) {
         if (distance < DISCONNECTION_THRESHOLD) {
@@ -78,16 +78,21 @@ void delete_extra_neighbours(uint16_t ip) {
     while (neighbours.size() > 0 && neighbours.size() > MAX_NEIGHBOURS) {
         int min_strength = neighbours[0].second;
         struct edge weakest_edge = neighbours[0].first;
+        bool erased = false;
         for (auto it : neighbours) {
             if (it.second < DISCONNECTION_THRESHOLD) {
                 graph.erase(it.first);
+                erased = true;
+                break;
             } else if (min_strength > it.second) {
                 min_strength = it.second;
                 weakest_edge = it.first;
             }
         }
 
-        graph.erase(weakest_edge);
+        if (!erased) {
+            graph.erase(weakest_edge);
+        }
     }
     unlock_graph();
 }
