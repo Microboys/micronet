@@ -50,7 +50,7 @@
 /* Time in ms before deciding a router is dead. If we don't receive a packet
  * from a router before the time is up, we delete it and every corresponding
  * arc from our graph. */
-#define NODE_LIFESPAN 4000
+#define NODE_LIFESPAN 10000
 
 /* Delimiter for serial communication. */
 #define SERIAL_DELIMITER "\n"
