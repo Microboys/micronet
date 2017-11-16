@@ -43,9 +43,7 @@ export default class HelpSlides extends Component {
           </Col>
         </Row>
         <Row id='skipRow' className='justify-content-center frontPageRow'>
-          <Col className='align-self-center'>
-            <Button id='skipButton' onClick={this.props.onSkip}>Get Started</Button>
-          </Col>
+          <Button id='skipButton' onClick={this.props.onSkip}>I'm Ready</Button>
         </Row>
       </div>
     );
