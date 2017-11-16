@@ -6,3 +6,12 @@
 h4.modal-title {
 	display: inline-block;
 }
+
+#carouselRow {
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+}
+
+.img-fluid {
+	width: 100% !important;
+}
