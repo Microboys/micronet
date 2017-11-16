@@ -1,7 +1,7 @@
 #pragma once
 #include <unordered_set>
 #include <queue>
-#include "Microbit.h"
+#include "MicroBit.h"
 #include "config.h"
 
 bool packet_cache_contains(PacketBuffer buffer);
