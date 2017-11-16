@@ -176,8 +176,9 @@ ManagedString Packet::to_json() {
             result = result + format_attr("payload", this->payload.toCharArray(), true);
             break;
         case DNS:
-            result = result + format_attr("ptype", "DNS", true);
-            //TODO
+            result = result + format_attr("ptype", "DNS");
+            result = result + format_attr("source_ip", this->source_ip);
+            result = result + format_attr("payload", this->payload.toCharArray(), true);
             break;
         default:
             break;

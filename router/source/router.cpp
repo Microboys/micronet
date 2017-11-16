@@ -46,7 +46,7 @@ void on_packet(MicroBitEvent) {
         return;
     }
 
-    if (packet_queue.size() > 10 && buffer[0] != MESSAGE) {
+    if (packet_queue.size() > MAX_PACKET_QUEUE_SIZE && buffer[0] != MESSAGE) {
         return;
     }
 
@@ -88,8 +88,12 @@ void handle_packet(Packet* p) {
 }
 
 void handle_lsa(Packet* p) {
-    update_graph(p);
     //recalculate_graph(ip);
+    if (p->source_ip == ip) {
+        return;
+    }
+
+    update_graph(p);
 
     if (p->ttl > 0) {
         p->ttl--;

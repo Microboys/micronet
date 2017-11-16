@@ -70,3 +70,5 @@
  * DNS\tAlice\n
  */
 #define DNS_REQUEST "DNS"
+
+#define MAX_PACKET_QUEUE_SIZE 12
