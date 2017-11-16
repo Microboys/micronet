@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { push } from 'react-router-redux';
 import HelpSlides from '../components/HelpSlides';
 
 const mapStateToProps = (state) => {
@@ -6,7 +7,11 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => { // eslint-disable-line no-unused-vars
-  return {};
+  return {
+  	onSkip: () => {
+			dispatch(push('/graph'));
+  	}
+  };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(HelpSlides);
