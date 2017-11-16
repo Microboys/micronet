@@ -8,10 +8,32 @@ h4.modal-title {
 }
 
 #carouselRow {
+	height: 90% !important;
+}
+
+.frontPageRow {
 	margin-left: 0 !important;
 	margin-right: 0 !important;
+	width: 100% !important;
+}
+
+#skipRow {
+	height: 10% !important;
+}
+
+#skipButton {
+	width: 100% !important;
 }
 
 .img-fluid {
-	width: 100% !important;
+	width: 85% !important;
+	margin: 0 auto;
+}
+
+.carousel-control-prev-icon {
+    background-image: url("./assets/left_arrow.png");
+}
+
+.carousel-control-next-icon {
+    background-image: url("./assets/right_arrow.png");
 }
