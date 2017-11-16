@@ -44,7 +44,6 @@ export default class NetworkGraph extends Component {
     this.handleChangeMsg = this.handleChangeMsg.bind(this);
     this.handleSend = this.handleSend.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
-    this.focusMsg = this.focusMsg.bind(this);
   }
 
   toggleModal() {
@@ -61,10 +60,6 @@ export default class NetworkGraph extends Component {
     this.toggleModal();
   }
 
-  focusMsg() {
-    this.msgInput.focus();
-  }
-
   render() {
     if (!this.props.connection.established) {
       return (
@@ -72,12 +67,12 @@ export default class NetworkGraph extends Component {
       );
     } else {
       return (
-	<div className="graph">
-        <Modal className={this.props.className} isOpen={this.state.modal} toggle={this.toggleModal} fade={false} onEnter={this.focusMsg}>
+	<div className="graph fullsize">
+        <Modal autoFocus={false} className={this.props.className} isOpen={this.state.modal} toggle={this.toggleModal} fade={false}>
           <ModalHeader toggle={this.toggleModal}>Send Message to {this.state.selectedNode}</ModalHeader>
           <ModalBody>
             <Form onSubmit={this.handleSend}>
-              <Input id={this.msgId} onChange={this.handleChangeMsg} value={this.state.msg} getRef={(input) => {this.msgInput = input;}}/>
+              <Input autoFocus={true} id={this.msgId} onChange={this.handleChangeMsg} value={this.state.msg} />
             </Form>
           </ModalBody>
           <ModalFooter>

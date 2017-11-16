@@ -15,7 +15,7 @@ var store = null
 const microbitProductId = '0204';
 const microbitVendorId = '0d28';
 const microbitBaudRate = 115200;
-const timeoutTime = 1500;
+const timeoutTime = 2000;
 
 var microbitPort = null;
 var firstMessageReceived = false;
@@ -76,6 +76,7 @@ function handleDataLine(data) {
   try {
     var dataJSON = JSON.parse(data);
   } catch (err) {
+    console.log(data);
     console.log('Failed to parse JSON with: ' + err + ' string is ' + dataJSON);
     return;
   }
