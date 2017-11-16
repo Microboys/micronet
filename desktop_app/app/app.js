@@ -44,6 +44,9 @@ const initialState = {
   'packet' : {
     'received' : []
   },
+  'dns' : {
+    'entries' : []
+  },
   'connection' : {
     'established' : false
   }

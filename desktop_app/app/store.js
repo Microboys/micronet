@@ -8,11 +8,15 @@ import connection from './reducers/connection';
 import connectionActions from './actions/connection';
 import packet from './reducers/packet';
 import packetActions from './actions/packet';
+import dns from './reducers/dns';
+import dnsActions from './actions/dns';
 
 export default function configureStore(initialState, routerHistory) {
   const router = routerMiddleware(routerHistory);
 
   const actionCreators = {
+    ...graphActions,
+    ...dnsActions,
     ...connectionActions,
     ...graphActions,
     ...packetActions,
@@ -20,6 +24,8 @@ export default function configureStore(initialState, routerHistory) {
   };
 
   const reducers = {
+    graph,
+    dns,
     connection,
     graph,
     packet,

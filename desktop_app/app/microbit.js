@@ -1,15 +1,21 @@
 import SerialPort from 'serialport';
 import jsonlines from 'jsonlines';
 import graphActions from './actions/graph';
+import dnsActions from './actions/dns';
 import connectionActions from './actions/connection';
 import packetActions from './actions/packet';
 import { remote } from 'electron';
 import Jimp from 'jimp';
+import fse from 'fs-extra';
 
 /* Get path to prepackaged assets and local temporary storage for new assets */
 const fs = remote.require('fs');
 const assetPath = remote.app.getAppPath() + '/build/assets';
+const routerPath = remote.app.getAppPath() + '/build/router/router.hex';
 const tempAssetPath = remote.app.getPath('appData') + '/micronet/temp';
+
+/* Get dialog for flashing microbit */
+const dialog = remote.dialog;
 
 var store = null
 
@@ -138,6 +144,14 @@ function handleDataLine(dataJSON) {
       var transformed = transformGraphJSON(dataJSON.graph, dataJSON.ip);
       store.dispatch(graphActions.updateGraph(transformed));
       break;
+    case 'dns':
+      if (!dataJSON.hasOwnProperty('dns')) {
+        console.log('Expecting a DNS field in JSON received with type \'dns\' from micro:bit, got: '
+          + dataJSON);
+        break;
+      }
+      store.dispatch(dnsActions.updateDNS({'entries': dataJSON.dns}));
+      break;
 
     default:
       console.log('Unrecognised JSON type from micro:bit: ' + dataJSON.type);
@@ -163,6 +177,13 @@ function sendMsg(to, msg) {
   if (microbitPort) {
     console.log("Sending message");
     microbitPort.write('MSG\t' + to + '\t' + msg + '\n');
+  }
+}
+
+function renameMicrobit(name) {
+  if (microbitPort) {
+    console.log("Renaming microbit to " + name);
+    microbitPort.write('DNS\t' + name + '\n');
   }
 }
 
@@ -200,7 +221,7 @@ function addNode(nodes, id, connected) {
   if (nodeExists(nodes, id)) {
     return;
   }
-  var node = {id: id, label: 'Node ' + id};
+  var node = {id: id, label: getLabel(id, connected)};
   if (connected) {
     node.shadow = {enabled: true, color: '#59B4FF', x: 0, y: 0, size: 20};
     node.label += ' (connected)';
@@ -218,6 +239,17 @@ function addEdge(edges, edge) {
     }
   }
   edges.push({from: edge.from, to: edge.to, label: distance.toString()});
+}
+
+function getLabel(id) {
+  var entries = store.getState().dns.entries;
+  for (var i = 0; i < entries.length; i++) {
+    var entry = entries[i];
+    if (id == entry.ip) {
+      return entry.name;
+    }
+  }
+  return 'Node ' + id;
 }
 
 function RSSIToAbstractDistanceUnits(rssi) {
@@ -268,6 +300,21 @@ function generateMicrobitImage(code) {
   return imgPath;
 }
 
+function flashMicrobit() {
+  var dialogProperties = {
+    properties: ["openDirectory"],
+    title: "Select the connected MICROBIT folder",
+    filters: [
+      { name: 'Directories', extensions: [''] }
+    ]
+  };
+  dialog.showOpenDialog(dialogProperties, function (fileNames) {
+    if (!fileNames) return;
+    var fileName = fileNames[0];
+    fse.copySync(routerPath, fileName + '/router.hex');
+  })
+}
+
 /* Exports. */
 
-export { init, sendMsg, removeLastPacket };
+export { init, sendMsg, removeLastPacket, renameMicrobit, flashMicrobit };
