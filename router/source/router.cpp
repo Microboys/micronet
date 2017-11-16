@@ -45,8 +45,16 @@ void on_packet(MicroBitEvent) {
             || buffer.length() != PACKET_SIZE) {
         return;
     }
-
-    if (packet_queue.size() > MAX_PACKET_QUEUE_SIZE && buffer[0] != MESSAGE) {
+    if (buffer[F_PTYPE] == LSA) {
+        uint8_t ttl = buffer[F_LSA_TTL];
+        buffer[F_LSA_TTL] = 0;
+        if (packet_cache_contains(buffer)) {
+            return;
+        } else {
+            buffer[F_LSA_TTL] = ttl;
+        }
+    }
+    if (packet_queue.size() > 10 && buffer[F_PTYPE] != MESSAGE) {
         return;
     }
 

@@ -3,6 +3,7 @@
 #include "packet.h"
 #include "graph.h"
 #include "config.h"
+#include "packet_cache.h"
 
 void broadcast(Packet* p);
 unsigned long get_system_time();
