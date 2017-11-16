@@ -37,3 +37,16 @@ h4.modal-title {
 .carousel-control-next-icon {
     background-image: url("./assets/right_arrow.png");
 }
+
+#mainRow {
+	margin: 0;
+}
+
+
+.col, .col-9, #mainContainer {
+	padding: 0;
+}
+
+#packetCol {
+	overflow: auto;
+}

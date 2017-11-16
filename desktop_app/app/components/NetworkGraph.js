@@ -95,9 +95,9 @@ export default class NetworkGraph extends Component {
       );
     } else {
       return (
-	<div className="graph fullsize">
-	  <Row className="fullsize">
-	    <Col xs="9">
+      	<div className="graph fullsize">
+      	  <Row id="mainRow" className="fullsize">
+      	    <Col xs="9">
               <Modal autoFocus={false} className={this.props.className} isOpen={this.state.msgModal} toggle={this.toggleMsgModal} fade={false}>
                 <ModalHeader toggle={this.toggleMsgModal}>Send Message to {this.state.selectedNode}</ModalHeader>
                 <ModalBody>
@@ -121,12 +121,12 @@ export default class NetworkGraph extends Component {
                 </ModalFooter>
               </Modal>
               <Graph graph={this.props.graph} options={this.state.options} events={this.state.events} />
-	    </Col>
-	    <Col>
-	      <PacketView packets={this.props.packet.received} />
-	    </Col>
-	  </Row>
-	</div>
+      	    </Col>
+      	    <Col id='packetCol'>
+      	      <PacketView packets={this.props.packet.received} />
+      	    </Col>
+      	  </Row>
+      	</div>
       );
     }
   }
