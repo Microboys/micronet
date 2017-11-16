@@ -11,7 +11,7 @@ h4.modal-title {
 	height: 90% !important;
 }
 
-.frontPageRow {
+.noMarginRow {
 	margin-left: 0 !important;
 	margin-right: 0 !important;
 	width: 100% !important;
@@ -19,6 +19,7 @@ h4.modal-title {
 
 #skipButton {
 	width: 25% !important;
+
 	margin: 0 auto !important;
 	background-color: #63B66E;
 	border-color: #63B66E;
@@ -42,9 +43,35 @@ h4.modal-title {
 	margin: 0;
 }
 
+.controlButton {
+	margin: 10px 0px;
+	width: 100%;
+}
 
-.col, .col-9, #mainContainer {
+#renameBtn {
+	color: white;
+	background-color: #63B66E;
+	border-color: #63B66E;
+}
+
+#flashBtn {
+	color: white;
+	background-color: #63B66E;
+	border-color: #63B66E;
+}
+
+#helpBtn {
+	color: white;
+	background-color: #63B66E;
+	border-color: #63B66E;
+}
+
+.col, .col-9 {
 	padding: 0;
+}
+
+#mainContainer {
+	padding: 10px;
 }
 
 .card {
@@ -52,8 +79,21 @@ h4.modal-title {
 }
 
 #packetCol {
+	margin: 0px;
+	display: flex;
+	flex-direction: column;
+	align-content: center;
+}
+
+#packetContainer {
+	margin: 0px 0px 10px 0px;
 	overflow: auto;
-	margin-top: 10px;
+	flex: 1 1 auto;
+}
+
+#buttonContainer {
+	flex: 0 0 auto;
+	padding-top: 10px;
 }
 
 .PING {

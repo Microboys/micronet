@@ -21,8 +21,10 @@ export default class PacketView extends Component {
     );
 
     return (
-      <div className='list-group'>
-	{packets}
+      <div id='packetContainer'>
+        <div className='list-group'>
+          {packets}
+        </div>
       </div>
     );
   }

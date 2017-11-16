@@ -37,12 +37,12 @@ export default class HelpSlides extends Component {
   render() {
     return (
       <div className='fullsize'>
-        <Row id='carouselRow' className='justify-content-center frontPageRow'>
+        <Row id='carouselRow' className='justify-content-center noMarginRow'>
           <Col className='align-self-center'>
             <UncontrolledCarousel items={this.state.items} />
           </Col>
         </Row>
-        <Row id='skipRow' className='justify-content-center frontPageRow'>
+        <Row id='skipRow' className='justify-content-center noMarginRow'>
           <Button autoFocus={true} id='skipButton' onClick={this.props.onSkip}>I'm Ready</Button>
         </Row>
       </div>

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Graph from 'react-graph-vis';
 import PacketView from './PacketView';
+import ButtonContainer from './ButtonContainer';
 import { Row, Col, Container, Modal, ModalHeader, ModalBody, ModalFooter, Input, Form, Button, ListGroup, ListGroupItem, Badge } from 'reactstrap';
 import { sendMsg, renameMicrobit } from './../microbit.js';
 
@@ -112,6 +113,7 @@ export default class NetworkGraph extends Component {
               <Modal autoFocus={false} className={this.props.className} isOpen={this.state.nameModal} toggle={this.toggleNameModal} fade={false}>
                 <ModalHeader toggle={this.toggleNameModal}>Rename Node</ModalHeader>
                 <ModalBody>
+                  <p>Rename your microbit (may take a few seconds to update)!</p>
                   <Form onSubmit={this.handleRename}>
                     <Input autoFocus={true} onChange={this.handleChangeName} value={this.state.name} />
                   </Form>
@@ -124,6 +126,7 @@ export default class NetworkGraph extends Component {
       	    </Col>
       	    <Col id='packetCol'>
       	      <PacketView packets={this.props.packet.received} />
+              <ButtonContainer showRenameModal={this.toggleNameModal} />
       	    </Col>
       	  </Row>
       	</div>
