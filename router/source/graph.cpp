@@ -75,7 +75,7 @@ void recalculate_graph(uint16_t source) {
 void delete_extra_neighbours(uint16_t ip) {
     std::vector<std::pair<edge, int>> neighbours = get_neighbour_edges(ip);
     lock_graph();
-    while (neighbours.size() > 0 && neighbours.size() > MAX_NEIGHBOURS) {
+    while (neighbours.size() > MAX_NEIGHBOURS) {
         int min_strength = neighbours[0].second;
         struct edge weakest_edge = neighbours[0].first;
         for (auto it : neighbours) {

@@ -250,7 +250,6 @@ void update_network() {
         send_lsa(MicroBitEvent());
         uBit.sleep(UPDATE_RATE);
 
-        delete_extra_neighbours(ip);
         remove_dead_nodes(get_system_time());
     }
 }
@@ -261,7 +260,7 @@ void update_desktop_app() {
         // recalculate_graph(ip);
 
         send_graph_update();
-        send_path_update();
+        // send_path_update();
         send_name_table();
         uBit.sleep(UPDATE_RATE);
     }
