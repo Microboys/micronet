@@ -33,8 +33,8 @@ void update_alive_nodes(uint16_t ip, unsigned long time) {
  * we delete the arc from our graph.
  */
 void update_graph(uint16_t from, uint16_t to, int distance) {
-    lock_graph();
     edge e({from, to});
+    lock_graph();
     auto it = graph.find(e);
     if (it != graph.end()) {
         if (distance < DISCONNECTION_THRESHOLD) {
@@ -64,7 +64,7 @@ void update_graph(Packet* p) {
 
 void recalculate_graph(uint16_t source) {
     lock_graph();
-    calculate_syn_tree(source, graph);
+    calculate_sink_tree(source, graph);
     unlock_graph();
 }
 
@@ -87,7 +87,7 @@ void delete_extra_neighbours(uint16_t ip) {
             }
         }
 
-        graph.erase(weakest_edge);
+    	graph.erase(weakest_edge);
     }
     unlock_graph();
 }
@@ -188,7 +188,7 @@ ManagedString sink_tree_to_json(std::unordered_map<struct edge, int> graph) {
     for (auto it = graph.begin(); it != graph.end(); ++it) {
         result = result + "{";
         result = result + format_attr("to", it->first.to);
-        std::vector<uint16_t> path = get_full_path_for_node(it->first.to);
+        std::vector<uint16_t> path = get_path_for_node(it->first.to);
         result = result + format_attr("path", path, true);
         result = result + "}";
         index++;

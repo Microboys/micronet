@@ -38,75 +38,84 @@ int test_main() {
     add_to_graph(3, 4, -2);
     add_to_graph(4, 5, -3);
 
-    calculate_syn_tree(1, test_graph);
+    calculate_sink_tree(1, test_graph);
 
     int test_failed = 0;
 
     // Testing path returned
-    if (get_path_for_node(1) != 0){
+    if (get_next_node(1) != 0){
         test_failed++;
         printf("Test Failed: wrong path for node 1 \n");
     }
 
-    if (get_path_for_node(2) != 3){
+    if (get_next_node(2) != 3){
         test_failed++;
         printf("Test Failed: wrong path for node 2 \n");
     }
 
-    if (get_path_for_node(3) != 3){
+    if (get_next_node(3) != 3){
         test_failed++;
         printf("Test Failed: wrong path for node 3 \n");
     }
 
-    if (get_path_for_node(4) != 3){
+    if (get_next_node(4) != 3){
         test_failed++;
         printf("Test Failed: wrong path for node 4 \n");
     }
 
-    if (get_path_for_node(5) != 3){
+    if (get_next_node(5) != 3){
         test_failed++;
         printf("Test Failed: wrong path for node 5 \n");
     }
 
     // Testing full path returned
     {
-      std::vector<uint16_t> path = get_full_path_for_node(1);
-      if (path.size() != 0){
-        test_failed++;
-        printf("Test Failed: wrong full path for node 1 \n");
-      }
+        std::vector<uint16_t> path = get_path_for_node(1);
+        if (path.size() != 0){
+            test_failed++;
+            printf("Test Failed: wrong full path for node 1 \n");
+        }
     }
 
     {
-      std::vector<uint16_t> path = get_full_path_for_node(2);
-      if (path.at(0) != 3 || path.at(1) != 2){
-        test_failed++;
-        printf("Test Failed: wrong full path for node 2 \n");
-      }
+        std::vector<uint16_t> path = get_path_for_node(2);
+        if (path.at(0) != 3 || path.at(1) != 2){
+            test_failed++;
+            printf("Test Failed: wrong full path for node 2 \n");
+        }
     }
 
     {
-      std::vector<uint16_t> path = get_full_path_for_node(3);
-      if (path.at(0) != 3) {
-        test_failed++;
-        printf("Test Failed: wrong full path for node 3 \n");
-      }
+        std::vector<uint16_t> path = get_path_for_node(3);
+        if (path.size() != 1){
+            test_failed++;
+            printf("Test Failed: wrong full path for node 3 \n");
+        } else if (path.at(0) != 3) {
+            test_failed++;
+            printf("Test Failed: wrong full path for node 3 \n");
+        }
     }
 
     {
-      std::vector<uint16_t> path = get_full_path_for_node(4);
-      if (path.at(0) != 3 || path.at(1) != 4){
-        test_failed++;
-        printf("Test Failed: wrong full path for node 4 \n");
-      }
+        std::vector<uint16_t> path = get_path_for_node(4);
+        if (path.size() != 2){
+            test_failed++;
+            printf("Test Failed: wrong full path for node 4 \n");
+        } else if (path.at(0) != 3 || path.at(1) != 4){
+            test_failed++;
+            printf("Test Failed: wrong full path for node 4 \n");
+        }
     }
 
     {
-      std::vector<uint16_t> path = get_full_path_for_node(5);
-      if (path.at(0) != 3 || path.at(1) != 2 || path.at(2) != 5){
-        test_failed++;
-        printf("Test Failed: wrong full path for node 5 \n");
-      }
+        std::vector<uint16_t> path = get_path_for_node(5);
+        if (path.size() != 3){
+            test_failed++;
+            printf("Test Failed: wrong full path for node 5\n");
+        } else if (path.at(0) != 3 || path.at(1) != 2 || path.at(2) != 5){
+            test_failed++;
+            printf("Test Failed: wrong full path for node 5 \n");
+        }
     }
 
     // Testing value returned to be correct

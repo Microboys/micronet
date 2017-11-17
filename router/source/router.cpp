@@ -1,6 +1,5 @@
 #include "router.h"
-#include "lsr.h"
-#include <vector>
+
 MicroBit uBit;
 MicroBitSerial serial(USBTX, USBRX);
 
@@ -27,7 +26,8 @@ void broadcast(Packet* p) {
 void send_message(Packet* p) {
   if (p->ttl > 0) {
       p->ttl--;
-      uint16_t next_node = get_path_for_node(p->dest_ip);
+      recalculate_graph(ip);
+      uint16_t next_node = get_next_node(p->dest_ip);
       p->imm_dest_ip = next_node;
       uBit.radio.datagram.send(p->format());
       uBit.sleep(1);
@@ -46,7 +46,16 @@ void on_packet(MicroBitEvent) {
         return;
     }
 
-    if (packet_queue.size() > MAX_PACKET_QUEUE_SIZE && buffer[0] != MESSAGE) {
+    // if (buffer[F_PTYPE] == LSA) {
+    //     uint8_t ttl = buffer[F_LSA_TTL];
+    //     buffer[F_LSA_TTL] = 0;
+    //     if (packet_cache_contains(buffer)) {
+    //         return;
+    //     } else {
+    //         buffer[F_LSA_TTL] = ttl;
+    //     }
+    // }
+    if (packet_queue.size() > MAX_PACKET_QUEUE_SIZE && buffer[F_PTYPE] != MESSAGE) {
         return;
     }
 
@@ -88,7 +97,6 @@ void handle_packet(Packet* p) {
 }
 
 void handle_lsa(Packet* p) {
-    //recalculate_graph(ip);
     if (p->source_ip == ip) {
         return;
     }
@@ -103,9 +111,8 @@ void handle_lsa(Packet* p) {
 }
 
 void handle_message(Packet* p) {
-    if (p->dest_ip == ip) {
-        uBit.display.printAsync(p->payload);
-    } else if (p->imm_dest_ip == ip) {
+    uBit.display.printAsync(p->payload);
+    if (p->imm_dest_ip == ip) {
         send_message(p);
     }
 }
@@ -119,7 +126,6 @@ void handle_ping(Packet* p) {
     } else if (p->imm_dest_ip == ip) {
         // Got back our own ping packet
         update_graph(ip, p->source_ip, p->rssi);
-        //recalculate_graph(ip);
     }
 }
 
@@ -137,22 +143,23 @@ void ping(MicroBitEvent) {
     uBit.sleep(1);
 }
 
- void send_payload(uint16_t dest_ip, ManagedString message) {
-     std::vector<uint16_t> neighbours = get_neighbours(ip);
-     if (!neighbours.empty()) {
-         for (auto n : neighbours) {
-             Packet p(MESSAGE, ip, n, dest_ip, 0, INITIAL_TTL, message);
-             uBit.radio.datagram.send(p.format());
-         }
-     }
- }
+ // void send_payload(uint16_t dest_ip, ManagedString message) {
+ //     std::vector<uint16_t> neighbours = get_neighbours(ip);
+ //     if (!neighbours.empty()) {
+ //         for (auto n : neighbours) {
+ //             Packet p(MESSAGE, ip, n, dest_ip, 0, INITIAL_TTL, message);
+ //             uBit.radio.datagram.send(p.format());
+ //         }
+ //     }
+ // }
 
-//void send_payload(uint16_t dest_ip, ManagedString message) {
-    //uint16_t next_node = get_path_for_node(dest_ip);
-    //Packet p(MESSAGE, ip, next_node, dest_ip, 0, INITIAL_TTL, message);
-    //uBit.radio.datagram.send(p.format());
-    //uBit.sleep(1);
-//}
+void send_payload(uint16_t dest_ip, ManagedString message) {
+    recalculate_graph(ip);
+    uint16_t next_node = get_next_node(dest_ip);
+    Packet p(MESSAGE, ip, next_node, dest_ip, 0, INITIAL_TTL, message);
+    uBit.radio.datagram.send(p.format());
+    uBit.sleep(1);
+}
 
 void send_lsa(MicroBitEvent) {
     std::unordered_map<edge, int> to_send = get_lsa_graph(ip);
@@ -245,13 +252,14 @@ void update_network() {
 
         delete_extra_neighbours(ip);
         remove_dead_nodes(get_system_time());
-        //recalculate_graph(ip);
     }
 }
 
 void update_desktop_app() {
     while(started) {
         //uBit.display.scrollAsync(ip);
+        recalculate_graph(ip);
+
         send_graph_update();
         send_path_update();
         send_name_table();
