@@ -111,9 +111,8 @@ void handle_lsa(Packet* p) {
 }
 
 void handle_message(Packet* p) {
-    if (p->dest_ip == ip) {
-        uBit.display.printAsync(p->payload);
-    } else if (p->imm_dest_ip == ip) {
+    uBit.display.printAsync(p->payload);
+    if (p->imm_dest_ip == ip) {
         send_message(p);
     }
 }
