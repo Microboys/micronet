@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
-import NetworkGraph from '../components/NetworkGraph';
+import MainPage from '../components/MainPage';
 
 const mapStateToProps = (state) => {
   return state;
@@ -14,4 +14,4 @@ const mapDispatchToProps = (dispatch) => { // eslint-disable-line no-unused-vars
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(NetworkGraph);
+export default connect(mapStateToProps, mapDispatchToProps)(MainPage);
