@@ -39,10 +39,10 @@
  * of these delays in a single loop (e.g. before sending ping and lsa) so one
  * update cycle will take longer than this value.
  */
-#define UPDATE_RATE 1000
+#define UPDATE_RATE 500
 
 /* Delay in ms before processing each packet. */
-#define PACKET_PROCESS_RATE 2000
+#define PACKET_PROCESS_RATE 1
 
 /* Serial read buffer size. */
 #define RX_BUFFER_SIZE 200
@@ -50,7 +50,7 @@
 /* Time in ms before deciding a router is dead. If we don't receive a packet
  * from a router before the time is up, we delete it and every corresponding
  * arc from our graph. */
-#define NODE_LIFESPAN 10000
+#define NODE_LIFESPAN 4000
 
 /* Delimiter for serial communication. */
 #define SERIAL_DELIMITER "\n"
