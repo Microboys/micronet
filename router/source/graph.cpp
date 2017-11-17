@@ -51,15 +51,17 @@ void update_graph(uint16_t from, uint16_t to, int distance) {
 
 /* Updates graph from LSA packet. Treats the packet as ground truth - deletes
  * all outgoing arcs we currently know and replaces them with ones from packet.
+ * Returns a bool indicating whether or not the graph has changed as a result.
  */
-void update_graph(Packet* p) {
+bool update_graph(Packet* p) {
     uint16_t source_ip = p->source_ip;
-    delete_all_edges(source_ip);
+    std::unordered_map<struct edge, int> deleted = delete_all_edges(source_ip);
     lock_graph();
     for (auto it : p->graph) {
         graph[it.first] = it.second;
     }
     unlock_graph();
+    return deleted == p->graph;
 }
 
 void recalculate_graph(uint16_t source) {
@@ -92,16 +94,21 @@ void delete_extra_neighbours(uint16_t ip) {
     unlock_graph();
 }
 
-/* Deletes all outgoing edges in the graph from a given IP. */
-void delete_all_edges(uint16_t ip) {
+/* Deletes all outgoing edges in the graph from a given IP.
+ * Returns the deleted edges and their weights. */
+std::unordered_map<struct edge, int> delete_all_edges(uint16_t ip) {
+    std::unordered_map<struct edge, int> deleted_edges;
     lock_graph();
     for (auto it : graph) {
         struct edge cur_edge = it.first;
+        int weight = it.second;
         if (cur_edge.from == ip) {
+            deleted_edges[cur_edge] = weight;
             graph.erase(cur_edge);
         }
     }
     unlock_graph();
+    return deleted_edges;
 }
 
 void print_graph(MicroBitSerial serial) {

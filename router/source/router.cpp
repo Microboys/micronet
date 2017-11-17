@@ -67,9 +67,6 @@ void process_packets() {
         if (!packet_queue.empty()) {
             Packet* p = packet_queue.front();
 
-            // Update desktop app
-            serial.send(p->to_json());
-
             update_alive_nodes(p->source_ip, get_system_time());
             handle_packet(p);
             packet_queue.erase(packet_queue.begin());
@@ -101,7 +98,10 @@ void handle_lsa(Packet* p) {
         return;
     }
 
-    update_graph(p);
+    /* Only update the desktop app if the lsa updates our graph. */
+    if (update_graph(p)) {
+      serial.send(p->to_json());
+    }
 
     if (p->ttl > 0) {
         p->ttl--;
@@ -111,7 +111,10 @@ void handle_lsa(Packet* p) {
 }
 
 void handle_message(Packet* p) {
-    if (p->imm_dest_ip == ip) {
+    if (p->dest_ip == ip) {
+        uBit.display.printAsync(p->payload);
+        serial.send(p->to_json());
+    } else if (p->imm_dest_ip == ip) {
         uBit.display.printAsync(p->payload);
         send_message(p);
     }
@@ -124,6 +127,7 @@ void handle_ping(Packet* p) {
         uBit.radio.datagram.send(p->format());
         uBit.sleep(1);
     } else if (p->imm_dest_ip == ip) {
+        // TODO: tell desktop app if we've found a neighbour or lost a neighbour
         // Got back our own ping packet
         update_graph(ip, p->source_ip, p->rssi);
     }
