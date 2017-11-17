@@ -71,7 +71,7 @@ h4.modal-title {
 }
 
 #mainContainer {
-	padding: 10px;
+	padding: 0;
 }
 
 .card {
@@ -80,9 +80,11 @@ h4.modal-title {
 
 #packetCol {
 	margin: 0px;
+	padding: 10px;
 	display: flex;
 	flex-direction: column;
 	align-content: center;
+	background-color: #EEEEEE;
 }
 
 #packetContainer {
