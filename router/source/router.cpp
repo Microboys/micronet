@@ -26,7 +26,7 @@ void broadcast(Packet* p) {
 void send_message(Packet* p) {
   if (p->ttl > 0) {
       p->ttl--;
-      recalculate_graph(ip);
+      // recalculate_graph(ip);
       uint16_t next_node = get_next_node(p->dest_ip);
       p->imm_dest_ip = next_node;
       uBit.radio.datagram.send(p->format());
@@ -154,7 +154,7 @@ void ping(MicroBitEvent) {
  // }
 
 void send_payload(uint16_t dest_ip, ManagedString message) {
-    recalculate_graph(ip);
+    // recalculate_graph(ip);
     uint16_t next_node = get_next_node(dest_ip);
     Packet p(MESSAGE, ip, next_node, dest_ip, 0, INITIAL_TTL, message);
     uBit.radio.datagram.send(p.format());
@@ -258,7 +258,7 @@ void update_network() {
 void update_desktop_app() {
     while(started) {
         //uBit.display.scrollAsync(ip);
-        recalculate_graph(ip);
+        // recalculate_graph(ip);
 
         send_graph_update();
         send_path_update();
