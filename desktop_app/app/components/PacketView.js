@@ -1,11 +1,33 @@
 import React, { Component } from 'react';
 import { Row, Col, ListGroup, ListGroupItem, Badge, Card, CardBody, CardHeader, CardText } from 'reactstrap';
-import { lookupName } from './../microbit.js';
+import { lookupName, transformGraphJSON } from './../microbit.js';
+import NetworkGraph from './NetworkGraph';
 
 export default class PacketView extends Component {
   
   constructor(props) {
     super(props);
+    this.state = {
+      options: {
+        autoResize: true,
+        width: '100%',
+        height: '100%',
+        nodes: {
+          shape: 'image',
+          image: './assets/microbit.png'
+        },
+        edges: {
+          font: {
+            align: 'horizontal',
+            vadjust: -10
+          }
+        },
+        physics: {
+          enabled: false
+        }
+      },
+      events: {}
+    }
   }
 
   getTitle(packet) {
@@ -28,7 +50,7 @@ export default class PacketView extends Component {
   getContent(packet) {
       switch (packet.ptype) {
         case "LSA":
-          return <CardText>TODO</CardText>
+          return <NetworkGraph graph={transformGraphJSON(packet.payload)} options={this.state.options} events={this.state.events} />
         case "MSG":
           return <CardText>{packet.payload}</CardText>
         case "DNS":
@@ -49,15 +71,18 @@ export default class PacketView extends Component {
       return (b.time - a.time);
     });
     const packetCards = filteredPackets
-      .map((packet, index) =>
-        <Card key={index}>
-          <CardHeader>
-            {this.getTitle(packet)}
-          </CardHeader>
-          <CardBody className={packet.ptype}>
-            {this.getContent(packet)}
-          </CardBody>
-        </Card>
+      .map((packet, index) => {
+        return (
+          <Card key={index}>
+            <CardHeader>
+              {this.getTitle(packet)}
+            </CardHeader>
+            <CardBody className={packet.ptype}>
+              {this.getContent(packet)}
+            </CardBody>
+          </Card>
+          );
+        }
       );
 
     return (

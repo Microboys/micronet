@@ -205,7 +205,9 @@ const lengthCoeff = 5; // Coefficient for multiplying arc length (on graph)
 function transformGraphJSON(graph, ip) {
   var nodes = [];
   var edges = [];
-  addNode(nodes, ip, true);
+  if (ip) {
+    addNode(nodes, ip, true);
+  }
   for (var i = 0; i < graph.length; i++) {
     var arc = graph[i];
     addNode(nodes, arc.from, false);
@@ -336,4 +338,4 @@ function flashMicrobit() {
 
 /* Exports. */
 
-export { init, sendMsg, renameMicrobit, flashMicrobit, lookupName};
+export { init, sendMsg, renameMicrobit, flashMicrobit, lookupName, transformGraphJSON };
