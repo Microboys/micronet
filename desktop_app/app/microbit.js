@@ -122,7 +122,7 @@ function handleDataLine(dataJSON) {
           + dataJSON);
 	break;
       }
-
+      dataJSON.time = new Date().getTime();
       store.dispatch(packetActions.addPacket(dataJSON));
       break;
 

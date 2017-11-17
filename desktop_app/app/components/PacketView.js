@@ -40,11 +40,14 @@ export default class PacketView extends Component {
     }
 
   render() {
-    const filteredPackets = this.props.packets.reverse()
+    var filteredPackets = this.props.packets.reverse()
       .filter((packet) => 
 	    packet.ptype === "DNS" ||
-	    packet.ptype === "MSG" ||
-	    packet.ptype === "LSA");
+	    packet.ptype === "LSA" ||
+	    packet.ptype === "MSG");
+    filteredPackets.sort((a, b) => {
+      return (b.time - a.time);
+    });
     const packetCards = filteredPackets
       .map((packet, index) =>
         <Card key={index}>
