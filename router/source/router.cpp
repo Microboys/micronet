@@ -244,6 +244,9 @@ void init_serial_read() {
 
 void update_network() {
     while(started) {
+        // Refresh visual ID on display in case we were displaying something else
+        uBit.display.print(get_visual_id(ip));
+
         ping(MicroBitEvent());
         uBit.sleep(UPDATE_RATE);
 
