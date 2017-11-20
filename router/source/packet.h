@@ -18,7 +18,8 @@
 
 #define F_LSA_TTL 1
 #define F_LSA_SOURCE_IP 2
-#define F_LSA_PAYLOAD 4
+#define F_LSA_SEQNUM 4
+#define F_LSA_PAYLOAD 7
 
 // Message
 #define F_MESSAGE_SOURCE_IP 1
@@ -47,7 +48,13 @@
  *  p[0] = type,
  *  p[1] = ttl,
  *  p[2-3] = source_ip,
- *  p[4-31] = [neighbour_ip + rssi] (maximum of 9)
+ *  p[4-5] = sequence_number,
+ *  p[6] = reserved,
+ *  p[7-31] = [neighbour_ip + rssi] (maximum of 8),
+ *
+ *  NOTE: At an update rate of 500ms, we only exhaust sequence numbers after 9 hours.
+ *  We are not using the extra byte for the sequence_number because a 2B value is
+ *  more convenient.
  *  
  * Message:
  *  p[0] = type,
@@ -86,6 +93,7 @@ class Packet {
         uint16_t dest_ip = 0;
         uint8_t timestamp = 0;
         uint8_t ttl = INITIAL_TTL;
+        uint16_t sequence_number = 0;
         ManagedString payload = "";
         int rssi = 0;
 
@@ -97,7 +105,8 @@ class Packet {
         Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip,
             uint16_t dest_ip, uint8_t timestamp, uint8_t ttl,
             ManagedString payload);
-        Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip, uint16_t dest_ip, uint8_t timestamp, uint8_t ttl, std::unordered_map<struct edge, int> graph);
+        Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip, uint16_t dest_ip, uint8_t timestamp, uint8_t ttl,
+            uint16_t sequence_number, std::unordered_map<struct edge, int> graph);
         Packet();
         PacketBuffer format();
         ManagedString to_json();

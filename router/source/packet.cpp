@@ -16,7 +16,7 @@ Packet::Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip,
 
 // Outgoing packets
 Packet::Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip,
-        uint16_t dest_ip, uint8_t timestamp, uint8_t ttl,
+        uint16_t dest_ip, uint8_t timestamp, uint8_t ttl, uint16_t sequence_number,
         std::unordered_map<edge, int> graph) {
 
         this->source_ip = source_ip;
@@ -25,6 +25,7 @@ Packet::Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip,
         this->timestamp = timestamp;
         this->ptype = ptype;
         this->ttl = ttl;
+        this->sequence_number = sequence_number;
         this->graph = graph;
 }
 // Incoming packets
@@ -35,6 +36,7 @@ Packet::Packet(PacketBuffer p, int rssi) {
         case LSA:
             this->ttl = p[F_LSA_TTL];
             this->source_ip = concat(p[F_LSA_SOURCE_IP], p[F_LSA_SOURCE_IP + 1]);
+            this->sequence_number = concat(p[F_LSA_SEQNUM], p[F_LSA_SEQNUM + 1]);
             this->graph = decode_lsa(p, this->source_ip);
             break;
         case PING:
@@ -74,6 +76,8 @@ PacketBuffer Packet::format() {
             p[F_LSA_TTL] = this->ttl;
             p[F_LSA_SOURCE_IP] = (uint8_t)(this->source_ip >> BYTE_SIZE);
             p[F_LSA_SOURCE_IP + 1] = (uint8_t)(this->source_ip);
+            p[F_LSA_SEQNUM] = (uint8_t)(this->sequence_number >> BYTE_SIZE);
+            p[F_LSA_SEQNUM + 1] = (uint8_t)(this->sequence_number);
             encode_lsa(p, this->graph);
             break;
         case MESSAGE:
@@ -163,6 +167,7 @@ ManagedString Packet::to_json() {
             result = result + format_attr("ptype", "LSA");
             result = result + format_attr("ttl", this->ttl);
             result = result + format_attr("source_ip", this->source_ip);
+            result = result + format_attr("sequence_number", this->sequence_number);
             result = result + "\"payload\":" + graph_to_json(this->graph);
             //result = result + format_attr("payload", graph_to_json(this->graph), true);
             break;
@@ -199,6 +204,7 @@ void Packet::print_packet(MicroBitSerial serial) {
             serial.printf("ptype: LSA\n\r");
             serial.printf("ttl: %i\n\r", this->ttl);
             serial.printf("source_ip: %i\n\r", this->source_ip);
+            serial.printf("sequence_number: %i\n\r", this->sequence_number);
             print_graph(serial, this->graph);
             break;
         case MESSAGE:

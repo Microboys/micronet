@@ -4,6 +4,7 @@ MicroBit uBit;
 MicroBitSerial serial(USBTX, USBRX);
 
 unordered_map<uint16_t, ManagedString> name_table;
+uint16_t sequence_number;
 
 /* Device IP */
 uint16_t ip = 0;
@@ -163,7 +164,8 @@ void send_payload(uint16_t dest_ip, ManagedString message) {
 
 void send_lsa(MicroBitEvent) {
     std::unordered_map<edge, int> to_send = get_lsa_graph(ip);
-    Packet p(LSA, ip, 0, 0, 0, INITIAL_TTL, to_send);
+    Packet p(LSA, ip, 0, 0, 0, INITIAL_TTL, sequence_number, to_send);
+    sequence_number++;
     uBit.radio.datagram.send(p.format());
     uBit.sleep(1);
 }
