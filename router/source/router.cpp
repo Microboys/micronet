@@ -4,6 +4,7 @@ MicroBit uBit;
 MicroBitSerial serial(USBTX, USBRX);
 
 unordered_map<uint16_t, ManagedString> name_table;
+unordered_map<uint16_t, PacketBuffer> lsa_table;
 uint16_t sequence_number;
 
 /* Device IP */
@@ -47,15 +48,6 @@ void on_packet(MicroBitEvent) {
         return;
     }
 
-    // if (buffer[F_PTYPE] == LSA) {
-    //     uint8_t ttl = buffer[F_LSA_TTL];
-    //     buffer[F_LSA_TTL] = 0;
-    //     if (packet_cache_contains(buffer)) {
-    //         return;
-    //     } else {
-    //         buffer[F_LSA_TTL] = ttl;
-    //     }
-    // }
     if (packet_queue.size() > MAX_PACKET_QUEUE_SIZE && buffer[F_PTYPE] != MESSAGE) {
         return;
     }
@@ -67,9 +59,6 @@ void process_packets() {
     while (true) {
         if (!packet_queue.empty()) {
             Packet* p = packet_queue.front();
-
-            // Update desktop app
-            serial.send(p->to_json());
 
             update_alive_nodes(p->source_ip, get_system_time());
             handle_packet(p);
@@ -99,13 +88,63 @@ void handle_packet(Packet* p) {
 
 void handle_lsa(Packet* p) {
     if (p->source_ip == ip) {
-        return;
+      /* If we see a packet sent from us with a higher sequence number, we should
+       * update our sequence number so our LSAs aren't ignored. */
+      if (p->sequence_number > sequence_number) {
+        sequence_number = p->sequence_number + 1;
+      }
+      return;
     }
 
-    update_graph(p);
+    bool should_flood = false;
+    uint8_t new_ttl = p->ttl - 1;
+    p->ttl = 0;
 
-    if (p->ttl > 0) {
-        p->ttl--;
+    if (lsa_table.count(p->source_ip) == 0) {
+      lsa_table[p->source_ip] = p->format();
+      should_flood = true;
+
+      /* This packet, has introduced a new node so we notify the desktop app. */
+      serial.send(p->to_json());
+
+    } else {
+      PacketBuffer old_packet_buffer = lsa_table[p->source_ip];
+      uint16_t old_sequence_number = Packet::get_sequence_number(old_packet_buffer);
+
+      if (old_sequence_number < p->sequence_number) {
+        should_flood = true;
+
+        // TODO: We're deserialising the packet just to serialise it again - better way?
+        PacketBuffer new_packet_buffer = p->format();
+
+        Packet::set_sequence_number(new_packet_buffer, 0);
+        Packet::set_sequence_number(old_packet_buffer, 0);
+
+        /* PacketBuffer does not support '!='. */
+        if (!(new_packet_buffer == old_packet_buffer)) {
+          update_graph(p);
+
+          /* TODO: Update desktop app with new packet only if the topology changes. */
+          // TODO: send as event rather than packet.
+          serial.send(p->to_json());
+        } 
+
+        Packet::set_sequence_number(new_packet_buffer, sequence_number);
+        lsa_table[p->source_ip] = new_packet_buffer;
+      } else if (old_sequence_number > p->sequence_number) {
+        /* If the router is a neighbour, we should flood its previous packet so it can
+         * learn its latest sequence number. */
+        std::vector<uint16_t> neighbours = get_neighbours(ip);
+        if (std::find(neighbours.begin(), neighbours.end(), p->source_ip) != neighbours.end()) {
+          uBit.radio.datagram.send(old_packet_buffer);
+          uBit.sleep(1);
+          return;
+        }
+      }
+    }
+
+    if (new_ttl > 0 && should_flood) {
+        p->ttl = new_ttl;
         uBit.radio.datagram.send(p->format());
         uBit.sleep(1);
     }

@@ -3,7 +3,6 @@
 #include "packet.h"
 #include "graph.h"
 #include "config.h"
-#include "packet_cache.h"
 #include "lsr.h"
 #include <vector>
 

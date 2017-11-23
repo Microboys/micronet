@@ -36,7 +36,7 @@ Packet::Packet(PacketBuffer p, int rssi) {
         case LSA:
             this->ttl = p[F_LSA_TTL];
             this->source_ip = concat(p[F_LSA_SOURCE_IP], p[F_LSA_SOURCE_IP + 1]);
-            this->sequence_number = concat(p[F_LSA_SEQNUM], p[F_LSA_SEQNUM + 1]);
+            this->sequence_number = Packet::get_sequence_number(p);
             this->graph = decode_lsa(p, this->source_ip);
             break;
         case PING:
@@ -76,9 +76,9 @@ PacketBuffer Packet::format() {
             p[F_LSA_TTL] = this->ttl;
             p[F_LSA_SOURCE_IP] = (uint8_t)(this->source_ip >> BYTE_SIZE);
             p[F_LSA_SOURCE_IP + 1] = (uint8_t)(this->source_ip);
-            p[F_LSA_SEQNUM] = (uint8_t)(this->sequence_number >> BYTE_SIZE);
-            p[F_LSA_SEQNUM + 1] = (uint8_t)(this->sequence_number);
+            Packet::set_sequence_number(p, this->sequence_number);
             encode_lsa(p, this->graph);
+            p[F_LSA_RESERVED] = 0;
             break;
         case MESSAGE:
             p[F_MESSAGE_SOURCE_IP] = (uint8_t)(this->source_ip >> BYTE_SIZE);
@@ -152,6 +152,17 @@ void Packet::encode_lsa(PacketBuffer p, std::unordered_map<edge, int> graph) {
     for (int i = index; i < PACKET_SIZE; i++) {
         p[i] = 0;
     }
+}
+
+/* Set the sequence number of an LSA PacketBuffer. */
+void Packet::set_sequence_number(PacketBuffer p, uint16_t sequence_number) {
+  p[F_LSA_SEQNUM] = (uint8_t)(sequence_number >> BYTE_SIZE);
+  p[F_LSA_SEQNUM + 1] = (uint8_t)(sequence_number);
+}
+
+/* Return the sequence number of an LSA PacketBuffer. */
+uint16_t Packet::get_sequence_number(PacketBuffer p) {
+  return concat(p[F_LSA_SEQNUM], p[F_LSA_SEQNUM + 1]);
 }
 
 ManagedString Packet::to_json() {

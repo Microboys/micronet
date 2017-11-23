@@ -20,6 +20,7 @@
 #define F_LSA_SOURCE_IP 2
 #define F_LSA_SEQNUM 4
 #define F_LSA_PAYLOAD 7
+#define F_LSA_RESERVED 31
 
 // Message
 #define F_MESSAGE_SOURCE_IP 1
@@ -99,6 +100,8 @@ class Packet {
 
         // For LSA packets
         std::unordered_map<struct edge, int> graph;
+        static void set_sequence_number(PacketBuffer p, uint16_t sequence_number);
+        static uint16_t get_sequence_number(PacketBuffer p);
 
         void print_packet(MicroBitSerial);
         Packet(PacketBuffer p, int rssi);
