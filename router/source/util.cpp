@@ -6,10 +6,10 @@ uint16_t concat(uint8_t upper, uint8_t lower) {
 
 ManagedString format_attr(ManagedString attr, ManagedString val, bool last) {
     ManagedString result = ManagedString("\"")
-        + ManagedString(attr)
+        + attr
         + ManagedString("\":")
         + ManagedString("\"")
-        + ManagedString(val)
+        + val
         + ManagedString("\"");
     if (last)
         return result;
@@ -19,7 +19,7 @@ ManagedString format_attr(ManagedString attr, ManagedString val, bool last) {
 
 ManagedString format_attr(ManagedString attr, int val, bool last) {
     ManagedString result = ManagedString("\"")
-        + ManagedString(attr)
+        + attr
         + ManagedString("\":")
         + ManagedString(val);
     if (last)
@@ -30,7 +30,7 @@ ManagedString format_attr(ManagedString attr, int val, bool last) {
 
 ManagedString format_attr(ManagedString attr, std::vector<uint16_t> val, bool last) {
     ManagedString result = ManagedString("\"")
-        + ManagedString(attr)
+        + attr
         + ManagedString("\":[");
     if (val.size() == 0) {
       result = result + ManagedString("]");

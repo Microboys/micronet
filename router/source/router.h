@@ -26,6 +26,7 @@ ManagedString name_table_json();
 void send_name_table();
 void on_serial(MicroBitEvent e);
 void init_serial_read();
+MicroBitImage get_visual_id(uint16_t ip);
 
 void update_network();
 void update_desktop_app();

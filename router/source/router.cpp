@@ -244,13 +244,15 @@ void init_serial_read() {
 
 void update_network() {
     while(started) {
+        // Refresh visual ID on display in case we were displaying something else
+        uBit.display.print(get_visual_id(ip));
+
         ping(MicroBitEvent());
         uBit.sleep(UPDATE_RATE);
 
         send_lsa(MicroBitEvent());
         uBit.sleep(UPDATE_RATE);
 
-        delete_extra_neighbours(ip);
         remove_dead_nodes(get_system_time());
     }
 }
@@ -261,10 +263,34 @@ void update_desktop_app() {
         // recalculate_graph(ip);
 
         send_graph_update();
-        send_path_update();
+        // send_path_update();
         send_name_table();
         uBit.sleep(UPDATE_RATE);
     }
+}
+
+MicroBitImage get_visual_id(uint16_t ip) {
+    ManagedString high(255);
+    ManagedString low(0);
+    ManagedString result = "";
+    ManagedString delim = "\n";
+    for (int i = 0; i < 25; i++) {
+        if (i % 5 == 0) {
+            delim = "\n";
+        } else {
+            delim = ",";
+        }
+
+        if (ip % 2 == 1) {
+            result = high + delim + result;
+            ip--;
+        } else {
+            result = low + delim + result;
+        }
+        ip /= 2;
+    }
+
+    return MicroBitImage(result.toCharArray());
 }
 
 void setup(MicroBitEvent) {
@@ -272,6 +298,7 @@ void setup(MicroBitEvent) {
         started = true;
         // Generate a random IP, exclude 0
         ip = uBit.random(IP_MAXIMUM - 1) + 1;
+        uBit.display.print(get_visual_id(ip));
 
         uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, on_packet, MESSAGE_BUS_LISTENER_QUEUE_IF_BUSY);
         uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_CLICK, ping);
