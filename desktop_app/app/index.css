@@ -7,6 +7,15 @@ h4.modal-title {
 	display: inline-block;
 }
 
+#searching {
+	text-align: center;
+	margin: auto auto 25px auto;
+}
+
+.halfHeight {
+	height: 50%;
+}
+
 #carouselRow {
 	height: 90% !important;
 }
@@ -15,6 +24,10 @@ h4.modal-title {
 	margin-left: 0 !important;
 	margin-right: 0 !important;
 	width: 100% !important;
+}
+
+#graphModalBody {
+	height: 50vh;
 }
 
 #skipButton {
@@ -60,6 +73,14 @@ h4.modal-title {
 	border-color: #63B66E;
 }
 
+#mainFlashBtn {
+	color: white;
+	background-color: #63B66E;
+	border-color: #63B66E;
+	width: 40%;
+	margin: 25px auto auto auto;
+}
+
 #helpBtn {
 	color: white;
 	background-color: #63B66E;
@@ -103,5 +124,6 @@ h4.modal-title {
 }
 
 .LSA {
-	background-color: #88B3FF;
+	background-color: white;
+	padding: 0;
 }

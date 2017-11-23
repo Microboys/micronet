@@ -1,11 +1,75 @@
 import React, { Component } from 'react';
-import { Row, Col, ListGroup, ListGroupItem, Badge, Card, CardBody, CardHeader, CardText } from 'reactstrap';
-import { lookupName } from './../microbit.js';
+import { Row, Col, ListGroup, ListGroupItem, Badge, Card, CardBody, CardHeader, CardText, Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
+import { lookupName, transformGraphJSON } from './../microbit.js';
+import NetworkGraph from './NetworkGraph';
 
 export default class PacketView extends Component {
   
   constructor(props) {
     super(props);
+    this.state = {
+      options: {
+        autoResize: true,
+        width: '100%',
+        height: '100%',
+        nodes: {
+          shape: 'image',
+          image: './assets/microbit.png'
+        },
+        edges: {
+          font: {
+            align: 'horizontal',
+            vadjust: -10
+          }
+        },
+        physics: {
+          enabled: false
+        },
+        interaction: {
+          zoomView: false,
+          hideEdgesOnDrag: true
+        }
+      },
+      modalOptions: {
+        autoResize: true,
+        width: '100%',
+        height: '100%',
+        nodes: {
+          shape: 'image',
+          image: './assets/microbit.png'
+        },
+        edges: {
+          font: {
+            align: 'horizontal',
+            vadjust: -10
+          }
+        },
+        physics: {
+          barnesHut: {
+            springConstant: 0.001,
+            gravitationalConstant: -20000
+          }
+        }
+      },
+      events: {},
+      graphModal: false,
+      selectedGraph: null,
+      selectedHeader: null
+    }
+    this.toggleGraphModal = this.toggleGraphModal.bind(this);
+    this.graphOnClick = this.graphOnClick.bind(this);
+  }
+
+  toggleGraphModal() {
+    this.setState({graphModal: !this.state.graphModal});
+  }
+
+  graphOnClick(graph, header) {
+    return (event) => {
+      this.toggleGraphModal();
+      this.setState({selectedGraph: graph});
+      this.setState({selectedHeader: header});
+    };
   }
 
   getTitle(packet) {
@@ -28,7 +92,9 @@ export default class PacketView extends Component {
   getContent(packet) {
       switch (packet.ptype) {
         case "LSA":
-          return <CardText>TODO</CardText>
+          const graph = transformGraphJSON(packet.payload);
+          const onClick = this.graphOnClick(<NetworkGraph graph={graph} options={this.state.modalOptions} events={this.state.events} />, this.getTitle(packet));
+          return <NetworkGraph graph={transformGraphJSON(packet.payload)} options={this.state.options} events={{click: onClick}} />
         case "MSG":
           return <CardText>{packet.payload}</CardText>
         case "DNS":
@@ -49,19 +115,28 @@ export default class PacketView extends Component {
       return (b.time - a.time);
     });
     const packetCards = filteredPackets
-      .map((packet, index) =>
-        <Card key={index}>
-          <CardHeader>
-            {this.getTitle(packet)}
-          </CardHeader>
-          <CardBody className={packet.ptype}>
-            {this.getContent(packet)}
-          </CardBody>
-        </Card>
+      .map((packet, index) => {
+        return (
+          <Card key={index}>
+            <CardHeader>
+              {this.getTitle(packet)}
+            </CardHeader>
+            <CardBody className={packet.ptype}>
+              {this.getContent(packet)}
+            </CardBody>
+          </Card>
+          );
+        }
       );
 
     return (
       <div id='packetContainer'>
+        <Modal autoFocus={false} className='modal-lg' isOpen={this.state.graphModal} toggle={this.toggleGraphModal} fade={false}>
+          <ModalHeader toggle={this.toggleGraphModal}>{this.state.selectedHeader}</ModalHeader>
+          <ModalBody id='graphModalBody'>
+            {this.state.selectedGraph}
+          </ModalBody>
+        </Modal>
         <div className='list-group'>
           {packetCards}
         </div>

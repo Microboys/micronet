@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PacketView from './PacketView';
 import NetworkGraph from './NetworkGraph';
+import FlashButton from './FlashButton';
 import ButtonContainer from './ButtonContainer';
 import { Row, Col, Container, Modal, ModalHeader, ModalBody, ModalFooter, Input, Form, Button, ListGroup, ListGroupItem, Badge } from 'reactstrap';
 import { sendMsg, renameMicrobit } from './../microbit.js';
@@ -91,13 +92,14 @@ export default class MainPage extends Component {
   render() {
     if (!this.props.connection.established) {
       return (
-        <Row className='fullsize justify-content-center'>
-          <Col className='align-self-center'>
-            <center>
-              <b>Looking for a router micro:bit - make sure it's flashed, connected and activated!</b>
-            </center>
-          </Col>
-        </Row>
+        <Container className='fullsize justify-content-center'>
+          <Row className='justify-content-center noMarginRow halfHeight'>
+            <h4 id='searching'>Looking for a router micro:bit - make sure it's flashed, connected and activated!</h4>
+          </Row>
+          <Row className='justify-content-center noMarginRow halfHeight'>
+            <FlashButton id='mainFlashBtn' className='flashBtn' />
+          </Row>
+        </Container>
       );
     } else {
       return (
