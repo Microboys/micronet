@@ -17,6 +17,10 @@ h4.modal-title {
 	width: 100% !important;
 }
 
+#graphModalBody {
+	height: 50vh;
+}
+
 #skipButton {
 	width: 25% !important;
 
