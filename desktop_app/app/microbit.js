@@ -121,13 +121,10 @@ function handleDataLine(dataJSON) {
           + dataJSON);
 	break;
       }
+
       dataJSON.time = new Date().getTime();
-      if (dataJSON.ptype == 'MSG') {
-        store.dispatch(packetActions.addPacket(dataJSON));
-      }
-      if (dataJSON.ptype == 'LSA') {
-        store.dispatch(packetActions.addPacket(dataJSON));
-      }
+      console.log(dataJSON);
+      store.dispatch(packetActions.addPacket(dataJSON));
       break;
 
     case 'sink-tree':

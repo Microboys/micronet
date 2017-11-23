@@ -29,24 +29,23 @@ void update_alive_nodes(uint16_t ip, unsigned long time) {
 
 /* Updates graph from ping response. If the ping came from a router that is
  * closer than CONNECTION_THRESHOLD, we add it to our graph or update its arc
- * value if it's already present. If it's farther away than DISCONNECTION_THRESHOLD,
- * we delete the arc from our graph.
+ * value if it's already present.
+ * Returns a bool indicating whether or not a new neighbour was added.
  */
-void update_graph(uint16_t from, uint16_t to, int distance) {
+bool update_graph(uint16_t from, uint16_t to, int distance) {
+    bool new_neighbour = false;
     edge e({from, to});
     lock_graph();
     auto it = graph.find(e);
     if (it != graph.end()) {
-        if (distance < DISCONNECTION_THRESHOLD) {
-            graph.erase(it);
-        } else {
-            graph[e] = distance;
-        }
+        graph[e] = distance;
     } else if (distance >= CONNECTION_THRESHOLD) {
         graph[e] = distance;
+        new_neighbour = true;
     }
     unlock_graph();
     delete_extra_neighbours(from);
+    return new_neighbour;
 }
 
 /* Updates graph from LSA packet. Treats the packet as ground truth - deletes
@@ -230,8 +229,8 @@ ManagedString path_json(uint16_t ip) {
 }
 
 /* Prunes graph by deleting 'dead' routers and every arc that contains them.
- */
-void remove_dead_nodes(unsigned long current_time) {
+ * Returns the nodes that were found to be dead. */
+std::unordered_set<uint16_t> remove_dead_nodes(unsigned long current_time) {
     std::unordered_set<uint16_t> dead_nodes = get_dead_nodes(current_time);
 
     std::unordered_map<struct edge, int> new_graph;
@@ -244,6 +243,7 @@ void remove_dead_nodes(unsigned long current_time) {
     }
     graph = new_graph;
     unlock_graph();
+    return dead_nodes;
 }
 
 bool contains(std::unordered_set<uint16_t> set, uint16_t value) {

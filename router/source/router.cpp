@@ -43,8 +43,10 @@ unsigned long get_system_time() {
 /* Handler for receiving a packet. */
 void on_packet(MicroBitEvent) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
-    if (buffer == PacketBuffer::EmptyPacket || uBit.radio.getRSSI() == 0
-            || buffer.length() != PACKET_SIZE) {
+    auto rssi = uBit.radio.getRSSI();
+    if (buffer == PacketBuffer::EmptyPacket || rssi == 0
+            || buffer.length() != PACKET_SIZE
+            || rssi < DISCONNECTION_THRESHOLD) {
         return;
     }
 
@@ -52,7 +54,7 @@ void on_packet(MicroBitEvent) {
         return;
     }
 
-    packet_queue.push_back(new Packet(buffer, uBit.radio.getRSSI()));
+    packet_queue.push_back(new Packet(buffer, rssi));
 }
 
 void process_packets() {
@@ -126,7 +128,7 @@ void handle_lsa(Packet* p) {
 
           if (update_graph(p)) {
             /* Update desktop app with new packet only if the topology changes. */
-            // TODO: send as event rather than packet.
+            // TODO: Make LSAs an event, like the neighbour updates.
             serial.send(p->to_json());
           }
 
@@ -168,7 +170,9 @@ void handle_ping(Packet* p) {
         uBit.sleep(1);
     } else if (p->imm_dest_ip == ip) {
         // Got back our own ping packet
-        update_graph(ip, p->source_ip, p->rssi);
+        if (update_graph(ip, p->source_ip, p->rssi)) {
+            serial.send(neighbour_discovered_event(ip, p->rssi));
+        }
     }
 }
 
@@ -297,7 +301,10 @@ void update_network() {
         send_lsa(MicroBitEvent());
         uBit.sleep(UPDATE_RATE);
 
-        remove_dead_nodes(get_system_time());
+        std::unordered_set<uint16_t> dead_nodes = remove_dead_nodes(get_system_time());
+        for (uint16_t ip: dead_nodes) {
+          serial.send(router_timed_out_event(ip));
+        }
     }
 }
 
