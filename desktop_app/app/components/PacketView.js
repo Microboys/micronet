@@ -24,6 +24,9 @@ export default class PacketView extends Component {
         },
         physics: {
           enabled: false
+        },
+        interaction: {
+          zoomView: false
         }
       },
       events: {}
