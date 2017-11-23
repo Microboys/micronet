@@ -103,6 +103,7 @@ void handle_lsa(Packet* p) {
     if (lsa_table.count(p->source_ip) == 0) {
       lsa_table[p->source_ip] = p->format();
       should_flood = true;
+      update_graph(p);
 
       /* This packet, has introduced a new node so we notify the desktop app. */
       serial.send(p->to_json());
@@ -122,11 +123,13 @@ void handle_lsa(Packet* p) {
 
         /* PacketBuffer does not support '!='. */
         if (!(new_packet_buffer == old_packet_buffer)) {
-          update_graph(p);
 
-          /* TODO: Update desktop app with new packet only if the topology changes. */
-          // TODO: send as event rather than packet.
-          serial.send(p->to_json());
+          if (update_graph(p)) {
+            /* Update desktop app with new packet only if the topology changes. */
+            // TODO: send as event rather than packet.
+            serial.send(p->to_json());
+          }
+
         } 
 
         Packet::set_sequence_number(new_packet_buffer, sequence_number);

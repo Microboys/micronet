@@ -113,7 +113,6 @@ function handleDataLine(dataJSON) {
   }
 
   switch (dataJSON.type) {
-
     case 'packet':
       timeoutUpdate();
 
@@ -126,7 +125,7 @@ function handleDataLine(dataJSON) {
       if (dataJSON.ptype == 'MSG') {
         store.dispatch(packetActions.addPacket(dataJSON));
       }
-      if (dataJSON.ptype == 'LSA' && Math.random() > 0.975) {
+      if (dataJSON.ptype == 'LSA') {
         store.dispatch(packetActions.addPacket(dataJSON));
       }
       break;

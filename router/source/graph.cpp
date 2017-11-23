@@ -51,15 +51,24 @@ void update_graph(uint16_t from, uint16_t to, int distance) {
 
 /* Updates graph from LSA packet. Treats the packet as ground truth - deletes
  * all outgoing arcs we currently know and replaces them with ones from packet.
+ * Returns whether the *topology* of the graph changes as a result of processing
+ * the packet.
  */
-void update_graph(Packet* p) {
+bool update_graph(Packet* p) {
     uint16_t source_ip = p->source_ip;
-    delete_all_edges(source_ip);
+    bool topology_change = false;
+
+    std::unordered_set<struct edge> old_edges = delete_all_edges(source_ip);
+
     lock_graph();
     for (auto it : p->graph) {
         graph[it.first] = it.second;
+        if (old_edges.count(it.first) != 1) {
+          topology_change = true;
+        }
     }
     unlock_graph();
+    return topology_change;
 }
 
 void recalculate_graph(uint16_t source) {
@@ -93,15 +102,18 @@ void delete_extra_neighbours(uint16_t ip) {
 }
 
 /* Deletes all outgoing edges in the graph from a given IP. */
-void delete_all_edges(uint16_t ip) {
+std::unordered_set<struct edge> delete_all_edges(uint16_t ip) {
+    std::unordered_set<struct edge> deleted_edges;
     lock_graph();
     for (auto it : graph) {
         struct edge cur_edge = it.first;
         if (cur_edge.from == ip) {
+            deleted_edges.emplace(cur_edge);
             graph.erase(cur_edge);
         }
     }
     unlock_graph();
+    return deleted_edges;
 }
 
 void print_graph(MicroBitSerial serial) {
