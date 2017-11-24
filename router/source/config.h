@@ -30,7 +30,7 @@
  * (which is 28B maximum). Since IPs are 2B each and we need 1B for the
  * distance, we can only fit floor(28/3) = 9 neighbours.
  */
-#define MAX_NEIGHBOURS 9
+#define MAX_NEIGHBOURS 8
 
 /* 2^16 - 1 */
 #define IP_MAXIMUM 65535
