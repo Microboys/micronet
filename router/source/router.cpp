@@ -303,8 +303,8 @@ void update_network() {
 
         std::unordered_set<uint16_t> dead_nodes = remove_dead_nodes(get_system_time());
         for (uint16_t dead_ip: dead_nodes) {
-          /* One the nodes taht can be removed is ourself, for some reason.
-           * Let's tell not tell the desktop app that this is the case. */
+          /* One of the nodes that can be removed is ourself, for some reason.
+           * Let's not tell the desktop app that this is the case. */
           if (dead_ip != ip) {
             serial.send(router_timed_out_event(dead_ip));
           }
