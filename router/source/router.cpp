@@ -29,7 +29,7 @@ void send_message(Packet* p) {
   if (p->ttl > 0) {
       p->ttl--;
       // recalculate_graph(ip);
-      uint16_t next_node = get_next_node(p->dest_ip);
+      uint16_t next_node = get_next_node(ip, p->dest_ip);
       p->imm_dest_ip = next_node;
       uBit.radio.datagram.send(p->format());
       uBit.sleep(1);
@@ -132,7 +132,7 @@ void handle_lsa(Packet* p) {
             serial.send(p->to_json());
           }
 
-        } 
+        }
 
         Packet::set_sequence_number(new_packet_buffer, sequence_number);
         lsa_table[p->source_ip] = new_packet_buffer;
@@ -202,7 +202,7 @@ void ping(MicroBitEvent) {
 
 void send_payload(uint16_t dest_ip, ManagedString message) {
     // recalculate_graph(ip);
-    uint16_t next_node = get_next_node(dest_ip);
+    uint16_t next_node = get_next_node(ip, dest_ip);
     Packet p(MESSAGE, ip, next_node, dest_ip, 0, INITIAL_TTL, message);
     uBit.radio.datagram.send(p.format());
     uBit.sleep(1);

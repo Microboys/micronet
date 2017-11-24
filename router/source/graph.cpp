@@ -70,11 +70,11 @@ bool update_graph(Packet* p) {
     return topology_change;
 }
 
-void recalculate_graph(uint16_t source) {
-    lock_graph();
-    calculate_sink_tree(source, graph);
-    unlock_graph();
-}
+// void recalculate_graph(uint16_t source) {
+//     lock_graph();
+//     calculate_sink_tree(source, graph);
+//     unlock_graph();
+// }
 
 /* Prunes the graph. Deletes arcs to neighbours who are too far away and if we
  * have more than MAX_NEIGHBOURS neighbours, we take the strongest MAX_NEIGHBOURS
@@ -146,6 +146,18 @@ std::unordered_map<edge, int> get_lsa_graph(uint16_t ip) {
     return to_send;
 }
 
+
+/* Returns next node from the routing algorithm.
+ */
+uint16_t get_next_node(uint16_t source, uint16_t target){
+  lock_graph();
+  std::vector<uint16_t> path = get_path_for_node(graph, source, target);
+  unlock_graph();
+  if (path.size() == 0)
+        return 0;
+  return path.front();
+}
+
 /* Returns a vector of all neighbour IPs of a given IP.
  */
 std::vector<uint16_t> get_neighbours(uint16_t ip) {
@@ -192,14 +204,15 @@ ManagedString graph_to_json(std::unordered_map<struct edge, int> graph) {
 }
 
 
-ManagedString sink_tree_to_json(std::unordered_map<struct edge, int> graph) {
+ManagedString sink_tree_to_json(std::unordered_map<struct edge, int>& graph,
+                                          uint16_t source) {
     ManagedString result = "[";
     unsigned int index = 0;
     lock_graph();
     for (auto it = graph.begin(); it != graph.end(); ++it) {
         result = result + "{";
         result = result + format_attr("to", it->first.to);
-        std::vector<uint16_t> path = get_path_for_node(it->first.to);
+        std::vector<uint16_t> path = get_path_for_node(graph, source, it->first.to);
         result = result + format_attr("path", path, true);
         result = result + "}";
         index++;
@@ -224,7 +237,7 @@ ManagedString path_json(uint16_t ip) {
     ManagedString result = "{";
     result = result + format_attr("type", "sink-tree");
     result = result + format_attr("ip", ip);
-    result = result + "\"sink-tree\":" + sink_tree_to_json(graph);
+    result = result + "\"sink-tree\":" + sink_tree_to_json(graph, ip);
     return result + "}" + SERIAL_DELIMITER;
 }
 
