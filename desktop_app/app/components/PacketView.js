@@ -53,7 +53,10 @@ export default class PacketView extends Component {
       },
       events: {},
       graphModal: false,
-      selectedGraph: null,
+      selectedGraph: {
+        nodes: [],
+        edges: []
+      },
       selectedHeader: null
     }
     this.toggleGraphModal = this.toggleGraphModal.bind(this);
@@ -100,7 +103,7 @@ export default class PacketView extends Component {
     switch (packet.ptype) {
       case "LSA":
         const graph = transformGraphJSON(packet.payload);
-        const onClick = this.graphOnClick(<NetworkGraph graph={graph} options={this.state.modalOptions} events={this.state.events} />, this.getTitle(packet));
+        const onClick = this.graphOnClick(graph, this.getTitle(packet));
         return <NetworkGraph graph={transformGraphJSON(packet.payload)} options={this.state.options} events={{click: onClick}} />
       case "MSG":
         return <CardText>{packet.payload}</CardText>
@@ -147,7 +150,7 @@ export default class PacketView extends Component {
         <Modal autoFocus={false} className='modal-lg' isOpen={this.state.graphModal} toggle={this.toggleGraphModal} fade={false}>
           <ModalHeader toggle={this.toggleGraphModal}>{this.state.selectedHeader}</ModalHeader>
           <ModalBody id='graphModalBody'>
-            {this.state.selectedGraph}
+            <NetworkGraph graph={this.state.selectedGraph} options={this.state.modalOptions} events={this.state.events} />
           </ModalBody>
         </Modal>
         <div className='list-group'>
