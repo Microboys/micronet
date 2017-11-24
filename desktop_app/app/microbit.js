@@ -55,7 +55,7 @@ async function listen () {
     microbitPort.on('error', handleError);
     microbitPort.on('close', handleClose);
     parser.on('data', handleDataLine);
-    parser.on('invalid-line', (invalid_line) => { console.log('ignore invalid JSON: ' + invalid_line) });
+    parser.on('invalid-line', (err) => { console.log('ignore invalid JSON: ' + err.source) });
   } catch (err) {
     console.log('Error on locating the micro:bit port ' + err); 
   }

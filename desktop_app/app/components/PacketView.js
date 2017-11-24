@@ -81,6 +81,10 @@ export default class PacketView extends Component {
         return "Advert from " + identifier + "!";
       case "MSG":
         return "Message from " + identifier + "!";
+      case "NEIGHBOUR_DISCOVERED":
+        return "Found a new neighbour!";
+      case "ROUTER_TIMED_OUT":
+        return "Lost contact with a router.";
       case "DNS":
         return "DNS update from " + identifier + "!";
       default:
@@ -90,26 +94,35 @@ export default class PacketView extends Component {
   }
 
   getContent(packet) {
-      switch (packet.ptype) {
-        case "LSA":
-          const graph = transformGraphJSON(packet.payload);
-          const onClick = this.graphOnClick(<NetworkGraph graph={graph} options={this.state.modalOptions} events={this.state.events} />, this.getTitle(packet));
-          return <NetworkGraph graph={transformGraphJSON(packet.payload)} options={this.state.options} events={{click: onClick}} />
-        case "MSG":
-          return <CardText>{packet.payload}</CardText>
-        case "DNS":
-          return <CardText>TODO</CardText>
-        default:
-          console.log("Unrecognised packet type: " + type);
-          return <h1>Error</h1>
-      }
+    let name = lookupName(packet.source_ip);
+    let identifier = (name) ? name : "Node " + packet.source_ip;
+
+    switch (packet.ptype) {
+      case "LSA":
+        const graph = transformGraphJSON(packet.payload);
+        const onClick = this.graphOnClick(<NetworkGraph graph={graph} options={this.state.modalOptions} events={this.state.events} />, this.getTitle(packet));
+        return <NetworkGraph graph={transformGraphJSON(packet.payload)} options={this.state.options} events={{click: onClick}} />
+      case "MSG":
+        return <CardText>{packet.payload}</CardText>
+      case "NEIGHBOUR_DISCOVERED":
+        return <CardText>We can see {identifier}</CardText>
+      case "ROUTER_TIMED_OUT":
+        return <CardText>We did not hear anything from {identifier}</CardText>
+      case "DNS":
+        return <CardText>TODO</CardText>
+      default:
+        console.log("Unrecognised packet type: " + type);
+        return <h1>Error</h1>
     }
+  }
 
   render() {
     var filteredPackets = this.props.packets.reverse()
       .filter((packet) => 
 	    packet.ptype === "DNS" ||
 	    packet.ptype === "LSA" ||
+	    packet.ptype === "NEIGHBOUR_DISCOVERED" ||
+	    packet.ptype === "ROUTER_TIMED_OUT" ||
 	    packet.ptype === "MSG");
     filteredPackets.sort((a, b) => {
       return (b.time - a.time);
