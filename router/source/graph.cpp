@@ -155,7 +155,7 @@ uint16_t get_next_node(uint16_t source, uint16_t target){
   unlock_graph();
   if (path.size() == 0)
         return 0;
-  return path.front();
+  return path.at(1);
 }
 
 /* Returns a vector of all neighbour IPs of a given IP.
