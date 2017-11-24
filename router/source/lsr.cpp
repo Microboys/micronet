@@ -4,6 +4,7 @@
 
 std::vector<uint16_t> get_path_for_node(std::unordered_map<struct edge, int>& input_graph,
                                         uint16_t source, uint16_t destination) {
+    // calculate the dfs path, using stack and graph
     std::vector<uint16_t> dfs_path;
     std::stack<uint16_t> stack_t;
     stack_t.push(source);
@@ -22,19 +23,23 @@ std::vector<uint16_t> get_path_for_node(std::unordered_map<struct edge, int>& in
         }
     }
 
+    // use above dfs path to claculate best path for min cost
     std::vector<uint16_t> curr_path;
     std::vector<uint16_t> best_path;
     uint16_t min_cost = SHRT_MAX;
 
-    //Using visited as current path and stack_t for cost;
-    uint8_t index = 1;
     curr_path.push_back(dfs_path.at(0));
 
-    while (index != dfs_path.size()) {
+    //iterate through the dfs path
+    for (uint8_t index = 1; index < dfs_path.size(); index++){
+
+        // get next required edge by moving up the graph
         while (input_graph.count({curr_path.at(curr_path.size()-1), dfs_path.at(index)}) <= 0) {
             curr_path.pop_back();
         }
         curr_path.push_back(dfs_path.at(index));
+
+        // if current path reach the destination update the cost and best path
         if (dfs_path.at(index) == destination){
             int16_t cost = 0;
             for (size_t i = 0; i < curr_path.size()-1; i++) {
@@ -45,7 +50,6 @@ std::vector<uint16_t> get_path_for_node(std::unordered_map<struct edge, int>& in
                 best_path = curr_path;
             }
         }
-        index++;
     }
 
     return best_path;
