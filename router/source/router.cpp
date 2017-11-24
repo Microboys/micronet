@@ -306,7 +306,7 @@ void update_network() {
           /* One the nodes taht can be removed is ourself, for some reason.
            * Let's tell not tell the desktop app that this is the case. */
           if (dead_ip != ip) {
-            serial.send(router_timed_out_event(ip));
+            serial.send(router_timed_out_event(dead_ip));
           }
         }
     }
