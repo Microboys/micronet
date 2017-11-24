@@ -278,6 +278,7 @@ void on_serial(MicroBitEvent) {
         // Advertise own name
         ManagedString name = request.substring(header_length + 1, request.length() - header_length - 1);
         name_table[ip] = name;
+        send_name_table();
         send_dns(name);
     }
 
