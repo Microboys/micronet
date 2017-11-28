@@ -319,7 +319,7 @@ void update_desktop_app() {
         // recalculate_graph(ip);
 
         send_graph_update();
-        // send_path_update();
+        send_path_update();
         send_name_table();
         uBit.sleep(UPDATE_RATE);
     }

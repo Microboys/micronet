@@ -6,19 +6,19 @@ std::vector<uint16_t> get_path_for_node(std::unordered_map<struct edge, int>& in
                                         uint16_t source, uint16_t destination) {
     // calculate the dfs path, using stack and graph
     std::vector<uint16_t> dfs_path;
-    std::stack<uint16_t> stack_t;
-    stack_t.push(source);
+    std::stack<uint16_t> stack;
+    stack.push(source);
 
     while (!stack_t.empty()) {
         uint16_t curr_node = stack_t.top();
-        stack_t.pop();
+        stack.pop();
         dfs_path.push_back(curr_node);
         if (curr_node == destination)
             continue;
         for (auto it : input_graph) {
             struct edge cur_edge = it.first;
             if (cur_edge.from == curr_node) {
-                stack_t.push(cur_edge.to);
+                stack.push(cur_edge.to);
             }
         }
     }

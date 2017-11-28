@@ -208,15 +208,23 @@ ManagedString sink_tree_to_json(std::unordered_map<struct edge, int>& graph,
                                           uint16_t source) {
     ManagedString result = "[";
     unsigned int index = 0;
+    std::vector<uint16_t> unique_nodes;
     lock_graph();
-    for (auto it = graph.begin(); it != graph.end(); ++it) {
+    for (auto it = graph.begin(); it != graph.end(); ++it){
+      if (unique_nodes.count(it->first.to) <= 0) {
+          unique_nodes.push_back(it->first.to);
+      }
+    }
+
+    for (auto it = unique_nodes.begin(); it != unique_nodes.end(); ++it) {
         result = result + "{";
-        result = result + format_attr("to", it->first.to);
-        std::vector<uint16_t> path = get_path_for_node(graph, source, it->first.to);
+        result = result + format_attr("to", *it);
+        std::vector<uint16_t> path = get_path_for_node(graph, source, *it);
+
         result = result + format_attr("path", path, true);
         result = result + "}";
         index++;
-        if (index < graph.size()) {
+        if (index < unique_nodes.size()) {
             result = result + ",";
         }
     }
