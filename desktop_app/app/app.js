@@ -43,7 +43,7 @@ const initialState = {
   },
   'packet' : {
     'received' : [],
-    'capacity' : 50
+    'capacity' : 15
   },
   'dns' : {
     'entries' : []
