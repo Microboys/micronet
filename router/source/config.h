@@ -23,7 +23,7 @@
  * constant connections/disconnections when two devices are on the boundary.
  * Threshold is inclusive.
  */
-#define DISCONNECTION_THRESHOLD -67
+#define DISCONNECTION_THRESHOLD -65
 
 /* Maximum number of neighbours. This limit exists because we want to be able
  * to send all neighbour information in the payload of one LSA packet

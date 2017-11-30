@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <algorithm>
 #include <limits.h>
 #include "util.h"
 #include "MicroBit.h"
@@ -20,7 +21,8 @@ void unlock_graph();
 void update_alive_nodes(uint16_t ip, unsigned long time);
 bool update_graph(Packet* p);
 bool update_graph(uint16_t from, uint16_t to, int distance);
-void recalculate_graph(uint16_t source);
+// void recalculate_graph(uint16_t source);
+uint16_t get_next_node(uint16_t source, uint16_t target);
 std::unordered_set<struct edge> delete_all_edges(uint16_t ip);
 void delete_extra_neighbours(uint16_t ip);
 bool if_all_nodes_computed(std::unordered_map<uint16_t,bool> if_computated);
