@@ -9,8 +9,8 @@ std::vector<uint16_t> get_path_for_node(std::unordered_map<struct edge, int>& in
     std::stack<uint16_t> stack;
     stack.push(source);
 
-    while (!stack_t.empty()) {
-        uint16_t curr_node = stack_t.top();
+    while (!stack.empty()) {
+        uint16_t curr_node = stack.top();
         stack.pop();
         dfs_path.push_back(curr_node);
         if (curr_node == destination)

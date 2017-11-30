@@ -62,7 +62,7 @@ bool update_graph(Packet* p) {
     lock_graph();
     for (auto it : p->graph) {
         graph[it.first] = it.second;
-        if (old_edges.count(it.first) != 1) {
+        if (std::count(old_edges.begin(), old_edges.end(), it.first) != 1) {
           topology_change = true;
         }
     }
@@ -211,7 +211,7 @@ ManagedString sink_tree_to_json(std::unordered_map<struct edge, int>& graph,
     std::vector<uint16_t> unique_nodes;
     lock_graph();
     for (auto it = graph.begin(); it != graph.end(); ++it){
-      if (unique_nodes.count(it->first.to) <= 0) {
+      if (std::count(unique_nodes.begin(), unique_nodes.end(), it->first.to) <= 0) {
           unique_nodes.push_back(it->first.to);
       }
     }

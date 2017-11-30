@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <algorithm>
 #include <limits.h>
 #include "util.h"
 #include "MicroBit.h"
