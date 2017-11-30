@@ -5,9 +5,9 @@ describe('reducers', () => {
 
   describe('graph', () => {    
     
-    it('should handle DRAW_GRAPH', () => {
+    it('should handle UPDATE_GRAPH', () => {
       const action = { 
-        type: 'DRAW_GRAPH',
+        type: 'UPDATE_GRAPH',
         payload: {}
       };
       const test = Object.assign({}, action.payload);
