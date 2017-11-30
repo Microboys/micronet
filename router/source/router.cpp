@@ -4,7 +4,7 @@ MicroBit uBit;
 MicroBitSerial serial(USBTX, USBRX);
 
 unordered_map<uint16_t, ManagedString> name_table;
-unordered_map<uint16_t, PacketBuffer> lsa_table;
+unordered_map<uint16_t, uint16_t> lsa_table;
 uint16_t sequence_number;
 
 /* Device IP */
@@ -100,10 +100,9 @@ void handle_lsa(Packet* p) {
 
     bool should_flood = false;
     uint8_t new_ttl = p->ttl - 1;
-    p->ttl = 0;
 
     if (lsa_table.count(p->source_ip) == 0) {
-      lsa_table[p->source_ip] = p->format();
+      lsa_table[p->source_ip] = sequence_number;
       should_flood = true;
       update_graph(p);
 
@@ -111,37 +110,22 @@ void handle_lsa(Packet* p) {
       serial.send(p->to_json());
 
     } else {
-      PacketBuffer old_packet_buffer = lsa_table[p->source_ip];
-      uint16_t old_sequence_number = Packet::get_sequence_number(old_packet_buffer);
+      uint16_t old_sequence_number = lsa_table[p->source_ip];
 
       if (old_sequence_number < p->sequence_number) {
         should_flood = true;
-
-        // TODO: We're deserialising the packet just to serialise it again - better way?
-        PacketBuffer new_packet_buffer = p->format();
-
-        Packet::set_sequence_number(new_packet_buffer, 0);
-        Packet::set_sequence_number(old_packet_buffer, 0);
-
-        /* PacketBuffer does not support '!='. */
-        if (!(new_packet_buffer == old_packet_buffer)) {
-
-          if (update_graph(p)) {
-            /* Update desktop app with new packet only if the topology changes. */
-            // TODO: Make LSAs an event, like the neighbour updates.
-            serial.send(p->to_json());
-          }
-
+        if (update_graph(p)) {
+          serial.send(p->to_json());
         }
+        lsa_table[p->source_ip] = p->sequence_number;
 
-        Packet::set_sequence_number(new_packet_buffer, sequence_number);
-        lsa_table[p->source_ip] = new_packet_buffer;
       } else if (old_sequence_number > p->sequence_number) {
         /* If the router is a neighbour, we should flood its previous packet so it can
          * learn its latest sequence number. */
         std::vector<uint16_t> neighbours = get_neighbours(ip);
         if (std::find(neighbours.begin(), neighbours.end(), p->source_ip) != neighbours.end()) {
-          uBit.radio.datagram.send(old_packet_buffer);
+          p->sequence_number = old_sequence_number;
+          uBit.radio.datagram.send(p->format());
           uBit.sleep(1);
           return;
         }
