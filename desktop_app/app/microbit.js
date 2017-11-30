@@ -271,16 +271,12 @@ function RSSIToAbstractDistanceUnits(rssi) {
 function getRoute(dest) {
   let routes = store.getState().sinkTree.routes;
   for (var i = 0; i < routes.length; i++) {
-    console.log(routes[i]);
-    console.log(dest);
     if (routes[i].to == dest) {
-      console.log("MATCH");
       routes[i].path.unshift(connectedIp);
       routes[i].path.push(dest);
       return routes[i].path;
     }
   }
-  console.log("NOMATCH");
   return null;
 }
 
