@@ -1,5 +1,5 @@
 import { createAction } from 'redux-actions';
 
 export default {
-  updateGraph: createAction('UPDATE_GRAPH')
+  updateConnection: createAction('UPDATE_CONNECTION')
 };

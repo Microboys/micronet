@@ -1,8 +1,8 @@
 import { handleActions } from 'redux-actions';
-import actions from '../actions/graph.js';
+import actions from '../actions/connection.js';
 
 export default handleActions({
-  [actions.updateGraph]: (state, action) => {
+  [actions.updateConnection]: (state, action) => {
     return { ...state, ...action.payload };
   }
 }, {});

@@ -1,36 +1,5 @@
 #include "packet.h"
 
-void Packet::print_packet(MicroBitSerial serial) {
-    serial.printf("===== PACKET START ====\n\r");
-    switch (ptype) {
-        case PING:
-            serial.printf("ptype: PING\n\r");
-            serial.printf("source_ip: %i\n\r", this->source_ip);
-            serial.printf("imm_dest_ip: %i\n\r", this->imm_dest_ip);
-            break;
-        case LSA:
-            serial.printf("ptype: LSA\n\r");
-            serial.printf("ttl: %i\n\r", this->ttl);
-            serial.printf("source_ip: %i\n\r", this->source_ip);
-            print_graph(serial, this->graph);
-            break;
-        case MESSAGE:
-            serial.printf("ptype: MESSAGE\n\r");
-            serial.printf("source_ip: %i\n\r", this->source_ip);
-            serial.printf("imm_dest_ip: %i\n\r", this->imm_dest_ip);
-            serial.printf("dest_ip: %i\n\r", this->dest_ip);
-            serial.printf("ttl: %i\n\r", this->ttl);
-            serial.printf("timestamp: %i\n\r", this->timestamp);
-            serial.printf("payload: %s\n\r", this->payload.toCharArray());
-            break;
-        case DNS:
-            serial.printf("ptype: DNS\n\r");
-            //TODO
-            break;
-    }
-    serial.printf("===== PACKET END ====\n\r");
-}
-
 // Outgoing packets
 Packet::Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip,
         uint16_t dest_ip, uint8_t timestamp, uint8_t ttl,
@@ -47,7 +16,7 @@ Packet::Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip,
 
 // Outgoing packets
 Packet::Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip,
-        uint16_t dest_ip, uint8_t timestamp, uint8_t ttl,
+        uint16_t dest_ip, uint8_t timestamp, uint8_t ttl, uint16_t sequence_number,
         std::unordered_map<edge, int> graph) {
 
         this->source_ip = source_ip;
@@ -56,6 +25,7 @@ Packet::Packet(packet_type ptype, uint16_t source_ip, uint16_t imm_dest_ip,
         this->timestamp = timestamp;
         this->ptype = ptype;
         this->ttl = ttl;
+        this->sequence_number = sequence_number;
         this->graph = graph;
 }
 // Incoming packets
@@ -66,6 +36,7 @@ Packet::Packet(PacketBuffer p, int rssi) {
         case LSA:
             this->ttl = p[F_LSA_TTL];
             this->source_ip = concat(p[F_LSA_SOURCE_IP], p[F_LSA_SOURCE_IP + 1]);
+            this->sequence_number = Packet::get_sequence_number(p);
             this->graph = decode_lsa(p, this->source_ip);
             break;
         case PING:
@@ -81,7 +52,11 @@ Packet::Packet(PacketBuffer p, int rssi) {
             this->payload = decode_payload(p, F_MESSAGE_PAYLOAD);
             break;
         case DNS:
-            //TODO
+            this->ttl = p[F_DNS_TTL];
+            this->source_ip = concat(p[F_DNS_SOURCE_IP], p[F_DNS_SOURCE_IP + 1]);
+            this->payload = decode_payload(p, F_DNS_PAYLOAD);
+            break;
+        default:
             break;
     }
 }
@@ -101,7 +76,9 @@ PacketBuffer Packet::format() {
             p[F_LSA_TTL] = this->ttl;
             p[F_LSA_SOURCE_IP] = (uint8_t)(this->source_ip >> BYTE_SIZE);
             p[F_LSA_SOURCE_IP + 1] = (uint8_t)(this->source_ip);
+            Packet::set_sequence_number(p, this->sequence_number);
             encode_lsa(p, this->graph);
+            p[F_LSA_RESERVED] = 0;
             break;
         case MESSAGE:
             p[F_MESSAGE_SOURCE_IP] = (uint8_t)(this->source_ip >> BYTE_SIZE);
@@ -115,7 +92,12 @@ PacketBuffer Packet::format() {
             encode_payload(p, payload, F_MESSAGE_PAYLOAD);
             break;
         case DNS:
-            //TODO
+            p[F_DNS_TTL] = this->ttl;
+            p[F_DNS_SOURCE_IP] = (uint8_t)(this->source_ip >> BYTE_SIZE);
+            p[F_DNS_SOURCE_IP + 1] = (uint8_t)(this->source_ip);
+            encode_payload(p, payload, F_DNS_PAYLOAD);
+            break;
+        default:
             break;
     }
     return p;
@@ -172,6 +154,17 @@ void Packet::encode_lsa(PacketBuffer p, std::unordered_map<edge, int> graph) {
     }
 }
 
+/* Set the sequence number of an LSA PacketBuffer. */
+void Packet::set_sequence_number(PacketBuffer p, uint16_t sequence_number) {
+  p[F_LSA_SEQNUM] = (uint8_t)(sequence_number >> BYTE_SIZE);
+  p[F_LSA_SEQNUM + 1] = (uint8_t)(sequence_number);
+}
+
+/* Return the sequence number of an LSA PacketBuffer. */
+uint16_t Packet::get_sequence_number(PacketBuffer p) {
+  return concat(p[F_LSA_SEQNUM], p[F_LSA_SEQNUM + 1]);
+}
+
 ManagedString Packet::to_json() {
     ManagedString result = "{";
     result = result + format_attr("type", "packet");
@@ -185,9 +178,12 @@ ManagedString Packet::to_json() {
             result = result + format_attr("ptype", "LSA");
             result = result + format_attr("ttl", this->ttl);
             result = result + format_attr("source_ip", this->source_ip);
-            result = result + format_attr("payload", graph_to_json(this->graph), true);
+            result = result + format_attr("sequence_number", this->sequence_number);
+            result = result + "\"payload\":" + graph_to_json(this->graph);
+            //result = result + format_attr("payload", graph_to_json(this->graph), true);
             break;
         case MESSAGE:
+            result = result + format_attr("ptype", "MSG");
             result = result + format_attr("source_ip", this->source_ip);
             result = result + format_attr("imm_dest_ip", this->imm_dest_ip);
             result = result + format_attr("dest_ip", this->dest_ip);
@@ -196,10 +192,50 @@ ManagedString Packet::to_json() {
             result = result + format_attr("payload", this->payload.toCharArray(), true);
             break;
         case DNS:
-            result = result + format_attr("ptype", "DNS", true);
-            //TODO
+            result = result + format_attr("ptype", "DNS");
+            result = result + format_attr("source_ip", this->source_ip);
+            result = result + format_attr("payload", this->payload.toCharArray(), true);
+            break;
+        default:
             break;
     }
-    result = result + "}\0";
-    return ManagedString(result);
+    result = result + "}" + SERIAL_DELIMITER;
+    return result;
 }
+
+void Packet::print_packet(MicroBitSerial serial) {
+    serial.printf("===== PACKET START ====\n\r");
+    switch (ptype) {
+        case PING:
+            serial.printf("ptype: PING\n\r");
+            serial.printf("source_ip: %i\n\r", this->source_ip);
+            serial.printf("imm_dest_ip: %i\n\r", this->imm_dest_ip);
+            break;
+        case LSA:
+            serial.printf("ptype: LSA\n\r");
+            serial.printf("ttl: %i\n\r", this->ttl);
+            serial.printf("source_ip: %i\n\r", this->source_ip);
+            serial.printf("sequence_number: %i\n\r", this->sequence_number);
+            print_graph(serial, this->graph);
+            break;
+        case MESSAGE:
+            serial.printf("ptype: MESSAGE\n\r");
+            serial.printf("source_ip: %i\n\r", this->source_ip);
+            serial.printf("imm_dest_ip: %i\n\r", this->imm_dest_ip);
+            serial.printf("dest_ip: %i\n\r", this->dest_ip);
+            serial.printf("ttl: %i\n\r", this->ttl);
+            serial.printf("timestamp: %i\n\r", this->timestamp);
+            serial.printf("payload: %s\n\r", this->payload.toCharArray());
+            break;
+        case DNS:
+            serial.printf("ptype: DNS\n\r");
+            serial.printf("ttl: %i\n\r", this->ttl);
+            serial.printf("source_ip: %i\n\r", this->source_ip);
+            serial.printf("name: %s\n\r", this->payload.toCharArray());
+            break;
+        default:
+            break;
+    }
+    serial.printf("===== PACKET END ====\n\r");
+}
+

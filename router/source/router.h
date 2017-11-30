@@ -3,23 +3,32 @@
 #include "packet.h"
 #include "graph.h"
 #include "config.h"
-#define DELIMITER "\r\n"
+#include "lsr.h"
+#include "event.h"
+#include <vector>
 
-#define GRAPH_REQUEST "GRAPH"
-#define PING_REQUEST "PING"
-#define IP_REQUEST "MYIP"
-
-#define MESSAGE_REQUEST "MSG"
-#define MESSAGE_REQUEST_LENGTH 3
-
-#define MESSAGE_DELIMITER '\t'
-
-void print_neighbours();
-void onData(MicroBitEvent e);
+void broadcast(Packet* p);
+unsigned long get_system_time();
+void on_packet(MicroBitEvent e);
+void handle_packet(Packet* p);
+void handle_lsa(Packet* p);
+void handle_message(Packet* p);
+void handle_ping(Packet* p);
+void process_packets();
+void handle_dns(Packet* p);
 void ping(MicroBitEvent e);
-void send_payload(uint16_t target, ManagedString message);
+void send_message_via_routing(MicroBitEvent e);
+void send_payload(uint16_t dest_ip, ManagedString message);
 void send_lsa(MicroBitEvent e);
-void broadcast(Packet p);
+void send_dns(ManagedString name);
+void send_graph_update();
+ManagedString name_table_json();
+void send_name_table();
+void on_serial(MicroBitEvent e);
+void init_serial_read();
+MicroBitImage get_visual_id(uint16_t ip);
+
+void update_network();
+void update_desktop_app();
 void setup(MicroBitEvent e);
-void update();
 int main();

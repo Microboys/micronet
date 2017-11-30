@@ -1,42 +1,22 @@
 import React, { Component } from 'react';
 import Graph from 'react-graph-vis';
+import PropTypes from 'prop-types';
 
 export default class NetworkGraph extends Component {
   
+  static propTypes = {
+    graph: PropTypes.object.isRequired,
+    options: PropTypes.object.isRequired,
+    events: PropTypes.object.isRequired
+  };
+
   constructor(props) {
     super(props);
-    this.state = {
-      options: {
-        autoResize: true,
-        width: '100%',
-        height: '100%',
-        nodes: {
-          shape: 'image',
-          image: './assets/microbit.png'
-        },
-        edges: {
-          font: {
-            align: 'horizontal',
-            vadjust: -10
-          },
-          smooth: {
-            type: 'curvedCW',
-            roundness: 0.3
-          }
-        },
-        physics: {
-          barnesHut: {
-            springConstant: 0.01
-          }
-        }
-      },
-      events: {}
-    };
   }
 
   render() {
     return (
-      <Graph graph={this.props.graph} options={this.state.options} events={this.state.events} />
+      <Graph graph={this.props.graph} options={this.props.options} events={this.props.events} />
     );
   }
 }
