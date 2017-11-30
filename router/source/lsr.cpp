@@ -17,7 +17,8 @@ std::vector<uint16_t> get_path_for_node(std::unordered_map<struct edge, int>& in
             continue;
         for (auto it : input_graph) {
             struct edge cur_edge = it.first;
-            if (cur_edge.from == curr_node) {
+            if (cur_edge.from == curr_node &&
+                    std::find(dfs_path.begin(), dfs_path.end(), cur_edge.to) == dfs_path.end()) {
                 stack.push(cur_edge.to);
             }
         }
