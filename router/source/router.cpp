@@ -142,7 +142,12 @@ void handle_lsa(Packet* p) {
 void handle_message(Packet* p) {
     if (p->imm_dest_ip == ip) {
         uBit.display.printAsync(p->payload);
-        send_message(p);
+
+        if (p->dest_ip == ip) {
+            serial.send(p->to_json());
+        } else {
+            send_message(p);
+        }
     }
 }
 
