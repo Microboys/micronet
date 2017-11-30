@@ -32,6 +32,7 @@ var microbitPort = null;
 var firstMessageReceived = false;
 var messageReceived = false;
 var timeoutCheckId = null;
+var connectedIp = null;
 
 function init(store_) {
   store = store_;  // TODO: this really shouldn't be necessary...
@@ -144,14 +145,17 @@ function handleDataLine(dataJSON) {
         break;
       }
 
-      var transformed = transformGraphJSON(dataJSON.graph, dataJSON.ip);
+      connectedIp = dataJSON.ip;
+      var transformed = transformGraphJSON(dataJSON.graph, connectedIp);
       store.dispatch(graphActions.updateGraph(transformed));
       break;
 
     case 'sink-tree':
-       timeoutUpdate();
-       store.dispatch(sinkTreeActions.updateSinkTree(dataJSON));
-       break;
+     timeoutUpdate();
+     let sinkTree = {};
+     sinkTree.routes = dataJSON['sink-tree'];
+     store.dispatch(sinkTreeActions.updateSinkTree(sinkTree));
+     break;
 
     case 'dns':
       timeoutUpdate();
@@ -267,10 +271,16 @@ function RSSIToAbstractDistanceUnits(rssi) {
 function getRoute(dest) {
   let routes = store.getState().sinkTree.routes;
   for (var i = 0; i < routes.length; i++) {
-    if (routes[i].dest == dest) {
+    console.log(routes[i]);
+    console.log(dest);
+    if (routes[i].to == dest) {
+      console.log("MATCH");
+      routes[i].path.unshift(connectedIp);
+      routes[i].path.push(dest);
       return routes[i].path;
     }
   }
+  console.log("NOMATCH");
   return null;
 }
 
