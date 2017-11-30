@@ -29,7 +29,7 @@ void send_message(Packet* p) {
   if (p->ttl > 0) {
       p->ttl--;
       // recalculate_graph(ip);
-      uint16_t next_node = get_next_node(p->dest_ip);
+      uint16_t next_node = get_next_node(ip, p->dest_ip);
       p->imm_dest_ip = next_node;
       uBit.radio.datagram.send(p->format());
       uBit.sleep(1);
@@ -117,8 +117,8 @@ void handle_lsa(Packet* p) {
         if (update_graph(p)) {
           serial.send(p->to_json());
         }
-
         lsa_table[p->source_ip] = p->sequence_number;
+
       } else if (old_sequence_number > p->sequence_number) {
         /* If the router is a neighbour, we should flood its previous packet so it can
          * learn its latest sequence number. */
@@ -186,7 +186,7 @@ void ping(MicroBitEvent) {
 
 void send_payload(uint16_t dest_ip, ManagedString message) {
     // recalculate_graph(ip);
-    uint16_t next_node = get_next_node(dest_ip);
+    uint16_t next_node = get_next_node(ip, dest_ip);
     Packet p(MESSAGE, ip, next_node, dest_ip, 0, INITIAL_TTL, message);
     uBit.radio.datagram.send(p.format());
     uBit.sleep(1);
@@ -303,7 +303,7 @@ void update_desktop_app() {
         // recalculate_graph(ip);
 
         send_graph_update();
-        // send_path_update();
+        send_path_update();
         send_name_table();
         uBit.sleep(UPDATE_RATE);
     }
