@@ -38,8 +38,8 @@ const syncHistoryWithStore = (store, history) => {
 
 const initialState = {
   'graph' : {
-    'nodes' : [],
-    'edges' : []
+    'nodes' : [{id: 1}, {id: 2}, {id: 3}],
+    'edges' : [{from: 1, to: 2}, {from: 2, to: 3}]
   },
   'packet' : {
     'received' : [],
@@ -49,7 +49,15 @@ const initialState = {
     'entries' : []
   },
   'connection' : {
-    'established' : false
+    'established' : true
+  },
+  'sinkTree' : {
+    'routes': [
+      {
+        dest: 3,
+        path: [1, 2, 3]
+      }
+    ]
   }
 };
 

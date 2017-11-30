@@ -129,8 +129,8 @@ function handleDataLine(dataJSON) {
 
     case 'sink-tree':
       timeoutUpdate();
-        //TODO: Implement sink-tree handling
-        return;
+      //TODO: Implement sink-tree handling
+      break;
 
     case 'graph':
       timeoutUpdate();
@@ -263,6 +263,16 @@ function RSSIToAbstractDistanceUnits(rssi) {
   return Math.round(100 - (Math.abs(Math.cos(rssi * scaling)) * 100));
 }
 
+function getRoute(dest) {
+  let routes = store.getState().sinkTree.routes;
+  for (var i = 0; i < routes.length; i++) {
+    if (routes[i].dest == dest) {
+      return routes[i].path;
+    }
+  }
+  return null;
+}
+
 /* Generating micro:bit images with a visual id (for the graph). */
 
 const imgLEDX = 142;
@@ -334,4 +344,4 @@ function flashMicrobit() {
 
 /* Exports. */
 
-export { init, sendMsg, renameMicrobit, flashMicrobit, lookupName, transformGraphJSON };
+export { init, sendMsg, renameMicrobit, flashMicrobit, lookupName, transformGraphJSON, getRoute };

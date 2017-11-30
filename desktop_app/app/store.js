@@ -10,6 +10,8 @@ import packet from './reducers/packet';
 import packetActions from './actions/packet';
 import dns from './reducers/dns';
 import dnsActions from './actions/dns';
+import sinkTree from './reducers/sinkTree';
+import sinkTreeActions from './actions/sinkTree';
 
 export default function configureStore(initialState, routerHistory) {
   const router = routerMiddleware(routerHistory);
@@ -20,6 +22,7 @@ export default function configureStore(initialState, routerHistory) {
     ...connectionActions,
     ...graphActions,
     ...packetActions,
+    ...sinkTreeActions,
     push
   };
 
@@ -29,6 +32,7 @@ export default function configureStore(initialState, routerHistory) {
     connection,
     graph,
     packet,
+    sinkTree,
     routing
   };
 

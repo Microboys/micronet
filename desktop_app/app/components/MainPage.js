@@ -4,8 +4,10 @@ import NetworkGraph from './NetworkGraph';
 import FlashButton from './FlashButton';
 import ButtonContainer from './ButtonContainer';
 import { Row, Col, Container, Modal, ModalHeader, ModalBody, ModalFooter, Input, Form, Button, ListGroup, ListGroupItem, Badge } from 'reactstrap';
-import { sendMsg, renameMicrobit } from './../microbit.js';
+import { sendMsg, renameMicrobit, getRoute } from './../microbit.js';
 import PropTypes from 'prop-types';
+
+const defaultEdgeColor = '#848484';
 
 export default class MainPage extends Component {
   
@@ -43,6 +45,34 @@ export default class MainPage extends Component {
           var node = event.nodes[0];
           this.setState({selectedNode: node});
           this.toggleMsgModal();
+        },
+        click: (event) => {
+          if (event.nodes.length > 1) return;
+          let node = event.nodes[0];
+          let path = getRoute(node);
+          let graph = this.state.graph;
+          let edges = graph.edges;
+
+          if (!path) {
+            for (let i = 0; i < edges.length; i++) {
+              edges[i].color = defaultEdgeColor;
+            }
+          } else {
+            let edgesInPath = [];
+            for (let i = 0; i < path.length - 1; i++) {
+              edgesInPath.push({from: path[i], to: path[i + 1]});
+            }
+
+            for (let i = 0; i < edges.length; i++){
+              let edge = edges[i];
+              if (this.inPath(edge, edgesInPath)) {
+                edge.color = '#f44245';
+              } else {
+                edge.color = defaultEdgeColor;
+              }
+            }
+          }
+          this.setState({graph: graph}, () => {console.log(this.state.graph);});
         }
       },
       msgModal: false,
@@ -50,7 +80,8 @@ export default class MainPage extends Component {
       msg: "",
       msgId:'msgInput',
       nameModal: false,
-      name: ""
+      name: "",
+      graph: props.graph
     };
     this.handleChangeMsg = this.handleChangeMsg.bind(this);
     this.handleSendMsg = this.handleSendMsg.bind(this);
@@ -59,6 +90,15 @@ export default class MainPage extends Component {
     this.handleChangeName = this.handleChangeName.bind(this);
     this.handleRename = this.handleRename.bind(this);
     this.toggleNameModal = this.toggleNameModal.bind(this);
+  }
+
+  inPath(edge, path) {
+    for (var i = 0; i < path.length; i++){
+      if (edge.to == path[i].to && edge.from == path[i].from) {
+        return true;
+      }
+    }
+    return false;
   }
 
   toggleMsgModal() {
@@ -129,7 +169,7 @@ export default class MainPage extends Component {
                   <Button onClick={this.handleRename} color='primary'>Rename</Button>
                 </ModalFooter>
               </Modal>
-              <NetworkGraph graph={this.props.graph} options={this.state.options} events={this.state.events} />
+              <NetworkGraph graph={this.state.graph} options={this.state.options} events={this.state.events} />
             </Col>
             <Col id='packetCol'>
               <PacketView packets={this.props.packet.received} />
