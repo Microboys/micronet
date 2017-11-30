@@ -116,7 +116,7 @@ extern uint32_t __etext;
 
 // The proportion of SRAM available on the mbed heap to reserve for the micro:bit heap.
 #ifndef MICROBIT_NESTED_HEAP_SIZE
-#define MICROBIT_NESTED_HEAP_SIZE               0.75
+#define MICROBIT_NESTED_HEAP_SIZE               0
 #endif
 
 // If defined, reuse any unused SRAM normally reserved for SoftDevice (Nordic's memory resident BLE stack) as heap memory.
