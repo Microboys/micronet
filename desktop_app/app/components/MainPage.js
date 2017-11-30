@@ -70,10 +70,10 @@ export default class MainPage extends Component {
             for (let i = 0; i < edges.length; i++){
               let edge = edges[i];
               if (this.inPath(edge, edgesInPath)) {
-                edge.color = {color: '#f44245', highlight: '#f44245'};
+                edge.color = {color: '#f44245', highlight: '#f44245', opacity: 1.0};
                 edge.width = 2 * defaultEdgeWidth;
               } else {
-                edge.color = defaultEdgeColor;
+                edge.color = {color: defaultEdgeColor, opacity: 0.5};
                 edge.width = defaultEdgeWidth;
               }
             }
