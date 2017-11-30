@@ -6,7 +6,8 @@ void get_path_for_node_recursive(std::unordered_map<struct edge, int>& input_gra
                                         uint16_t current_node, uint16_t destination_node, int16_t current_cost,
                                         int16_t *best_cost, std::vector<uint16_t>& current_path,
                                         std::vector<uint16_t>& best_path, int8_t depth, int8_t max_depth) {
-    if (depth >= max_depth) {
+    if (depth >= max_depth ||
+            std::find(current_path.begin(), current_path.end(), current_node) != current_path.end()) {
         return;
     }
 
