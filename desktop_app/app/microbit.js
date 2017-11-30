@@ -2,6 +2,7 @@ import SerialPort from 'serialport';
 import jsonlines from 'jsonlines';
 import graphActions from './actions/graph';
 import dnsActions from './actions/dns';
+import sinkTreeActions from './actions/sinkTree';
 import connectionActions from './actions/connection';
 import packetActions from './actions/packet';
 import { remote } from 'electron';
@@ -127,11 +128,6 @@ function handleDataLine(dataJSON) {
       store.dispatch(packetActions.addPacket(dataJSON));
       break;
 
-    case 'sink-tree':
-      timeoutUpdate();
-      //TODO: Implement sink-tree handling
-      break;
-
     case 'graph':
       timeoutUpdate();
       messageReceived = true;
@@ -151,6 +147,11 @@ function handleDataLine(dataJSON) {
       var transformed = transformGraphJSON(dataJSON.graph, dataJSON.ip);
       store.dispatch(graphActions.updateGraph(transformed));
       break;
+
+    case 'sink-tree':
+       timeoutUpdate();
+       store.dispatch(sinkTreeActions.updateSinkTree(dataJSON));
+       break;
 
     case 'dns':
       timeoutUpdate();
@@ -325,6 +326,11 @@ function lookupName(id) {
     }
   }
   return null;
+}
+
+function calculateSinkTree(graph) {
+    console.log(graph);
+    return {};
 }
 
 function flashMicrobit() {
