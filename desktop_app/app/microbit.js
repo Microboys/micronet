@@ -247,7 +247,7 @@ function addEdge(edges, edge) {
   var distance = RSSIToAbstractDistanceUnits(edge.distance);
   for (var i = 0; i < edges.length; i++) {
     if (edges[i].from == edge.to && edges[i].to == edge.from) {
-      distance = (distance + parseInt(edges[i].label)) / 2;
+      distance = Math.round((distance + parseInt(edges[i].label)) / 2);
       edges[i].label = distance.toString();
     }
   }
@@ -264,8 +264,7 @@ function getLabel(id) {
 }
 
 function RSSIToAbstractDistanceUnits(rssi) {
-  let scaling = -(Math.PI/2) / -255;
-  return Math.round(100 - (Math.abs(Math.cos(rssi * scaling)) * 100));
+  return Math.max((-rssi) - 50, 0);
 }
 
 function getRoute(dest) {
