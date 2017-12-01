@@ -54,7 +54,7 @@ void on_packet(MicroBitEvent) {
         return;
     }
 
-    if (packet_queue.size() > MAX_PACKET_QUEUE_SIZE && buffer[F_PTYPE] != MESSAGE && buffer[F_PTYPE] != DNS) {
+    if (packet_queue.size() > MAX_PACKET_QUEUE_SIZE && buffer[F_PTYPE] != MESSAGE) {
         return;
     }
 
