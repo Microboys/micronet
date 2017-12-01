@@ -25,6 +25,14 @@ void broadcast(Packet* p) {
     }
 }
 
+/* Rebroadcasts own name if available. Should be called when we suspect a new
+ * router has joined the network. */
+void broadcast_name() {
+    if (name_table.count(ip)) {
+        send_dns(name_table[ip]);
+    }
+}
+
 void send_message(Packet* p) {
     uint16_t next_node = get_next_node(ip, p->dest_ip);
     p->imm_dest_ip = next_node;
@@ -46,7 +54,7 @@ void on_packet(MicroBitEvent) {
         return;
     }
 
-    if (packet_queue.size() > MAX_PACKET_QUEUE_SIZE && buffer[F_PTYPE] != MESSAGE) {
+    if (packet_queue.size() > MAX_PACKET_QUEUE_SIZE && buffer[F_PTYPE] != MESSAGE && buffer[F_PTYPE] != DNS) {
         return;
     }
 
@@ -104,7 +112,7 @@ void handle_lsa(Packet* p) {
 
       /* This packet, has introduced a new node so we notify the desktop app. */
       serial.send(p->to_json());
-
+      broadcast_name();
     } else {
       uint16_t old_sequence_number = lsa_table[p->source_ip];
 
@@ -112,6 +120,7 @@ void handle_lsa(Packet* p) {
         should_flood = true;
         if (update_graph(p)) {
           serial.send(p->to_json());
+          broadcast_name();
         }
         lsa_table[p->source_ip] = p->sequence_number;
 
@@ -122,6 +131,8 @@ void handle_lsa(Packet* p) {
         if (std::find(neighbours.begin(), neighbours.end(), p->source_ip) != neighbours.end()) {
           p->sequence_number = old_sequence_number;
           uBit.radio.datagram.send(p->format());
+          uBit.sleep(1);
+          broadcast_name();
           uBit.sleep(1);
           return;
         }
@@ -157,6 +168,7 @@ void handle_ping(Packet* p) {
         // Got back our own ping packet
         if (update_graph(ip, p->source_ip, p->rssi)) {
             serial.send(neighbour_discovered_event(p->source_ip, p->rssi));
+            broadcast_name();
         }
     }
 }
@@ -264,7 +276,7 @@ void on_serial(MicroBitEvent) {
         ManagedString name = request.substring(header_length + 1, request.length() - header_length - 1);
         name_table[ip] = name;
         send_name_table();
-        send_dns(name);
+        broadcast_name();
     }
 
     serial.eventOn(SERIAL_DELIMITER);
