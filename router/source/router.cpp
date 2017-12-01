@@ -26,14 +26,10 @@ void broadcast(Packet* p) {
 }
 
 void send_message(Packet* p) {
-  if (p->ttl > 0) {
-      p->ttl--;
-      // recalculate_graph(ip);
-      uint16_t next_node = get_next_node(ip, p->dest_ip);
-      p->imm_dest_ip = next_node;
-      uBit.radio.datagram.send(p->format());
-      uBit.sleep(1);
-  }
+    uint16_t next_node = get_next_node(ip, p->dest_ip);
+    p->imm_dest_ip = next_node;
+    uBit.radio.datagram.send(p->format());
+    uBit.sleep(1);
 }
 
 unsigned long get_system_time() {

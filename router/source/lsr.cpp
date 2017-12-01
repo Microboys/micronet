@@ -45,7 +45,7 @@ std::vector<uint16_t> get_path_for_node(std::unordered_map<struct edge, int>& in
     }
 
     get_path_for_node_recursive(input_graph, source, destination, SHRT_MIN, &best_cost,
-        current_path, best_path, 0, input_graph.size() - 1);
+        current_path, best_path, 0, input_graph.size());
 
     return best_path;
 }
