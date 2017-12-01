@@ -57,7 +57,7 @@ async function listen () {
     microbitPort.on('error', handleError);
     microbitPort.on('close', handleClose);
     parser.on('data', handleDataLine);
-    parser.on('invalid-line', (err) => { console.log('ignore invalid JSON: ' + err.source) });
+    //parser.on('invalid-line', (err) => { console.log('ignore invalid JSON: ' + err.source) });
   } catch (err) {
     console.log('Error on locating the micro:bit port ' + err); 
   }
@@ -332,11 +332,6 @@ function lookupName(id) {
     }
   }
   return null;
-}
-
-function calculateSinkTree(graph) {
-    console.log(graph);
-    return {};
 }
 
 function flashMicrobit() {
