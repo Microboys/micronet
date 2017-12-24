@@ -30,9 +30,12 @@ const parser = jsonlines.parse({ emitInvalidLines : true });
 
 var microbitPort = null;
 var firstMessageReceived = false;
+var initialisedParser = false;
 var messageReceived = false;
 var timeoutCheckId = null;
 var connectedIp = null;
+
+var imgWaitBuffer = [];
 
 function init(store_) {
   store = store_;  // TODO: this really shouldn't be necessary...
@@ -56,7 +59,10 @@ async function listen () {
     microbitPort.on('open', handleOpen);
     microbitPort.on('error', handleError);
     microbitPort.on('close', handleClose);
-    parser.on('data', handleDataLine);
+    if (!initialisedParser) {
+      parser.on('data', handleDataLine);
+      initialisedParser = true;
+    }
     //parser.on('invalid-line', (err) => { console.log('ignore invalid JSON: ' + err.source) });
   } catch (err) {
     console.log('Error on locating the micro:bit port ' + err); 
@@ -291,12 +297,27 @@ const imgOffsetY = 33;
 function generateMicrobitImage(code) {
   //First check if image exists for this ID
   var codeImgPath = tempAssetPath + '/microbit-' + code + '.png';
+  var genericImgPath = assetPath + '/microbit.png';
   var imgPath = codeImgPath;
   try {
     fs.accessSync(imgPath);
+
+    //Check if image is in wait buffer (i.e. can't be loaded yet to avoid loading non-finished images)
+    for (var i = 0; i < imgWaitBuffer.length; i++) {
+      if (imgWaitBuffer[i] == imgPath) {
+        console.log(imgWaitBuffer);
+        imgWaitBuffer.splice(i, 1);
+        console.log(imgWaitBuffer);
+        imgPath = genericImgPath;
+        break;
+      }
+    }
   } catch(err) {
+    //Add image to image wait buffer so the image isn't used too soon (before being generated)
+    imgWaitBuffer.push(codeImgPath);
+
     //Image doesn't exist, create using Jimp (async) and use default img for now
-    imgPath = assetPath + '/microbit.png';
+    imgPath = genericImgPath;
     try {
       Jimp.read(imgPath, (err, microbit) => {
         if (err) {
