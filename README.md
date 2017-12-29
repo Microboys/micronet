@@ -1,7 +1,8 @@
 ![micro:net logo](readme_assets/slide_1.svg)
 ![slide](readme_assets/slide_2.svg)
 ![slide](readme_assets/slide_3.svg)
-![slide](readme_assets/slide_4svg)
+![slide](readme_assets/slide_4.svg)
+![slide](readme_assets/slide_5.svg)
 ![slide](readme_assets/slide_6.svg)
 
 micro:net is a desktop app and a micro:bit hex that allows you to build a physical network of micro:bits, visualise the network and how data is sent through it. 
