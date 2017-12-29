@@ -14,22 +14,22 @@
 
 ---
 
-micro:net is a desktop app and a micro:bit hex that allows you to build a physical network of micro:bits, visualise the network and how data is sent through it. 
+micro:net is a desktop app and a micro:bit hex that allows you to build a physical network of micro:bits, visualise the network and see how data is sent through it.
 
-**It's still early days for this project; more information coming soon!**
+*Video coming soon!*
 
-# Running
+# Running It
 
-No installation required - just go to the latest releases [here](https://github.com/Microboys/micronet/releases/latest) and follow the relevant instructions below.
+**[Latest releases here!](https://github.com/Microboys/micronet/releases/latest)**
 
-## Linux
+### Windows
+Just download the `.exe` installer from the [latest releases](https://github.com/Microboys/micronet/releases/latest) and run it.
 
-Just run the file ending in `.AppImage`
+**Important:** if you're on Windows 10, you might need to update a driver so you can talk to the micro:bit - check out [this guide](https://support.microbit.org/support/solutions/articles/19000022103-how-do-i-use-the-serial-port-with-a-micro-bit-on-windows).
 
-## MacOS
+### MacOS
+Download and unzip the `.app.zip` from the [latest releases](https://github.com/Microboys/micronet/releases/latest) and run it.
 
-Unzip the file ending and `.app.zip`
+### Linux
 
-## Windows
-
-Just run the the `.exe`
+Just download and run the file ending in `.AppImage` from the [latest releases](https://github.com/Microboys/micronet/releases/latest).
