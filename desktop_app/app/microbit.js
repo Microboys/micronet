@@ -22,7 +22,6 @@ var store = null
 
 /* Locating and maintaining connection micro:bit. */
 const microbitProductId = '0204';
-const microbitVendorId = '0d28';
 const microbitBaudRate = 115200;
 const timeoutTime = 2000;
 const pollSerialTime = 10;
@@ -74,7 +73,7 @@ async function locatePort() {
   while (!port) {
     let ports =  await SerialPort.list();
     port = ports.find(function (port) {
-      return port.productId === microbitProductId && port.vendorId === microbitVendorId;
+      return port.productId === microbitProductId;
     });
   }
   return port.comName;
