@@ -16,7 +16,7 @@
 
 **micro:net** is a classroom activity that aims to introduce students to some interesting concepts in computer networks in a hands-on way. Rather than static diagrams of a network or web-based simulations, students can play around with a *physical* network of micro:bits scattered around the room. By adding, removing or just moving micro:bits and seeing the messages exchanged between them, students can get a sense of the simple rules that can make a collection of dumb micro:bits operate as a dynamic network.
 
-The activity doesn't assume any particular year group and can be useful for covering things like what a network is to more morer advanced topics like [Link State Routing](https://en.wikipedia.org/wiki/Link-state_routing_protocol) which we've used to implement micro:net.
+The activity doesn't assume any particular year group and can be useful for covering the basics of what a network is to more more advanced topics like [Link State Routing](https://en.wikipedia.org/wiki/Link-state_routing_protocol) which we've used to implement micro:net.
 
 *Video and some lesson plan ideas coming soon!*
 
@@ -51,7 +51,7 @@ Download and run the file ending in `.AppImage` from the [latest releases](https
 
 # Issues
 
-We're doing our best to keep things robust but we're aware of a few bugs. Resetting the micro:bit (pressing the little black button) or restarting the desktop application often fixes the problem but if you're still having problems and its not in the known issues below, please let us know.
+We're doing our best to keep things robust but we're aware of a few bugs. Resetting the micro:bit (pressing the little black button) or restarting the desktop application often fixes the problem but if it persists and its not in the known issues below, please let us know.
 
 * **Micro:net crashes when there are more than 15 connections.** This is because we're already using up quite a lot of the micro:bit's memory and can't find any more space. If this happens, try moving the micro:bits further apart to reduce the number of connections and restarting them.
 * **Duplicate events in the desktop app.** We're looking into this one. For now, restarting the desktop app should fix it.
