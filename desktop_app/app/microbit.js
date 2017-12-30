@@ -2,6 +2,7 @@ import SerialPort from 'serialport';
 import jsonlines from 'jsonlines';
 import graphActions from './actions/graph';
 import dnsActions from './actions/dns';
+import sinkTreeActions from './actions/sinkTree';
 import connectionActions from './actions/connection';
 import packetActions from './actions/packet';
 import { remote } from 'electron';
@@ -21,7 +22,6 @@ var store = null
 
 /* Locating and maintaining connection micro:bit. */
 const microbitProductId = '0204';
-const microbitVendorId = '0d28';
 const microbitBaudRate = 115200;
 const timeoutTime = 2000;
 const pollSerialTime = 10;
@@ -29,8 +29,12 @@ const parser = jsonlines.parse({ emitInvalidLines : true });
 
 var microbitPort = null;
 var firstMessageReceived = false;
+var initialisedParser = false;
 var messageReceived = false;
 var timeoutCheckId = null;
+var connectedIp = null;
+
+var imgWaitBuffer = [];
 
 function init(store_) {
   store = store_;  // TODO: this really shouldn't be necessary...
@@ -54,8 +58,11 @@ async function listen () {
     microbitPort.on('open', handleOpen);
     microbitPort.on('error', handleError);
     microbitPort.on('close', handleClose);
-    parser.on('data', handleDataLine);
-    parser.on('invalid-line', (err) => { console.log('ignore invalid JSON: ' + err.source) });
+    if (!initialisedParser) {
+      parser.on('data', handleDataLine);
+      initialisedParser = true;
+    }
+    //parser.on('invalid-line', (err) => { console.log('ignore invalid JSON: ' + err.source) });
   } catch (err) {
     console.log('Error on locating the micro:bit port ' + err); 
   }
@@ -66,7 +73,7 @@ async function locatePort() {
   while (!port) {
     let ports =  await SerialPort.list();
     port = ports.find(function (port) {
-      return port.productId === microbitProductId && port.vendorId === microbitVendorId;
+      return port.productId === microbitProductId;
     });
   }
   return port.comName;
@@ -127,11 +134,6 @@ function handleDataLine(dataJSON) {
       store.dispatch(packetActions.addPacket(dataJSON));
       break;
 
-    case 'sink-tree':
-      timeoutUpdate();
-        //TODO: Implement sink-tree handling
-        return;
-
     case 'graph':
       timeoutUpdate();
       messageReceived = true;
@@ -148,9 +150,17 @@ function handleDataLine(dataJSON) {
         break;
       }
 
-      var transformed = transformGraphJSON(dataJSON.graph, dataJSON.ip);
+      connectedIp = dataJSON.ip;
+      var transformed = transformGraphJSON(dataJSON.graph, connectedIp);
       store.dispatch(graphActions.updateGraph(transformed));
       break;
+
+    case 'sink-tree':
+     timeoutUpdate();
+     let sinkTree = {};
+     sinkTree.routes = dataJSON['sink-tree'];
+     store.dispatch(sinkTreeActions.updateSinkTree(sinkTree));
+     break;
 
     case 'dns':
       timeoutUpdate();
@@ -242,7 +252,7 @@ function addEdge(edges, edge) {
   var distance = RSSIToAbstractDistanceUnits(edge.distance);
   for (var i = 0; i < edges.length; i++) {
     if (edges[i].from == edge.to && edges[i].to == edge.from) {
-      distance = (distance + parseInt(edges[i].label)) / 2;
+      distance = Math.round((distance + parseInt(edges[i].label)) / 2);
       edges[i].label = distance.toString();
     }
   }
@@ -259,8 +269,19 @@ function getLabel(id) {
 }
 
 function RSSIToAbstractDistanceUnits(rssi) {
-  let scaling = -(Math.PI/2) / -255;
-  return Math.round(100 - (Math.abs(Math.cos(rssi * scaling)) * 100));
+  return Math.max((-rssi) - 50, 0);
+}
+
+function getRoute(dest) {
+  let routes = store.getState().sinkTree.routes;
+  for (var i = 0; i < routes.length; i++) {
+    if (routes[i].to == dest) {
+      routes[i].path.unshift(connectedIp);
+      routes[i].path.push(dest);
+      return routes[i].path;
+    }
+  }
+  return null;
 }
 
 /* Generating micro:bit images with a visual id (for the graph). */
@@ -275,12 +296,27 @@ const imgOffsetY = 33;
 function generateMicrobitImage(code) {
   //First check if image exists for this ID
   var codeImgPath = tempAssetPath + '/microbit-' + code + '.png';
+  var genericImgPath = assetPath + '/microbit.png';
   var imgPath = codeImgPath;
   try {
     fs.accessSync(imgPath);
+
+    //Check if image is in wait buffer (i.e. can't be loaded yet to avoid loading non-finished images)
+    for (var i = 0; i < imgWaitBuffer.length; i++) {
+      if (imgWaitBuffer[i] == imgPath) {
+        console.log(imgWaitBuffer);
+        imgWaitBuffer.splice(i, 1);
+        console.log(imgWaitBuffer);
+        imgPath = genericImgPath;
+        break;
+      }
+    }
   } catch(err) {
+    //Add image to image wait buffer so the image isn't used too soon (before being generated)
+    imgWaitBuffer.push(codeImgPath);
+
     //Image doesn't exist, create using Jimp (async) and use default img for now
-    imgPath = assetPath + '/microbit.png';
+    imgPath = genericImgPath;
     try {
       Jimp.read(imgPath, (err, microbit) => {
         if (err) {
@@ -334,4 +370,4 @@ function flashMicrobit() {
 
 /* Exports. */
 
-export { init, sendMsg, renameMicrobit, flashMicrobit, lookupName, transformGraphJSON };
+export { init, sendMsg, renameMicrobit, flashMicrobit, lookupName, transformGraphJSON, getRoute };

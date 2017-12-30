@@ -25,15 +25,19 @@ void broadcast(Packet* p) {
     }
 }
 
+/* Rebroadcasts own name if available. Should be called when we suspect a new
+ * router has joined the network. */
+void broadcast_name() {
+    if (name_table.count(ip)) {
+        send_dns(name_table[ip]);
+    }
+}
+
 void send_message(Packet* p) {
-  if (p->ttl > 0) {
-      p->ttl--;
-      // recalculate_graph(ip);
-      uint16_t next_node = get_next_node(p->dest_ip);
-      p->imm_dest_ip = next_node;
-      uBit.radio.datagram.send(p->format());
-      uBit.sleep(1);
-  }
+    uint16_t next_node = get_next_node(ip, p->dest_ip);
+    p->imm_dest_ip = next_node;
+    uBit.radio.datagram.send(p->format());
+    uBit.sleep(1);
 }
 
 unsigned long get_system_time() {
@@ -108,7 +112,7 @@ void handle_lsa(Packet* p) {
 
       /* This packet, has introduced a new node so we notify the desktop app. */
       serial.send(p->to_json());
-
+      broadcast_name();
     } else {
       uint16_t old_sequence_number = lsa_table[p->source_ip];
 
@@ -116,9 +120,10 @@ void handle_lsa(Packet* p) {
         should_flood = true;
         if (update_graph(p)) {
           serial.send(p->to_json());
+          broadcast_name();
         }
-
         lsa_table[p->source_ip] = p->sequence_number;
+
       } else if (old_sequence_number > p->sequence_number) {
         /* If the router is a neighbour, we should flood its previous packet so it can
          * learn its latest sequence number. */
@@ -126,6 +131,8 @@ void handle_lsa(Packet* p) {
         if (std::find(neighbours.begin(), neighbours.end(), p->source_ip) != neighbours.end()) {
           p->sequence_number = old_sequence_number;
           uBit.radio.datagram.send(p->format());
+          uBit.sleep(1);
+          broadcast_name();
           uBit.sleep(1);
           return;
         }
@@ -142,7 +149,12 @@ void handle_lsa(Packet* p) {
 void handle_message(Packet* p) {
     if (p->imm_dest_ip == ip) {
         uBit.display.printAsync(p->payload);
-        send_message(p);
+
+        if (p->dest_ip == ip) {
+            serial.send(p->to_json());
+        } else {
+            send_message(p);
+        }
     }
 }
 
@@ -156,6 +168,7 @@ void handle_ping(Packet* p) {
         // Got back our own ping packet
         if (update_graph(ip, p->source_ip, p->rssi)) {
             serial.send(neighbour_discovered_event(p->source_ip, p->rssi));
+            broadcast_name();
         }
     }
 }
@@ -186,7 +199,7 @@ void ping(MicroBitEvent) {
 
 void send_payload(uint16_t dest_ip, ManagedString message) {
     // recalculate_graph(ip);
-    uint16_t next_node = get_next_node(dest_ip);
+    uint16_t next_node = get_next_node(ip, dest_ip);
     Packet p(MESSAGE, ip, next_node, dest_ip, 0, INITIAL_TTL, message);
     uBit.radio.datagram.send(p.format());
     uBit.sleep(1);
@@ -263,7 +276,7 @@ void on_serial(MicroBitEvent) {
         ManagedString name = request.substring(header_length + 1, request.length() - header_length - 1);
         name_table[ip] = name;
         send_name_table();
-        send_dns(name);
+        broadcast_name();
     }
 
     serial.eventOn(SERIAL_DELIMITER);
@@ -303,7 +316,7 @@ void update_desktop_app() {
         // recalculate_graph(ip);
 
         send_graph_update();
-        // send_path_update();
+        send_path_update();
         send_name_table();
         uBit.sleep(UPDATE_RATE);
     }

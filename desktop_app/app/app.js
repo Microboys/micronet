@@ -50,6 +50,9 @@ const initialState = {
   },
   'connection' : {
     'established' : false
+  },
+  'sinkTree' : {
+    routes: []
   }
 };
 

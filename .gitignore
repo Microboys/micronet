@@ -11,6 +11,7 @@ router/tags.lock
 desktop_app/node_modules
 desktop_app/dist
 desktop_app/build
+desktop_app/app/router/router.hex
 desktop_app/.DS_Store
 desktop_app/*.log
 *~

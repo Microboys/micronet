@@ -3,10 +3,10 @@
 #include "packet.h"
 #include "graph.h"
 #include "config.h"
-#include "lsr.h"
 #include "event.h"
 #include <vector>
 
+void broadcast_name();
 void broadcast(Packet* p);
 unsigned long get_system_time();
 void on_packet(MicroBitEvent e);

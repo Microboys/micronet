@@ -1,14 +1,14 @@
 {
   "name": "micronet",
-  "version": "0.0.0",
-  "description": "TODO",
+  "version": "1.0.0",
+  "description": "A tabletop network of micro:bits for the classroom.",
   "main": "init.js",
-  "homepage": "TODO",
+  "homepage": "https://github.com/Microboys/micronet",
   "author": {
-    "name": "TODO",
-    "email": "TODO"
+    "name": "Nik Gupta",
+    "email": "vngupta77@gmail.com"
   },
-  "repository": "TODO",
+  "repository": "https://github.com/Microboys/micronet",
   "license": "MIT",
   "dependencies": {
     "7zip-bin-linux": "^1.1.0",
