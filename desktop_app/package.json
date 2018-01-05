@@ -58,6 +58,7 @@
   },
   "scripts": {
     "prepublish": "sh update-router-hex.sh",
+    "prepackage": "sh update-router-hex.sh",
     "postinstall": "electron-rebuild -t 'prod,dev,optional' && electron-builder install-app-deps",
     "develop": "npm run private:compile -- --source-maps true && run-p -r private:watch private:serve",
     "test": "electron-mocha --renderer -R spec --compilers js:babel-core/register test/**/*.spec.js",
