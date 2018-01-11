@@ -269,7 +269,7 @@ function getLabel(id) {
 }
 
 function RSSIToAbstractDistanceUnits(rssi) {
-  return Math.max((-rssi) - 50, 0);
+  return Math.max((-rssi) - 50, 1);
 }
 
 function getRoute(dest) {
